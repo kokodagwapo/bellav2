@@ -204,22 +204,22 @@ const AddressInput: React.FC<{
                 setIsLoading(false);
             });
 
-            // Validate on manual input with debouncing
-            const handleInput = (e?: Event) => {
+            // Validate on manual input with debouncing (for autocomplete suggestions)
+            // Note: React's onChange handler handles the value updates
+            const handleInput = () => {
                 if (inputTimeoutRef.current) {
                     clearTimeout(inputTimeoutRef.current);
                 }
                 const inputValue = addressInputRef.current?.value || '';
                 
-                // Update parent immediately for controlled input
+                // Clear address details if manually editing (value will be updated by React onChange)
                 if (inputValue !== value) {
-                    onChange(id, inputValue);
-                    setAddressDetails(null); // Clear verified details when manually editing
+                    setAddressDetails(null);
                 }
                 
+                // Debounced validation (React onChange handles immediate validation)
                 inputTimeoutRef.current = setTimeout(() => {
                     if (inputValue.length > 5) {
-                        // Basic validation - at least 6 characters for a valid address
                         const isValidInput = inputValue.trim().length > 5;
                         setIsValid(isValidInput);
                         setErrorMessage('');
@@ -232,10 +232,13 @@ const AddressInput: React.FC<{
                             onValidationChange(false);
                         }
                     }
-                }, 300); // Debounce for 300ms
+                }, 300);
             };
 
-            addressInputRef.current.addEventListener('input', handleInput);
+            // Only add listener if autocomplete is active (for triggering suggestions)
+            if (mapsLoaded) {
+                addressInputRef.current.addEventListener('input', handleInput);
+            }
             
             // Add focus event to show suggestions
             const handleFocus = () => {
@@ -253,7 +256,7 @@ const AddressInput: React.FC<{
                 if (inputTimeoutRef.current) {
                     clearTimeout(inputTimeoutRef.current);
                 }
-                if (addressInputRef.current) {
+                if (addressInputRef.current && mapsLoaded) {
                     addressInputRef.current.removeEventListener('input', handleInput);
                     addressInputRef.current.removeEventListener('focus', handleFocus);
                 }
