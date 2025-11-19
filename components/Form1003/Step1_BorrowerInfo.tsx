@@ -159,16 +159,9 @@ const AddressInput: React.FC<{
                     onChange={(e) => {
                         const newValue = e.target.value;
                         onChange(id, newValue);
-                        // Only reset verification if we had a verified address and user is editing
-                        if (isVerified && newValue !== value) {
+                        // Reset verification when manually editing
+                        if (isVerified) {
                             setIsVerified(false);
-                        }
-                    }}
-                    onInput={(e) => {
-                        // Ensure input works normally
-                        const newValue = (e.target as HTMLInputElement).value;
-                        if (newValue !== value) {
-                            onChange(id, newValue);
                         }
                     }}
                     placeholder={placeholder || "Street address, City, State ZIP"}
