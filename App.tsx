@@ -14,7 +14,7 @@ import { appFlow, AppStep } from './appFlow';
 const LogoSection = () => {
   const { open, animate } = useSidebar();
   return (
-    <div className="mb-6 pt-4 flex flex-col items-center">
+    <div className="mb-4 sm:mb-6 pt-3 sm:pt-4 flex flex-col items-center">
       <motion.div
         animate={{
           opacity: animate ? (open ? 1 : 0) : 1,
@@ -25,8 +25,8 @@ const LogoSection = () => {
         <img 
           src={`${import.meta.env.BASE_URL}TeraTrans.png`}
           alt="TERAVERDE Logo" 
-          className="w-auto h-auto max-w-[140px] object-contain"
-          style={{ maxHeight: '80px', width: 'auto', height: 'auto' }}
+          className="w-auto h-auto max-w-[120px] sm:max-w-[140px] object-contain"
+          style={{ maxHeight: '60px', width: 'auto', height: 'auto' }}
           onError={(e) => {
             console.error('Logo failed to load');
             (e.target as HTMLImageElement).style.display = 'none';
@@ -37,7 +37,7 @@ const LogoSection = () => {
             display: animate ? (open ? "inline-block" : "none") : "inline-block",
             opacity: animate ? (open ? 1 : 0) : 1,
           }}
-          className="text-xs font-medium text-muted-foreground text-center whitespace-nowrap"
+          className="text-[10px] sm:text-xs font-medium text-muted-foreground text-center whitespace-nowrap"
           style={{ color: '#6b7280' }}
         >
           Business Process Solutions
@@ -197,9 +197,20 @@ const App: React.FC = () => {
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden" style={{ color: '#000000' }}>
             {/* Logo */}
             <LogoSection />
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1 md:gap-2">
               {links.map((link, idx) => ( 
-                <button key={idx} onClick={link.action} className="w-full" style={{ color: '#000000' }}>
+                <button 
+                  key={idx} 
+                  onClick={() => {
+                    link.action();
+                    if (window.innerWidth < 768) {
+                      // Close mobile sidebar after clicking
+                      setOpen(false);
+                    }
+                  }} 
+                  className="w-full text-left touch-manipulation"
+                  style={{ color: '#000000' }}
+                >
                   <SidebarLink link={{...link, href: "#"}} className="w-full" />
                 </button> 
               ))}
@@ -243,7 +254,7 @@ const App: React.FC = () => {
                                         <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
                                             <button
                                                 onClick={prevStep}
-                                                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md w-full sm:w-auto sm:min-w-[120px] text-sm sm:text-base"
+                                                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-3 rounded-xl sm:rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md w-full sm:w-auto sm:min-w-[120px] text-base sm:text-base touch-manipulation min-h-[48px] sm:min-h-[44px]"
                                             >
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -252,7 +263,7 @@ const App: React.FC = () => {
                                             </button>
                                             <button
                                                 onClick={nextStep}
-                                                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg sm:rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md w-full sm:w-auto sm:min-w-[120px] text-sm sm:text-base"
+                                                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 sm:py-3 rounded-xl sm:rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md w-full sm:w-auto sm:min-w-[120px] text-base sm:text-base touch-manipulation min-h-[48px] sm:min-h-[44px]"
                                             >
                                                 Next
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -29,7 +29,7 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
         placeholder="City, ST"
         value={data.location}
         onChange={(e) => onChange('location', e.target.value)}
-        className="w-full px-4 py-3 text-lg border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition duration-200"
+        className="w-full px-4 py-3 sm:py-3 text-base sm:text-lg border border-input bg-background rounded-xl sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition duration-200 touch-manipulation min-h-[44px]"
         aria-label="City and State"
         required
       />

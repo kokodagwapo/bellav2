@@ -115,42 +115,58 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "h-14 px-4 py-4 flex flex-row md:hidden items-center justify-between bg-card w-full border-b border-border"
+          "h-14 px-4 py-3 flex flex-row md:hidden items-center justify-between bg-white w-full border-b border-border shadow-sm"
         )}
         {...props}
       >
-        <div className="flex justify-end z-20 w-full">
-            <div className="font-normal flex space-x-2 items-center text-sm py-1 relative z-20">
-                <div className="h-6 w-6 rounded-lg bg-primary flex-shrink-0" />
-            </div>
+        <div className="flex items-center justify-between z-20 w-full">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-primary flex-shrink-0" />
+          </div>
           <Menu
-            className="text-foreground cursor-pointer"
+            className="text-foreground cursor-pointer h-6 w-6 touch-manipulation"
             onClick={() => setOpen(!open)}
           />
         </div>
         <AnimatePresence>
           {open && (
-            <motion.div
-              initial={{ x: "-100%", opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "-100%", opacity: 0 }}
-              transition={{
-                duration: 0.3,
-                ease: "easeInOut",
-              }}
-              className={cn(
-                "fixed h-full w-full inset-0 bg-card p-10 z-[100] flex flex-col justify-between",
-                className
-              )}
-            >
-              <div
-                className="absolute right-10 top-10 z-50 text-foreground cursor-pointer"
-                onClick={() => setOpen(!open)}
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/50 z-[99]"
+                onClick={() => setOpen(false)}
+              />
+              <motion.div
+                initial={{ x: "-100%", opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: "-100%", opacity: 0 }}
+                transition={{
+                  duration: 0.3,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                className={cn(
+                  "fixed h-full w-[85%] max-w-sm inset-y-0 left-0 bg-white shadow-2xl z-[100] flex flex-col overflow-hidden",
+                  className
+                )}
               >
-                <X />
-              </div>
-              {children}
-            </motion.div>
+                <div className="flex items-center justify-between px-4 py-4 border-b border-border bg-white">
+                  <div className="h-8 w-8 rounded-lg bg-primary flex-shrink-0" />
+                  <button
+                    className="p-2 rounded-lg hover:bg-muted/50 transition-colors touch-manipulation"
+                    onClick={() => setOpen(false)}
+                    aria-label="Close menu"
+                  >
+                    <X className="h-6 w-6 text-foreground" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto px-4 py-4">
+                  {children}
+                </div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </div>
@@ -172,19 +188,22 @@ export const SidebarLink = ({
     <a
       href={link.href}
       className={cn(
-        "flex items-center justify-start gap-3 group/sidebar py-2 px-3 rounded-lg",
+        "flex items-center justify-start gap-3 group/sidebar py-3 px-4 rounded-xl transition-all duration-200 hover:bg-primary/10 active:bg-primary/20 touch-manipulation",
+        "md:py-2 md:px-3 md:rounded-lg",
         className
       )}
       style={{ color: '#000000' }}
       {...props}
     >
-      {link.icon}
+      <div className="flex-shrink-0 text-foreground group-hover/sidebar:text-primary transition-colors">
+        {link.icon}
+      </div>
       <motion.span
         animate={{
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
           opacity: animate ? (open ? 1 : 0) : 1,
         }}
-        className="text-lg font-semibold transition duration-150 whitespace-pre inline-block !p-0 !m-0"
+        className="text-base md:text-lg font-semibold transition duration-150 whitespace-pre inline-block !p-0 !m-0 group-hover/sidebar:text-primary"
         style={{ color: '#000000' }}
       >
         {link.label}

@@ -45,10 +45,10 @@ const SelectionButton: React.FC<SelectionButtonProps> = ({ label, icon, isSelect
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className={`w-full p-4 sm:p-6 border-2 rounded-lg sm:rounded-xl text-left transition-all duration-300 flex items-center gap-3 sm:gap-4 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary relative ${
+            className={`w-full p-4 sm:p-6 border-2 rounded-xl sm:rounded-xl text-left transition-all duration-300 flex items-center gap-3 sm:gap-4 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary relative touch-manipulation min-h-[64px] sm:min-h-[auto] ${
                 isSelected
                 ? 'bg-gradient-to-br from-primary/10 to-primary/5 border-primary shadow-lg shadow-primary/20 ring-2 ring-primary/20'
-                : 'bg-card border-border hover:border-primary/30 hover:bg-primary/5 hover:shadow-md'
+                : 'bg-card border-border hover:border-primary/30 hover:bg-primary/5 hover:shadow-md active:scale-[0.98]'
             }`}
         >
             {icon && (

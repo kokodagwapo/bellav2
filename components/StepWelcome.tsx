@@ -16,7 +16,7 @@ const StepWelcome: React.FC<StepWelcomeProps> = ({ onNext }) => {
         {onNext && (
           <button
             onClick={onNext}
-            className="w-full sm:w-auto sm:min-w-[200px] mx-auto bg-primary text-primary-foreground font-bold py-3 sm:py-4 px-8 sm:px-10 rounded-xl sm:rounded-2xl hover:bg-primary/90 transition duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-lg hover:shadow-xl text-base sm:text-lg"
+            className="w-full sm:w-auto sm:min-w-[200px] mx-auto bg-primary text-primary-foreground font-bold py-4 sm:py-4 px-8 sm:px-10 rounded-xl sm:rounded-2xl hover:bg-primary/90 transition duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-lg hover:shadow-xl text-base sm:text-lg touch-manipulation min-h-[56px] sm:min-h-[52px]"
           >
             Get Started
           </button>
