@@ -97,9 +97,11 @@ const AddressInput: React.FC<{
             return;
         }
 
+        const inputElement = addressInputRef.current;
+        
         try {
             const autocomplete = new window.google.maps.places.Autocomplete(
-                addressInputRef.current,
+                inputElement,
                 {
                     types: ['address'],
                     componentRestrictions: { country: 'us' },
@@ -109,7 +111,7 @@ const AddressInput: React.FC<{
 
             autocompleteRef.current = autocomplete;
 
-            autocomplete.addListener('place_changed', () => {
+            const handlePlaceChanged = () => {
                 const place = autocomplete.getPlace();
                 
                 if (place.formatted_address && place.geometry?.location) {
@@ -124,7 +126,9 @@ const AddressInput: React.FC<{
                         onValidationChange(false);
                     }
                 }
-            });
+            };
+
+            autocomplete.addListener('place_changed', handlePlaceChanged);
 
             return () => {
                 if (window.google && autocompleteRef.current) {
@@ -135,7 +139,7 @@ const AddressInput: React.FC<{
         } catch (error) {
             console.error('Error initializing autocomplete:', error);
         }
-    }, [mapsLoaded]); // Only depend on mapsLoaded to prevent re-initialization
+    }, [mapsLoaded, id]); // Include id to ensure proper initialization
 
     // Validate address on value change
     useEffect(() => {
