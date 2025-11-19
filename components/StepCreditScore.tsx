@@ -18,6 +18,13 @@ const creditScoreOptions = [
 ];
 
 const StepCreditScore: React.FC<StepCreditScoreProps> = ({ data, onChange, onNext, onBack }) => {
+  const handleSelect = (value: CreditScore) => {
+    onChange('creditScore', value);
+    if (onNext) {
+      setTimeout(onNext, 250); // Small delay for visual feedback
+    }
+  };
+
   return (
     <div className="px-2 sm:px-0">
       <StepHeader title="What is your estimated credit score?" />
@@ -27,7 +34,7 @@ const StepCreditScore: React.FC<StepCreditScoreProps> = ({ data, onChange, onNex
             key={option.value}
             label={option.value}
             isSelected={data.creditScore === option.value}
-            onClick={() => onChange('creditScore', option.value)}
+            onClick={() => handleSelect(option.value)}
           />
         ))}
       </div>
