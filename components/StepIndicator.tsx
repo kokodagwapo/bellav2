@@ -44,7 +44,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ labels, currentStepIndex,
                       <motion.div 
                         initial={{ scale: 0 }} 
                         animate={{ scale: 1 }}
-                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 border-primary bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-lg shadow-primary/30 ring-4 ring-primary/10"
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-primary bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shadow-lg shadow-primary/30 ring-4 ring-primary/10"
                       >
                           <motion.div 
                             initial={{ scale: 0 }}
