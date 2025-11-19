@@ -3,17 +3,22 @@ import { motion } from 'framer-motion';
 import { FilePlus2, FileText, LayoutList, Shield, Zap, Users, CheckCircle2 } from './icons';
 
 const LandingPage: React.FC = () => {
-  const features = [
+  const mainProducts = [
     {
-      icon: <FilePlus2 className="h-8 w-8 text-primary" />,
+      icon: <FilePlus2 className="h-10 w-10 text-primary" />,
       title: "Prep4Loan",
-      description: "Get pre-qualified in minutes with our streamlined pre-evaluation process."
+      description: "Get pre-qualified in minutes with our streamlined pre-evaluation process.",
+      action: "Start Pre-Evaluation"
     },
     {
-      icon: <FileText className="h-8 w-8 text-primary" />,
+      icon: <FileText className="h-10 w-10 text-primary" />,
       title: "Home Journey",
-      description: "Complete your URLA 1003 form with our guided, step-by-step process."
-    },
+      description: "Complete your URLA 1003 form with our guided, step-by-step process.",
+      action: "Begin Application"
+    }
+  ];
+
+  const features = [
     {
       icon: <LayoutList className="h-8 w-8 text-primary" />,
       title: "Document Management",
@@ -130,7 +135,73 @@ const LandingPage: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Features Grid */}
+      {/* Main Products Section */}
+      <div className="mb-20 sm:mb-24 md:mb-28 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="text-center mb-12 sm:mb-16"
+        >
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground mb-4">
+            Our Main Products
+          </h2>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Two powerful solutions to guide you through your mortgage journey
+          </p>
+        </motion.div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 max-w-6xl mx-auto">
+          {mainProducts.map((product, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.2, duration: 0.8 }}
+              whileHover={{ y: -12, scale: 1.02, transition: { duration: 0.3 } }}
+              className="group relative bg-gradient-to-br from-white via-white to-white/95 backdrop-blur-sm rounded-[2rem] border-2 border-primary/20 p-10 sm:p-12 shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden"
+            >
+              {/* Enhanced gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 mb-8 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-primary/30">
+                  <div className="group-hover:scale-110 transition-transform duration-500">
+                    {product.icon}
+                  </div>
+                </div>
+                <h3 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4 group-hover:text-primary transition-colors duration-300">
+                  {product.title}
+                </h3>
+                <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed mb-8">
+                  {product.description}
+                </p>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    if (index === 0) {
+                      // Navigate to Prep4Loan
+                      window.location.hash = '#prep4loan';
+                    } else {
+                      // Navigate to Home Journey
+                      window.location.hash = '#loan-application';
+                    }
+                  }}
+                  className="w-full bg-primary text-primary-foreground font-bold py-4 px-8 rounded-2xl hover:bg-primary/90 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30 shadow-lg hover:shadow-xl text-base sm:text-lg touch-manipulation"
+                >
+                  {product.action}
+                </motion.button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Additional Features Section */}
       <div className="mb-16 sm:mb-20 md:mb-24 px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -140,14 +211,14 @@ const LandingPage: React.FC = () => {
           className="text-center mb-12 sm:mb-16"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground mb-4">
-            Everything You Need in One Platform
+            Additional Features
           </h2>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Comprehensive tools and features designed to streamline your mortgage experience
+            Everything you need for a seamless mortgage experience
           </p>
         </motion.div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
           {features.map((feature, index) => (
             <motion.div
               key={index}
