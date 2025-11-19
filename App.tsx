@@ -7,6 +7,7 @@ import RequirementsChecklist from './components/Checklist';
 import BellaChatWidget from './components/ChatWidget';
 import DocumentList from './components/DocumentList';
 import LandingPage from './components/LandingPage';
+import Footer from './components/Footer';
 import { FormData, LoanPurpose } from './types';
 import { generateLoanSummary } from './services/geminiService';
 import { motion, AnimatePresence } from "framer-motion";
@@ -315,6 +316,7 @@ const App: React.FC = () => {
                 </div>
             )}
         </div>
+        <Footer />
       </main>
       
       {isChatOpen && (
