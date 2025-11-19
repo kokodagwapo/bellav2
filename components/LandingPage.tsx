@@ -104,7 +104,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
               transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
               className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold text-foreground mb-6 sm:mb-8 leading-tight"
             >
-              Transform Your<br className="hidden sm:block" /> <Highlight className="text-foreground">Mortgage Journey</Highlight>
+              Transform Your<br className="hidden sm:block" /> <Highlight className="text-foreground">Home Journey</Highlight>
             </motion.h1>
             
             <motion.p 
