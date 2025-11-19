@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { FilePlus2, FileText, LayoutList, Shield, Zap, CheckCircle2, UploadCloud, Smartphone, Scan } from './icons';
 import { HeroHighlight, Highlight } from './ui/hero-highlight';
 
@@ -9,15 +9,7 @@ interface LandingPageProps {
 }
 
 const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateToForm1003 }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [frontImageIndex, setFrontImageIndex] = useState(0);
-  
-  // Scroll progress for the images container
-  // Using viewport-based scroll tracking
-  const { scrollYProgress } = useScroll({
-    target: scrollContainerRef,
-    offset: ["start 0.8", "start 0.2"]
-  });
 
   // Rotate images to front every 12 seconds
   useEffect(() => {
@@ -83,83 +75,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
           className="w-full"
         >
           <div className="relative w-full px-4 sm:px-6 lg:px-8" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
-
-            {/* Images backdrop - positioned absolutely behind content */}
-            <div 
-              ref={scrollContainerRef}
-              className="absolute inset-0 -mx-20 -my-20 sm:-mx-28 sm:-my-28 md:-mx-40 md:-my-40 lg:-mx-56 lg:-my-56 xl:-mx-72 xl:-my-72 flex items-center justify-center overflow-visible z-0"
-              style={{ height: 'calc(100% + 10rem)', width: 'calc(100% + 10rem)' }}
-            >
-              {[1, 2, 3, 4].map((index) => {
-                // Each image animates at different scroll thresholds
-                const startProgress = Math.max(0, (index - 1) * 0.25);
-                const midProgress = (index - 0.5) * 0.25;
-                const endProgress = Math.min(1, index * 0.25);
-                
-                const opacity = useTransform(
-                  scrollYProgress,
-                  [startProgress, midProgress, endProgress],
-                  [0, 0.5, 1]
-                );
-                
-                const scale = useTransform(
-                  scrollYProgress,
-                  [startProgress, midProgress, endProgress],
-                  [0.85, 0.92, 1]
-                );
-
-                // Calculate z-index based on rotation: front image gets highest z-index
-                // Images rotate: 0 -> 1 -> 2 -> 3 -> 0 (cycling)
-                const imageIndex = index - 1; // Convert to 0-based
-                const relativePosition = (imageIndex - frontImageIndex + 4) % 4;
-                const dynamicZIndex = 10 - relativePosition; // Front image gets z-index 10, others get lower
-
-                // Calculate offset positions - all images centered, front image slightly larger
-                const isFront = relativePosition === 0;
-                const baseOffsetX = imageIndex % 2 === 0 ? 40 : -40;
-                const baseOffsetY = (imageIndex) * 40;
-                
-                // Scale animation - front image is slightly larger
-                const frontScale = isFront ? 1.05 : 1;
-                const combinedScale = useTransform(scale, (scrollScale) => scrollScale * frontScale);
-
-                return (
-                  <motion.img
-                    key={`${index}-${frontImageIndex}`}
-                    src={`${import.meta.env.BASE_URL}app-image-${index}.png`}
-                    alt={`App screenshot ${index}`}
-                    className="absolute w-full max-w-[1000px] sm:max-w-[1200px] md:max-w-[1400px] lg:max-w-[1600px] xl:max-w-[1800px] h-auto object-contain rounded-2xl"
-                    animate={{
-                      x: 768, // Move all images 8 inches (768px) to the right
-                      y: isFront ? 192 : baseOffsetY + 192, // Move all images 2 inches (192px) down
-                      zIndex: dynamicZIndex,
-                    }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 60,
-                      damping: 20,
-                      mass: 0.7,
-                      duration: 1.5,
-                    }}
-                    style={{
-                      border: '4mm solid white',
-                      boxShadow: isFront 
-                        ? '0 30px 60px -12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05)' 
-                        : '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)',
-                      opacity,
-                      scale: combinedScale,
-                      transformOrigin: 'center center',
-                    }}
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: false, margin: `-${80 + index * 40}px` }}
-                  />
-                );
-              })}
-            </div>
-
             {/* Hero Text Content with backdrop overlay */}
-            <div className="relative z-20 text-center lg:text-left max-w-4xl mx-auto lg:mx-0" style={{ transform: 'translateX(-144px)' }}>
+            <div className="relative z-20 text-center max-w-4xl mx-auto" style={{ transform: 'translateY(-96px)' }}>
               <div className="bg-white/90 backdrop-blur-md rounded-2xl md:rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 shadow-xl border border-white/50">
                 {/* Logo/Badge Section - Top Center */}
                 <motion.div 
@@ -208,17 +125,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.35, duration: 0.7 }}
-                  className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-xl lg:max-w-lg mx-auto lg:mx-0 mb-8 sm:mb-10 leading-relaxed font-normal"
+                  className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-xl mx-auto mb-8 sm:mb-10 leading-relaxed font-normal text-center"
                   style={{ color: '#4b5563' }}
                 >
-                  Experience a seamless, AI-powered mortgage application process designed to save you time and simplify every step.
+                  Experience a seamless mortgage application process designed to save you time and simplify every step with intelligent guidance.
                 </motion.p>
 
                 <motion.div
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.7 }}
-                  className="flex flex-col sm:flex-row gap-3.5 sm:gap-4 justify-center lg:justify-start items-stretch sm:items-center"
+                  className="flex flex-col sm:flex-row gap-3.5 sm:gap-4 justify-center items-stretch sm:items-center"
                 >
                   <motion.button
                     whileHover={{ scale: 1.02, y: -1 }}
@@ -259,6 +176,108 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
             </div>
           </div>
         </HeroHighlight>
+      </div>
+
+      {/* Rotating Images Section - Moved outside hero */}
+      <div 
+        className="relative mb-16 sm:mb-20 md:mb-24 lg:mb-28 px-4 sm:px-6 lg:px-8" 
+        style={{ minHeight: '600px', overflow: 'visible' }}
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12">
+            {/* Title and Description Section - Left */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="flex-shrink-0 lg:w-1/2 text-center lg:text-left"
+            >
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground mb-4 sm:mb-5 tracking-tight">
+                See It In Action
+              </h2>
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed mb-4" style={{ color: '#6b7280' }}>
+                Explore our platform through interactive screenshots showcasing the seamless mortgage application experience. Watch as each feature comes to life.
+              </p>
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed" style={{ color: '#6b7280' }}>
+                Our intuitive interface guides you through every step, from initial pre-qualification to final document submission, making the mortgage process simpler and more transparent than ever before.
+              </p>
+            </motion.div>
+
+            {/* Images Section - Right */}
+            <div 
+              className="relative flex-shrink-0 lg:w-1/2"
+              style={{ height: '600px', width: '100%', overflow: 'visible' }}
+            >
+              <div 
+                className="absolute inset-0 flex items-center justify-center overflow-visible z-0"
+                style={{ height: '100%', width: '100%' }}
+              >
+          {[1, 2, 3, 4].map((index) => {
+            // Stack images with cascading effect
+            const imageIndex = index - 1; // Convert to 0-based
+            const relativePosition = (imageIndex - frontImageIndex + 4) % 4;
+            
+            // Cascading offsets: each image offset by 40px horizontally and vertically
+            const cascadeOffsetX = relativePosition * 40; // Horizontal offset for cascade
+            const cascadeOffsetY = relativePosition * 40; // Vertical offset for cascade
+            
+            // Z-index: front image highest, others decrease
+            const dynamicZIndex = 10 - relativePosition;
+            
+            // Opacity: all visible but slightly fade back images
+            const opacity = 1 - (relativePosition * 0.15); // Front image fully opaque, others slightly fade
+            
+            // Scale: front image largest, others slightly smaller
+            const finalScale = 1.05 - (relativePosition * 0.05); // Front image 1.05, others decrease
+
+            // Center images in their container with cascade offset
+            const finalX = cascadeOffsetX; // Cascade offset from center
+            const finalY = cascadeOffsetY; // Cascade offset from center
+
+            return (
+              <motion.img
+                key={`${index}-${frontImageIndex}`}
+                src={`${import.meta.env.BASE_URL}app-image-${index}.png`}
+                alt={`App screenshot ${index}`}
+                className="absolute w-full max-w-[1000px] sm:max-w-[1200px] md:max-w-[1400px] lg:max-w-[1600px] xl:max-w-[1800px] h-auto object-contain rounded-2xl"
+                animate={{
+                  x: finalX,
+                  y: finalY,
+                  zIndex: dynamicZIndex,
+                  opacity: opacity, // Cascading opacity
+                  scale: finalScale, // Cascading scale
+                }}
+                transition={{
+                  opacity: { duration: 3, ease: [0.25, 0.46, 0.45, 0.94] }, // Slow, cinematic fade transition
+                  scale: { duration: 3, ease: [0.25, 0.46, 0.45, 0.94] }, // Slow, cinematic scale transition
+                  x: { duration: 3, ease: [0.25, 0.46, 0.45, 0.94] }, // Slow, cinematic cascade movement
+                  y: { duration: 3, ease: [0.25, 0.46, 0.45, 0.94] }, // Slow, cinematic cascade movement
+                }}
+                style={{
+                  border: '4mm solid white',
+                  boxShadow: relativePosition === 0
+                    ? '0 30px 60px -12px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05)' 
+                    : '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05)',
+                  transformOrigin: 'center center',
+                }}
+                initial={{ 
+                  opacity: 0, 
+                  x: finalX, // Start at final position
+                  y: finalY, // Start at final position
+                  scale: finalScale 
+                }}
+                whileInView={{ 
+                  opacity: opacity 
+                }}
+                viewport={{ once: true }}
+              />
+            );
+          })}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Main Products Section */}

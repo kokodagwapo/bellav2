@@ -99,8 +99,8 @@ export const Highlight = ({
           scaleX: 1,
       }}
       transition={{
-        duration: 2,
-        ease: "linear",
+        duration: 6,
+        ease: [0.25, 0.46, 0.45, 0.94],
         delay: 0.5,
       }}
         className="absolute inset-0 bg-green-100 dark:bg-green-800 rounded-lg"
