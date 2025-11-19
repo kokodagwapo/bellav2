@@ -20,6 +20,16 @@ const StepWelcome: React.FC<StepWelcomeProps> = ({ onNext }) => {
           animate={{ opacity: 1, display: 'flex' }}
           className="flex flex-col items-center gap-2 mb-4 sm:mb-6"
         >
+          <img 
+            src={`${import.meta.env.BASE_URL}TeraTrans.png`}
+            alt="TERAVERDE Logo" 
+            className="w-auto h-auto max-w-[120px] sm:max-w-[140px] object-contain"
+            style={{ maxHeight: '60px', width: 'auto', height: 'auto' }}
+            onError={(e) => {
+              console.error('Logo failed to load');
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
           <motion.span
             animate={{ opacity: 1, display: 'flex' }}
             className="text-[10px] sm:text-xs font-medium text-muted-foreground text-center whitespace-nowrap"
