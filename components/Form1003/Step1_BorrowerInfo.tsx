@@ -321,14 +321,12 @@ const AddressInput: React.FC<{
                     {errorMessage}
                 </p>
             )}
-            {!mapsLoaded && (
+            {!mapsLoaded && !value && import.meta.env.VITE_GOOGLE_MAPS_API_KEY && (
                 <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    {import.meta.env.VITE_GOOGLE_MAPS_API_KEY 
-                        ? 'Loading address suggestions...' 
-                        : 'Address autocomplete unavailable. Please enter address manually.'}
+                    Loading address suggestions...
                 </p>
             )}
             {isValid && value && mapsLoaded && addressDetails && (
@@ -347,7 +345,7 @@ const AddressInput: React.FC<{
                     </div>
                 </div>
             )}
-            {isValid && value && mapsLoaded && !addressDetails && (
+            {isValid && value && (!mapsLoaded || !addressDetails) && (
                 <p className="mt-1.5 text-xs sm:text-sm text-primary flex items-center gap-1">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
