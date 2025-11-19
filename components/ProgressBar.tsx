@@ -25,14 +25,14 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps }) =>
         </div>
       </div>
       <div className="relative w-full">
-        <div className="w-full bg-gradient-to-r from-muted via-muted/80 to-muted rounded-full h-3 sm:h-4 overflow-hidden shadow-inner border border-border/50">
+        <div className="w-full bg-gradient-to-r from-green-50 via-green-50/80 to-green-50 rounded-full h-1 sm:h-1.5 overflow-hidden shadow-inner border border-green-100/50">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${progressPercentage}%` }}
             transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-            className="h-full rounded-full bg-gradient-to-r from-primary via-primary/95 to-primary shadow-lg relative overflow-hidden"
+            className="h-full rounded-full bg-gradient-to-r from-green-200 via-green-300 to-green-200 shadow-sm relative overflow-hidden"
             style={{
-              boxShadow: '0 0 20px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+              boxShadow: '0 0 10px rgba(187, 247, 208, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
             }}
           >
             {/* Shimmer effect */}
@@ -58,7 +58,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps }) =>
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              className="absolute inset-0 bg-gradient-to-r from-primary/50 via-primary to-primary/50 blur-sm"
+              className="absolute inset-0 bg-gradient-to-r from-green-200/50 via-green-300 to-green-200/50 blur-sm"
             />
           </motion.div>
         </div>
@@ -68,7 +68,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps }) =>
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3 }}
-            className="absolute -top-8 left-0 text-xs font-bold text-primary"
+            className="absolute -top-8 left-0 text-xs font-bold text-green-600"
             style={{ left: `calc(${progressPercentage}% - 20px)` }}
           >
             {Math.round(progressPercentage)}%
