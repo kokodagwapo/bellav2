@@ -129,7 +129,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
                 className="w-full sm:w-auto sm:min-w-[200px] md:min-w-[240px] bg-primary text-primary-foreground font-bold py-4 sm:py-4 md:py-5 px-8 sm:px-10 md:px-12 rounded-xl sm:rounded-2xl md:rounded-3xl hover:bg-primary/95 active:bg-primary/90 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30 shadow-xl hover:shadow-2xl text-base sm:text-base md:text-lg touch-manipulation min-h-[48px] sm:min-h-[52px] md:min-h-[56px]"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
               >
-                Get Started
+                Prep4Loan
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -138,7 +138,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
                 className="w-full sm:w-auto sm:min-w-[200px] md:min-w-[240px] bg-white text-primary border-2 border-primary/30 font-bold py-4 sm:py-4 md:py-5 px-8 sm:px-10 md:px-12 rounded-xl sm:rounded-2xl md:rounded-3xl hover:bg-white hover:border-primary active:bg-gray-50 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/20 shadow-lg hover:shadow-xl text-base sm:text-base md:text-lg touch-manipulation min-h-[48px] sm:min-h-[52px] md:min-h-[56px]"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
               >
-                Start Application
+                Home Journey
               </motion.button>
             </motion.div>
           </div>
