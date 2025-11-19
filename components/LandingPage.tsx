@@ -63,23 +63,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
           containerClassName="h-auto min-h-[500px] sm:min-h-[600px] md:min-h-[700px] lg:min-h-[800px] rounded-none"
           className="w-full"
         >
-          <div className="relative text-center px-3 sm:px-4 pt-6 sm:pt-8 md:pt-12 pb-8 sm:pb-12 md:pb-16 w-full">
+          <div className="relative text-center px-4 sm:px-6 pt-8 sm:pt-12 md:pt-16 pb-10 sm:pb-14 md:pb-20 w-full">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="flex flex-col items-center gap-3 sm:gap-4 md:gap-5 mb-6 sm:mb-8 md:mb-10"
+              className="flex flex-col items-center gap-4 sm:gap-5 md:gap-6 mb-8 sm:mb-10 md:mb-12"
             >
               <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
-                className="relative"
+                className="relative mb-2"
               >
                 <img 
                   src={`${import.meta.env.BASE_URL}TeraTrans.png`}
                   alt="TERAVERDE Logo" 
-                  className="relative w-auto h-auto max-w-[120px] sm:max-w-[160px] md:max-w-[200px] lg:max-w-[240px] object-contain"
+                  className="relative w-auto h-auto max-w-[120px] sm:max-w-[160px] md:max-w-[200px] lg:max-w-[240px] object-contain drop-shadow-lg"
                   style={{ maxHeight: '80px', width: 'auto', height: 'auto' }}
                   onError={(e) => {
                     console.error('Logo failed to load');
@@ -91,8 +91,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
-                className="text-xs sm:text-sm md:text-base font-semibold text-muted-foreground tracking-wider uppercase px-2"
-                style={{ color: '#6b7280', letterSpacing: '0.1em' }}
+                className="text-xs sm:text-sm md:text-base font-semibold text-muted-foreground tracking-wider uppercase px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm"
+                style={{ color: '#6b7280', letterSpacing: '0.15em' }}
               >
                 Business Process Solutions
               </motion.span>
@@ -102,16 +102,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-extrabold text-foreground mb-4 sm:mb-6 md:mb-8 leading-tight px-2"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground mb-6 sm:mb-8 md:mb-10 leading-tight px-4 max-w-5xl mx-auto"
             >
-              Transform Your<br className="hidden sm:block" /> <Highlight className="text-foreground">Home Journey</Highlight>
+              Your <Highlight className="text-foreground">Home Journey</Highlight>.<br className="hidden sm:block" /> Faster. Clearer. Better.
             </motion.h1>
             
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.8 }}
-              className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-muted-foreground max-w-4xl mx-auto mb-8 sm:mb-10 md:mb-12 lg:mb-14 leading-relaxed font-light px-3"
+              className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 sm:mb-12 md:mb-14 lg:mb-16 leading-relaxed font-light px-4"
             >
               Experience a seamless, AI-powered mortgage application process designed to save you time and simplify every step.
             </motion.p>
@@ -120,25 +120,41 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8 }}
-              className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-5 justify-center items-stretch sm:items-center px-2"
+              className="flex flex-col sm:flex-row gap-4 sm:gap-5 md:gap-6 justify-center items-stretch sm:items-center px-4"
             >
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onNavigateToPrep?.()}
-                className="w-full sm:w-auto sm:min-w-[200px] md:min-w-[240px] bg-primary text-primary-foreground font-bold py-4 sm:py-4 md:py-5 px-8 sm:px-10 md:px-12 rounded-xl sm:rounded-2xl md:rounded-3xl hover:bg-primary/95 active:bg-primary/90 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30 shadow-xl hover:shadow-2xl text-base sm:text-base md:text-lg touch-manipulation min-h-[48px] sm:min-h-[52px] md:min-h-[56px]"
+                className="group relative w-full sm:w-auto sm:min-w-[220px] md:min-w-[260px] bg-gradient-to-r from-primary via-primary to-green-600 text-white font-bold py-4 sm:py-4 md:py-5 px-8 sm:px-10 md:px-14 rounded-2xl sm:rounded-2xl md:rounded-3xl hover:from-green-600 hover:via-primary hover:to-primary transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/30 shadow-xl hover:shadow-2xl hover:shadow-primary/30 text-base sm:text-base md:text-lg touch-manipulation min-h-[52px] sm:min-h-[56px] md:min-h-[60px] overflow-hidden"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
               >
-                Prep4Loan
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  Prep4Loan
+                  <svg className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0"
+                  initial={{ x: '-100%' }}
+                  whileHover={{ x: '100%' }}
+                  transition={{ duration: 0.6 }}
+                />
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onNavigateToForm1003?.()}
-                className="w-full sm:w-auto sm:min-w-[200px] md:min-w-[240px] bg-white text-primary border-2 border-primary/30 font-bold py-4 sm:py-4 md:py-5 px-8 sm:px-10 md:px-12 rounded-xl sm:rounded-2xl md:rounded-3xl hover:bg-white hover:border-primary active:bg-gray-50 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/20 shadow-lg hover:shadow-xl text-base sm:text-base md:text-lg touch-manipulation min-h-[48px] sm:min-h-[52px] md:min-h-[56px]"
+                className="group relative w-full sm:w-auto sm:min-w-[220px] md:min-w-[260px] bg-white text-primary border-2 border-primary/40 font-bold py-4 sm:py-4 md:py-5 px-8 sm:px-10 md:px-14 rounded-2xl sm:rounded-2xl md:rounded-3xl hover:bg-gradient-to-r hover:from-primary/5 hover:via-primary/10 hover:to-primary/5 hover:border-primary transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 text-base sm:text-base md:text-lg touch-manipulation min-h-[52px] sm:min-h-[56px] md:min-h-[60px] backdrop-blur-sm"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
               >
-                Home Journey
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  Home Journey
+                  <svg className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
               </motion.button>
             </motion.div>
           </div>

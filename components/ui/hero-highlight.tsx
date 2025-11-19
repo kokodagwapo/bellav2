@@ -82,28 +82,38 @@ export const Highlight = ({
 }) => {
   return (
     <motion.span
-      initial={{
-        backgroundSize: "0% 100%",
-      }}
-      animate={{
-        backgroundSize: "100% 100%",
-      }}
-      transition={{
-        duration: 2,
-        ease: "linear",
-        delay: 0.5,
-      }}
-      style={{
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "left center",
-        display: "inline",
-      }}
       className={cn(
-        `relative inline-block pb-1 px-1 rounded-lg bg-green-100 dark:bg-green-800`,
+        `relative inline-block text-3xl sm:text-4xl md:text-5xl lg:text-6xl`,
         className
       )}
+      style={{
+        position: "relative",
+        zIndex: 1,
+      }}
     >
-      {children}
+      <motion.span
+        initial={{
+          scaleX: 0,
+        }}
+        animate={{
+          scaleX: 1,
+        }}
+        transition={{
+          duration: 2,
+          ease: "linear",
+          delay: 0.5,
+        }}
+        className="absolute inset-0 bg-green-100 dark:bg-green-800 rounded-lg"
+        style={{
+          zIndex: -1,
+          transformOrigin: "left center",
+          top: '0.25rem',
+          bottom: '0.25rem',
+          left: '0.125rem',
+          right: '0.125rem',
+        }}
+      />
+      <span className="relative z-10 px-1">{children}</span>
     </motion.span>
   );
 };
