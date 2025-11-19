@@ -50,6 +50,7 @@ const AddressInput: React.FC<{
 }> = ({ label, id, value, onChange, fullWidth = false, placeholder, onValidationChange }) => {
     const addressInputRef = useRef<HTMLInputElement>(null);
     const autocompleteRef = useRef<any>(null);
+    const inputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [isValid, setIsValid] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [mapsLoaded, setMapsLoaded] = useState(false);
@@ -204,9 +205,10 @@ const AddressInput: React.FC<{
             });
 
             // Validate on manual input with debouncing
-            let inputTimeout: NodeJS.Timeout;
             const handleInput = () => {
-                clearTimeout(inputTimeout);
+                if (inputTimeoutRef.current) {
+                    clearTimeout(inputTimeoutRef.current);
+                }
                 const inputValue = addressInputRef.current?.value || '';
                 
                 // Clear address details if manually editing
@@ -214,7 +216,7 @@ const AddressInput: React.FC<{
                     setAddressDetails(null);
                 }
                 
-                inputTimeout = setTimeout(() => {
+                inputTimeoutRef.current = setTimeout(() => {
                     if (inputValue.length > 5) {
                         // Basic validation - at least 6 characters for a valid address
                         const isValidInput = inputValue.trim().length > 5;
@@ -245,6 +247,9 @@ const AddressInput: React.FC<{
             
             return () => {
                 console.log('Cleaning up autocomplete listeners');
+                if (inputTimeoutRef.current) {
+                    clearTimeout(inputTimeoutRef.current);
+                }
                 if (addressInputRef.current) {
                     addressInputRef.current.removeEventListener('input', handleInput);
                 }
