@@ -8,6 +8,11 @@ export interface Requirement {
 
 const PURCHASE_REQUIREMENTS: Requirement[] = [
   {
+    key: 'loanPurpose',
+    label: 'Loan Purpose',
+    isCompleted: (data) => !!data.loanPurpose,
+  },
+  {
     key: 'borrowerInfo',
     label: 'Borrower Information',
     isCompleted: (data) => !!data.fullName && !!data.email && !!data.phoneNumber,
@@ -28,6 +33,16 @@ const PURCHASE_REQUIREMENTS: Requirement[] = [
     isCompleted: (data) => data.purchasePrice > 0 && data.downPayment > 0,
   },
   {
+    key: 'firstTimeBuyer',
+    label: 'First-Time Buyer Status',
+    isCompleted: (data) => data.isFirstTimeBuyer !== null,
+  },
+  {
+    key: 'militaryStatus',
+    label: 'Military Service Status',
+    isCompleted: (data) => data.isMilitary !== null,
+  },
+  {
     key: 'driversLicense',
     label: "Driver's License (via OCR)",
     isCompleted: (data) => !!data.borrowerAddress && !!data.dob,
@@ -40,6 +55,11 @@ const PURCHASE_REQUIREMENTS: Requirement[] = [
 ];
 
 const REFINANCE_REQUIREMENTS: Requirement[] = [
+    {
+        key: 'loanPurpose',
+        label: 'Loan Purpose',
+        isCompleted: (data) => !!data.loanPurpose,
+    },
     {
         key: 'borrowerInfo',
         label: 'Borrower Information',
@@ -59,6 +79,11 @@ const REFINANCE_REQUIREMENTS: Requirement[] = [
         key: 'refinanceFinancials',
         label: 'Property Value & Loan Amount',
         isCompleted: (data) => data.estimatedPropertyValue > 0 && data.loanAmount > 0,
+    },
+    {
+        key: 'militaryStatus',
+        label: 'Military Service Status',
+        isCompleted: (data) => data.isMilitary !== null,
     },
     {
         key: 'driversLicense',
