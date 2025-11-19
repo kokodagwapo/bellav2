@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FilePlus2, FileText, LayoutList, Shield, Zap, Users, CheckCircle2 } from './icons';
+import { FilePlus2, FileText, LayoutList, Shield, Zap, Users, CheckCircle2, UploadCloud, Smartphone, Scan } from './icons';
 import { HeroHighlight, Highlight } from './ui/hero-highlight';
 
 interface LandingPageProps {
@@ -26,13 +26,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
 
   const features = [
     {
+      icon: <div className="flex items-center gap-2"><Scan className="h-8 w-8 text-primary" /><UploadCloud className="h-6 w-6 text-primary" /><Smartphone className="h-6 w-6 text-primary" /></div>,
+      title: "OCR Technology",
+      description: "Upload documents via mobile or desktop. Our advanced OCR automatically extracts and verifies information from driver's licenses, W-2s, and paystubs."
+    },
+    {
       icon: <LayoutList className="h-8 w-8 text-primary" />,
       title: "Document Management",
       description: "Track your required documents and see your progress in real-time."
     },
     {
       icon: <Shield className="h-8 w-8 text-primary" />,
-      title: "Secure & Compliant",
+      title: "SOC2 Ready",
       description: "Bank-level security with full compliance to industry standards."
     },
     {
