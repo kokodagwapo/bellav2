@@ -23,10 +23,14 @@ const LogoSection = () => {
         className="flex flex-col items-center gap-2"
       >
         <img 
-          src="/TeraTrans.png" 
+          src={`${import.meta.env.BASE_URL}TeraTrans.png`}
           alt="TERAVERDE Logo" 
           className="w-auto h-auto max-w-[140px] object-contain"
-          style={{ maxHeight: '80px' }}
+          style={{ maxHeight: '80px', width: 'auto', height: 'auto' }}
+          onError={(e) => {
+            console.error('Logo failed to load');
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
         />
         <motion.span
           animate={{
