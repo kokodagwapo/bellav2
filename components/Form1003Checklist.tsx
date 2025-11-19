@@ -1,4 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown } from './icons';
 import { FormData } from '../types';
 import { getForm1003Requirements, Form1003Requirement } from '../data/form1003Requirements';
 
@@ -47,6 +49,32 @@ const Form1003Checklist: React.FC<Form1003ChecklistProps> = ({ formData }) => {
   const totalCount = requirements.length;
   const completionPercentage = Math.round((completedCount / totalCount) * 100);
 
+  // Initialize expanded sections - Section 1A expanded by default
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
+    const groups: { [key: string]: Form1003Requirement[] } = {};
+    requirements.forEach(req => {
+      const sectionKey = req.section.split(' ')[0] + ' ' + req.section.split(' ')[1];
+      if (!groups[sectionKey]) {
+        groups[sectionKey] = [];
+      }
+    });
+    const sections = Object.keys(groups);
+    const defaultExpanded = sections.find(s => s.toLowerCase() === 'section 1a') || sections[0];
+    return new Set(defaultExpanded ? [defaultExpanded] : []);
+  });
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(section)) {
+        newSet.delete(section);
+      } else {
+        newSet.add(section);
+      }
+      return newSet;
+    });
+  };
+
   return (
     <div className="space-y-4 p-6 bg-secondary/50 rounded-lg border border-border">
       <div>
@@ -67,24 +95,50 @@ const Form1003Checklist: React.FC<Form1003ChecklistProps> = ({ formData }) => {
         <p className="text-xs text-muted-foreground mt-1 text-right">{completionPercentage}% Complete</p>
       </div>
       
-      <div className="space-y-5 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-        {Object.entries(groupedRequirements).map(([section, sectionReqs]) => (
-          <div key={section} className="space-y-3">
-            <h4 className="text-xs font-bold text-primary uppercase tracking-wider sticky top-0 bg-secondary/50 py-1 z-10">
-              {section}
-            </h4>
-            <ul className="space-y-3 pl-1">
-              {sectionReqs.map((req) => (
-                <li key={req.key}>
-                  <RequirementItem 
-                    requirement={req} 
-                    isCompleted={req.isCompleted(formData)}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+      <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+        {Object.entries(groupedRequirements).map(([section, sectionReqs]) => {
+          const isExpanded = expandedSections.has(section);
+          return (
+            <div key={section} className="border border-border rounded-lg overflow-hidden">
+              <button
+                onClick={() => toggleSection(section)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-secondary/50 hover:bg-secondary/70 transition-colors cursor-pointer"
+              >
+                <h4 className="text-xs font-bold text-primary uppercase tracking-wider">
+                  {section}
+                </h4>
+                <motion.div
+                  animate={{ rotate: isExpanded ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ChevronDown className="h-4 w-4 text-primary" />
+                </motion.div>
+              </button>
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <ul className="space-y-3 p-4 pl-5">
+                      {sectionReqs.map((req) => (
+                        <li key={req.key}>
+                          <RequirementItem 
+                            requirement={req} 
+                            isCompleted={req.isCompleted(formData)}
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </div>
       
       <div className="pt-4 border-t border-border">
