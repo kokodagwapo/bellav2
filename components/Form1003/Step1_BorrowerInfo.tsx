@@ -235,11 +235,6 @@ const AddressInput: React.FC<{
                 }, 300); // Debounce for 300ms
             };
 
-            // Use React's onChange handler instead of addEventListener to avoid conflicts
-            const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                handleInput();
-            };
-
             addressInputRef.current.addEventListener('input', handleInput);
             
             // Add focus event to show suggestions
