@@ -253,7 +253,7 @@ const AddressInput: React.FC<{
             
             addressInputRef.current.addEventListener('focus', handleFocus);
             
-            return () => {
+            const cleanup = () => {
                 console.log('Cleaning up autocomplete listeners');
                 if (inputTimeoutRef.current) {
                     clearTimeout(inputTimeoutRef.current);
@@ -266,6 +266,8 @@ const AddressInput: React.FC<{
                     window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
                 }
             };
+            
+            return cleanup;
         } catch (error) {
             console.error('Error initializing autocomplete:', error);
         }
