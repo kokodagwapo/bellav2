@@ -50,206 +50,104 @@ const AddressInput: React.FC<{
 }> = ({ label, id, value, onChange, fullWidth = false, placeholder, onValidationChange }) => {
     const addressInputRef = useRef<HTMLInputElement>(null);
     const autocompleteRef = useRef<any>(null);
-    const inputTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const [isValid, setIsValid] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [isVerified, setIsVerified] = useState(false);
     const [mapsLoaded, setMapsLoaded] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [addressDetails, setAddressDetails] = useState<{
-        street?: string;
-        city?: string;
-        state?: string;
-        zip?: string;
-    } | null>(null);
 
     // Load Google Maps API script
     useEffect(() => {
-        // Check if already loaded
-        if (window.google && window.google.maps && window.google.maps.places) {
-            console.log('Google Maps already loaded');
+        if (window.google?.maps?.places) {
             setMapsLoaded(true);
             return;
         }
 
         const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-        console.log('Google Maps API Key check:', apiKey ? 'Found' : 'Not found');
-        
         if (!apiKey) {
-            console.warn('Google Maps API key not found. Please set VITE_GOOGLE_MAPS_API_KEY in your environment variables.');
-            // For development, you can use a test key or allow manual entry
             setMapsLoaded(false);
             return;
         }
 
-        // Check if script is already loading or loaded
         const existingScript = document.querySelector(`script[src*="maps.googleapis.com"]`);
         if (existingScript) {
-            console.log('Google Maps script already exists, waiting for load...');
             const checkInterval = setInterval(() => {
-                if (window.google && window.google.maps && window.google.maps.places) {
-                    console.log('Google Maps loaded from existing script');
+                if (window.google?.maps?.places) {
                     setMapsLoaded(true);
                     clearInterval(checkInterval);
                 }
             }, 100);
-            
-            // Timeout after 10 seconds
-            setTimeout(() => {
-                clearInterval(checkInterval);
-                if (!window.google || !window.google.maps) {
-                    console.error('Google Maps failed to load after timeout');
-                }
-            }, 10000);
-            
+            setTimeout(() => clearInterval(checkInterval), 10000);
             return () => clearInterval(checkInterval);
         }
 
-        console.log('Loading Google Maps API script...');
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
         script.async = true;
         script.defer = true;
         script.onload = () => {
-            console.log('Google Maps API script loaded successfully');
-            if (window.google && window.google.maps && window.google.maps.places) {
+            if (window.google?.maps?.places) {
                 setMapsLoaded(true);
-            } else {
-                console.error('Google Maps API loaded but places library not available');
-                setMapsLoaded(false);
             }
         };
-        script.onerror = (error) => {
-            console.error('Failed to load Google Maps API:', error);
-            setMapsLoaded(false);
-        };
+        script.onerror = () => setMapsLoaded(false);
         document.head.appendChild(script);
     }, []);
 
+    // Initialize autocomplete when maps loads
     useEffect(() => {
-        if (!addressInputRef.current) {
-            console.log('Address input ref not available');
-            return;
-        }
-        
-        if (!mapsLoaded) {
-            console.log('Maps not loaded yet, waiting...');
-            return;
-        }
-        
-        if (!window.google || !window.google.maps || !window.google.maps.places) {
-            console.error('Google Maps Places API not available');
+        if (!addressInputRef.current || !mapsLoaded || !window.google?.maps?.places) {
             return;
         }
 
-        console.log('Initializing Google Maps Autocomplete...');
         try {
             const autocomplete = new window.google.maps.places.Autocomplete(
                 addressInputRef.current,
                 {
                     types: ['address'],
                     componentRestrictions: { country: 'us' },
-                    fields: ['address_components', 'formatted_address', 'geometry', 'place_id']
+                    fields: ['formatted_address', 'geometry']
                 }
             );
 
-            console.log('Autocomplete initialized successfully');
             autocompleteRef.current = autocomplete;
 
             autocomplete.addListener('place_changed', () => {
-                setIsLoading(true);
                 const place = autocomplete.getPlace();
-                console.log('Place selected:', place);
                 
-                if (place.formatted_address && place.geometry && place.geometry.location) {
-                    // Extract address components
-                    const components: any = {};
-                    if (place.address_components) {
-                        place.address_components.forEach((component: any) => {
-                            if (component.types.includes('street_number') || component.types.includes('route')) {
-                                components.street = components.street 
-                                    ? `${components.street} ${component.long_name}`
-                                    : component.long_name;
-                            }
-                            if (component.types.includes('locality')) {
-                                components.city = component.long_name;
-                            }
-                            if (component.types.includes('administrative_area_level_1')) {
-                                components.state = component.short_name;
-                            }
-                            if (component.types.includes('postal_code')) {
-                                components.zip = component.long_name;
-                            }
-                        });
-                    }
-                    
-                    // Verify this is a valid address with coordinates
-                    const formattedAddress = place.formatted_address;
-                    console.log('Valid address selected:', formattedAddress);
-                    onChange(id, formattedAddress);
-                    setIsValid(true);
-                    setErrorMessage('');
-                    setAddressDetails(components);
+                if (place.formatted_address && place.geometry?.location) {
+                    onChange(id, place.formatted_address);
+                    setIsVerified(true);
                     if (onValidationChange) {
                         onValidationChange(true);
                     }
                 } else {
-                    console.warn('Invalid place selected:', place);
-                    setIsValid(false);
-                    setErrorMessage('Please select a valid address from the suggestions');
-                    setAddressDetails(null);
+                    setIsVerified(false);
                     if (onValidationChange) {
                         onValidationChange(false);
                     }
                 }
-                setIsLoading(false);
             });
 
-            // Add focus event to show suggestions (optional enhancement)
-            const handleFocus = () => {
-                // Google Maps autocomplete will show suggestions automatically on focus
-                // No need to manually trigger
-            };
-            
-            addressInputRef.current.addEventListener('focus', handleFocus);
-            
-            const cleanup = () => {
-                console.log('Cleaning up autocomplete listeners');
-                if (addressInputRef.current) {
-                    addressInputRef.current.removeEventListener('focus', handleFocus);
-                }
+            return () => {
                 if (window.google && autocompleteRef.current) {
                     window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
                 }
             };
-            
-            return cleanup;
         } catch (error) {
             console.error('Error initializing autocomplete:', error);
         }
-    }, [mapsLoaded, id, value]); // Removed onChange and onValidationChange from deps to prevent re-initialization
+    }, [mapsLoaded, id, onChange, onValidationChange]);
 
+    // Validate address on value change
     useEffect(() => {
-        // Validate existing address
-        if (value && value.trim().length > 5) {
-            setIsValid(true);
-            if (onValidationChange) {
-                onValidationChange(true);
-            }
-        } else {
-            setIsValid(false);
-            if (onValidationChange) {
-                onValidationChange(false);
-            }
+        const isValid = value ? value.trim().length > 5 : false;
+        if (!isVerified && onValidationChange) {
+            onValidationChange(isValid);
         }
-    }, [value, onValidationChange]);
+    }, [value, isVerified, onValidationChange]);
 
     return (
         <div className={fullWidth ? 'col-span-1 sm:col-span-2' : ''}>
             <label htmlFor={id} className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">
                 {label}
-                {mapsLoaded && (
-                    <span className="ml-2 text-xs text-primary">✨ Smart suggestions enabled</span>
-                )}
             </label>
             <div className="relative">
                 <input
@@ -259,91 +157,27 @@ const AddressInput: React.FC<{
                     value={value || ''}
                     onChange={(e) => {
                         const newValue = e.target.value;
-                        // Update parent immediately
                         onChange(id, newValue);
-                        
-                        // Clear address details when manually editing
-                        setAddressDetails(null);
-                        
-                        // Validate with debouncing
-                        if (inputTimeoutRef.current) {
-                            clearTimeout(inputTimeoutRef.current);
-                        }
-                        
-                        inputTimeoutRef.current = setTimeout(() => {
-                            if (newValue.trim().length > 5) {
-                                setIsValid(true);
-                                setErrorMessage('');
-                                if (onValidationChange) {
-                                    onValidationChange(true);
-                                }
-                            } else {
-                                setIsValid(false);
-                                if (onValidationChange) {
-                                    onValidationChange(false);
-                                }
-                            }
-                        }, 300);
+                        setIsVerified(false); // Reset verification when manually editing
                     }}
-                    placeholder={mapsLoaded ? "Start typing your address (e.g., 123 Main St, New York, NY)" : placeholder || "Street address, City, State ZIP"}
+                    placeholder={placeholder || "Street address, City, State ZIP"}
                     className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto] pr-10"
                     autoComplete="address-line1"
                 />
-                {isLoading && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <svg className="animate-spin h-5 w-5 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </div>
-                )}
-                {mapsLoaded && !isLoading && value && (
+                {isVerified && (
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                         <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
                 )}
             </div>
-            {errorMessage && (
-                <p className="mt-1.5 text-xs sm:text-sm text-red-500 flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {errorMessage}
-                </p>
-            )}
-            {!mapsLoaded && !value && import.meta.env.VITE_GOOGLE_MAPS_API_KEY && (
-                <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
-                    <svg className="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Loading address suggestions...
-                </p>
-            )}
-            {isValid && value && mapsLoaded && addressDetails && (
-                <div className="mt-2 p-3 bg-primary/5 border border-primary/20 rounded-lg">
-                    <p className="text-xs sm:text-sm text-primary font-medium flex items-center gap-1 mb-1">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Verified Address
-                    </p>
-                    <div className="text-xs text-muted-foreground space-y-0.5">
-                        {addressDetails.street && <p><span className="font-medium">Street:</span> {addressDetails.street}</p>}
-                        {addressDetails.city && <p><span className="font-medium">City:</span> {addressDetails.city}</p>}
-                        {addressDetails.state && <p><span className="font-medium">State:</span> {addressDetails.state}</p>}
-                        {addressDetails.zip && <p><span className="font-medium">ZIP:</span> {addressDetails.zip}</p>}
-                    </div>
-                </div>
-            )}
-            {isValid && value && (!mapsLoaded || !addressDetails) && (
+            {isVerified && value && (
                 <p className="mt-1.5 text-xs sm:text-sm text-primary flex items-center gap-1">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    Address entered
+                    Address verified
                 </p>
             )}
         </div>
