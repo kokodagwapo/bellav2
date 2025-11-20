@@ -77,7 +77,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
   return (
     <div className="w-full max-w-7xl mx-auto animate-fade-in">
       {/* Hero Section with HeroHighlight Background */}
-      <div className="relative mb-16 sm:mb-20 md:mb-24 lg:mb-28 -mx-2 sm:-mx-4 md:-mx-6 lg:-mx-8">
+      <div className="hidden md:block relative mb-16 sm:mb-20 md:mb-24 lg:mb-28 -mx-2 sm:-mx-4 md:-mx-6 lg:-mx-8">
         <HeroHighlight 
           containerClassName="h-auto min-h-[600px] sm:min-h-[700px] md:min-h-[800px] lg:min-h-[900px] rounded-none"
           className="w-full"
@@ -193,7 +193,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
 
       {/* Rotating Images Section - Moved outside hero */}
       <div 
-        className="relative mb-16 sm:mb-20 md:mb-24 lg:mb-28 px-4 sm:px-6 lg:px-8" 
+        className="hidden md:block relative mb-16 sm:mb-20 md:mb-24 lg:mb-28 px-4 sm:px-6 lg:px-8" 
         style={{ minHeight: '600px', overflow: 'visible' }}
       >
         <div className="max-w-7xl mx-auto">
