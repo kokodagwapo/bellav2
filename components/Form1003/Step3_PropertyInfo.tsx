@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { LoanPurpose } from '../../types';
 import type { FormData } from '../../types';
 import StepHeader from '../StepHeader';
 import StepNavigation from '../StepNavigation';
+import { Lightbulb } from '../icons';
 
 interface Step3Props {
     data: FormData;
@@ -46,21 +47,64 @@ const Step3PropertyInfo: React.FC<Step3Props> = ({ data, onDataChange, onNext, o
         onDataChange({ [id]: value });
     };
 
+    // Backward compatibility: Map Prep4Loan property data
+    useEffect(() => {
+        // Map subjectProperty to purchasePrice/estimatedPropertyValue
+        if (data.subjectProperty?.value && !data.purchasePrice && !data.estimatedPropertyValue) {
+            if (isPurchase) {
+                onDataChange({ purchasePrice: data.subjectProperty.value });
+            } else {
+                onDataChange({ estimatedPropertyValue: data.subjectProperty.value });
+            }
+        }
+        // Map subjectProperty address to location
+        if (data.subjectProperty?.address && !data.location) {
+            const addr = data.subjectProperty.address;
+            if (addr.city && addr.state) {
+                onDataChange({ location: `${addr.city}, ${addr.state}` });
+            }
+        }
+    }, [data.subjectProperty, isPurchase, onDataChange]);
+
+    const isComplete = isPurchase 
+        ? data.purchasePrice && data.purchasePrice > 0
+        : data.estimatedPropertyValue && data.estimatedPropertyValue > 0;
+
     return (
         <div className="px-2 sm:px-0">
             <StepHeader title="Section 3: Property Information" subtitle="Details about the property you are financing." />
+            
+            {/* Bella's Insight */}
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 text-blue-800 rounded-md flex items-start gap-3 mt-4 mb-6">
+                <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-1" />
+                <p className="text-sm">
+                    <span className="font-semibold">Bella's Insight:</span> Most of this information was pre-filled from your Prep4Loan evaluation! You can update any fields if needed. The property value helps lenders determine the loan-to-value (LTV) ratio.
+                </p>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mt-4 sm:mt-6 md:mt-8">
                 <ReadOnlyField label="Loan Purpose" value={data.loanPurpose} />
                 <ReadOnlyField label="Property Type" value={data.propertyType} />
                 <ReadOnlyField label="Intended Property Use" value={data.propertyUse} />
                 <ReadOnlyField label="Property Location (City, State)" value={data.location} />
                 {isPurchase ? (
-                    <InputField label="Purchase Price" id="purchasePrice" value={data.purchasePrice} onChange={handleFieldChange} />
+                    <InputField label="Purchase Price" id="purchasePrice" value={data.purchasePrice || 0} onChange={handleFieldChange} />
                 ) : (
-                    <InputField label="Estimated Property Value" id="estimatedPropertyValue" value={data.estimatedPropertyValue} onChange={handleFieldChange} />
+                    <InputField label="Estimated Property Value" id="estimatedPropertyValue" value={data.estimatedPropertyValue || 0} onChange={handleFieldChange} />
                 )}
             </div>
-            <StepNavigation onNext={onNext} onBack={onBack} />
+
+            {/* LTV Insight for purchase */}
+            {isPurchase && data.purchasePrice && data.downPayment && data.purchasePrice > 0 && (
+                <div className="mt-4 bg-primary/10 border-l-4 border-primary p-3 text-primary rounded-md flex items-start gap-2">
+                    <Lightbulb className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                    <p className="text-xs">
+                        <span className="font-semibold">Loan-to-Value (LTV):</span> With a ${data.downPayment.toLocaleString()} down payment on a ${data.purchasePrice.toLocaleString()} home, your LTV is {Math.round(((data.purchasePrice - data.downPayment) / data.purchasePrice) * 100)}%. Lower LTV often means better rates!
+                    </p>
+                </div>
+            )}
+
+            <StepNavigation onNext={onNext} onBack={onBack} isNextDisabled={!isComplete} />
         </div>
     );
 };

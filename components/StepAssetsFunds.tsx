@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import StepHeader from './StepHeader';
 import { SelectionButton } from './StepHeader';
 import StepNavigation from './StepNavigation';
-import { Building, TrendingUp, Gift, Zap } from './icons';
+import { Building, TrendingUp, Gift, Zap, Lightbulb } from './icons';
 import type { FormData } from '../types';
 
 interface StepAssetsFundsProps {
@@ -71,6 +71,14 @@ const StepAssetsFunds: React.FC<StepAssetsFundsProps> = ({
         title="Assets & Funds"
         subtitle="Tell us about your available funds and assets"
       />
+      
+      {/* Bella's Insight */}
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 text-blue-800 rounded-md flex items-start gap-3 mt-4 mb-6">
+        <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-1" />
+        <p className="text-sm">
+          <span className="font-semibold">Bella's Insight:</span> Your assets and available funds help determine your down payment options and loan eligibility. Gift funds are allowed for down payments, but you'll need a gift letter from the donor!
+        </p>
+      </div>
       
       <div className="space-y-6 mt-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

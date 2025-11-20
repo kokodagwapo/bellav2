@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import StepHeader from './StepHeader';
 import { SelectionButton } from './StepHeader';
 import StepNavigation from './StepNavigation';
-import { Briefcase, User, Clock, Home as HomeIcon } from './icons';
+import { Briefcase, User, Clock, Home as HomeIcon, Lightbulb } from './icons';
 import type { FormData } from '../types';
 
 interface StepEmploymentStatusProps {
@@ -42,6 +42,14 @@ const StepEmploymentStatus: React.FC<StepEmploymentStatusProps> = ({
         title="Employment Status"
         subtitle="How would you describe your current employment situation?"
       />
+      
+      {/* Bella's Insight */}
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 text-blue-800 rounded-md flex items-start gap-3 mt-4 mb-6">
+        <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-1" />
+        <p className="text-sm">
+          <span className="font-semibold">Bella's Insight:</span> Your employment status helps us determine the best loan options for you. Self-employed borrowers may need additional documentation, while employed borrowers typically have a simpler process.
+        </p>
+      </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6">
         {employmentOptions.map((option, index) => (

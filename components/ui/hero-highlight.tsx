@@ -38,6 +38,7 @@ export const HeroHighlight = ({
         containerClassName
       )}
       onMouseMove={handleMouseMove}
+      style={{ overflow: 'visible' }}
     >
       <div 
         className="absolute inset-0 pointer-events-none opacity-70" 
@@ -83,7 +84,7 @@ export const Highlight = ({
   return (
     <motion.span
       className={cn(
-        `relative inline-block text-3xl sm:text-4xl md:text-5xl lg:text-6xl`,
+        `relative inline-block`,
         className
       )}
       style={{

@@ -86,6 +86,9 @@ export interface EmploymentInfo {
     monthsInLineOfWork?: number;
     isFamilyMember?: boolean;
     isBusinessOwner?: boolean;
+    isSelfEmployed?: boolean;
+    jobType?: string;
+    timeInPreviousJob?: string;
     ownershipShare?: number; // 0-100
     monthlyIncome?: {
         base?: number;

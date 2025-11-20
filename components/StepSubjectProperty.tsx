@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import StepHeader from './StepHeader';
 import { SelectionButton } from './StepHeader';
 import StepNavigation from './StepNavigation';
-import { Home } from './icons';
+import { Home, Lightbulb } from './icons';
 import type { FormData, Address } from '../types';
 
 interface StepSubjectPropertyProps {
@@ -101,6 +101,14 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
         subtitle="Tell us about the property you're interested in"
       />
       
+      {/* Bella's Insight */}
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 text-blue-800 rounded-md flex items-start gap-3 mt-4 mb-6">
+        <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-1" />
+        <p className="text-sm">
+          <span className="font-semibold">Bella's Insight:</span> If you already have a property in mind, providing the address helps us give you more accurate loan estimates. If not, that's okay too - we can work with your budget range!
+        </p>
+      </div>
+      
       <div className="space-y-6 mt-6">
         <div>
           <h3 className="text-lg font-semibold text-foreground mb-4">
@@ -128,7 +136,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
             className="space-y-4"
           >
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 ZIP Code *
               </label>
               <input
@@ -142,13 +150,13 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                   }
                 }}
                 placeholder="12345"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
                 maxLength={5}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 Street Address *
               </label>
               <input
@@ -156,12 +164,12 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                 value={address.street || ''}
                 onChange={(e) => handleAddressChange('street', e.target.value)}
                 placeholder="123 Main St"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 Unit (optional)
               </label>
               <input
@@ -169,7 +177,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                 value={address.unit || ''}
                 onChange={(e) => handleAddressChange('unit', e.target.value)}
                 placeholder="Apt 4B"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
               />
             </div>
 
@@ -177,16 +185,16 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-sm text-muted-foreground"
+                className="text-sm text-gray-600"
               >
                 {address.city && address.state && (
-                  <p>{address.city}, {address.state}</p>
+                  <p className="text-black">{address.city}, {address.state}</p>
                 )}
               </motion.div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 What do you believe is the VALUE of the home? *
               </label>
               <input
@@ -195,7 +203,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                 onChange={(e) => handleValueChange(Number(e.target.value))}
                 placeholder="500000"
                 min="0"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
               />
             </div>
           </motion.div>
@@ -229,7 +237,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
+              <label className="block text-sm font-medium text-black mb-2">
                 Target ZIP Code *
               </label>
               <input
@@ -240,7 +248,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                   handleZipChange(zip);
                 }}
                 placeholder="12345"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
                 maxLength={5}
               />
             </div>

@@ -1,5 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle2 } from './icons';
 
 interface StepIndicatorProps {
   labels: string[];
@@ -9,31 +10,59 @@ interface StepIndicatorProps {
 }
 
 const StepIndicator: React.FC<StepIndicatorProps> = ({ labels, currentStepIndex, onStepClick, stepIndices }) => {
-  const getStepWidth = () => {
-    if (labels.length <= 4) return '100%';
-    if (labels.length <= 6) return 'auto';
-    return 'auto';
-  };
+  const containerRef = useRef<HTMLDivElement>(null);
+  const activeStepRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to active step when it changes
+  useEffect(() => {
+    if (activeStepRef.current && containerRef.current) {
+      const container = containerRef.current;
+      const activeStep = activeStepRef.current;
+      const containerWidth = container.offsetWidth;
+      const stepLeft = activeStep.offsetLeft;
+      const stepWidth = activeStep.offsetWidth;
+      const scrollPosition = stepLeft - (containerWidth / 2) + (stepWidth / 2);
+      
+      container.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth'
+      });
+    }
+  }, [currentStepIndex]);
 
   return (
-    <div className="w-full pb-1 sm:pb-3 px-1 sm:px-2">
-      <div className="flex items-start justify-center w-full py-1 sm:py-5 flex-wrap gap-0.5 sm:gap-2 md:gap-3">
+    <div className="w-full pb-2 sm:pb-3 px-2 sm:px-4">
+      <div 
+        ref={containerRef}
+        className="flex items-center w-full overflow-x-auto scrollbar-hide gap-1 sm:gap-2 py-2"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        <style>{`
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
         {labels.map((label, index) => {
           const isActive = index === currentStepIndex;
           const isCompleted = index < currentStepIndex;
+          const isUpcoming = index > currentStepIndex;
+          const showLabel = isActive || isCompleted || index === currentStepIndex + 1;
 
           return (
             <React.Fragment key={index}>
-              <div 
-                className="flex flex-col items-center text-center flex-shrink-0" 
-                style={{
-                  width: labels.length <= 4 ? `calc((100% - ${(labels.length - 1) * 4}px) / ${labels.length})` : 'auto',
-                  minWidth: labels.length > 4 ? '40px' : 'auto',
-                  maxWidth: labels.length > 4 ? '80px' : 'none'
+              <motion.div
+                ref={isActive ? activeStepRef : null}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ 
+                  opacity: isCompleted ? 1 : (isActive ? 1 : (showLabel ? 0.6 : 0.3)),
+                  scale: isActive ? 1.1 : 1,
+                  width: isCompleted ? 'auto' : (isActive ? 'auto' : (showLabel ? 'auto' : '32px'))
                 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
               >
                 <motion.button 
-                  className="relative w-6 h-6 sm:w-12 sm:h-12 flex items-center justify-center mb-1 sm:mb-4 cursor-pointer touch-manipulation group"
+                  className="relative flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg cursor-pointer touch-manipulation group transition-all"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -41,41 +70,72 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ labels, currentStepIndex,
                       onStepClick(stepIndices[index]);
                     }
                   }}
-                  whileHover={{ scale: 1.1 }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  style={{ pointerEvents: 'auto', minHeight: '24px', minWidth: '24px' }}
+                  style={{ 
+                    pointerEvents: 'auto',
+                    backgroundColor: isActive ? 'rgba(16, 185, 129, 0.1)' : isCompleted ? 'rgba(16, 185, 129, 0.05)' : 'transparent'
+                  }}
                   aria-label={`Go to step: ${label || `Step ${index + 1}`}`}
                 >
                   {isCompleted ? (
-                     <div className="w-6 h-6 sm:w-12 sm:h-12 rounded-full bg-primary flex items-center justify-center">
-                        <svg className="w-3 h-3 sm:w-6 sm:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                     </div>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: index * 0.05, type: "spring", stiffness: 200 }}
+                    >
+                      <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                    </motion.div>
                   ) : isActive ? (
-                      <div className="w-6 h-6 sm:w-12 sm:h-12 rounded-full border-2 border-primary bg-white flex items-center justify-center">
-                          <div className="w-2 h-2 sm:w-5 sm:h-5 bg-primary rounded-full" />
-                      </div>
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                      className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-primary flex items-center justify-center flex-shrink-0"
+                    >
+                      <div className="w-2 h-2 sm:w-3 sm:h-3 bg-white rounded-full" />
+                    </motion.div>
                   ) : (
-                      <div className="w-6 h-6 sm:w-12 sm:h-12 rounded-full bg-gray-100 border border-gray-300"></div>
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gray-200 border border-gray-300 flex-shrink-0"></div>
                   )}
+                  
+                  <AnimatePresence>
+                    {showLabel && (
+                      <motion.span
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: 'auto' }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className={`text-xs sm:text-sm font-medium whitespace-nowrap ${
+                          isActive 
+                            ? 'text-primary font-semibold' 
+                            : isCompleted 
+                            ? 'text-primary' 
+                            : 'text-gray-500'
+                        }`}
+                      >
+                        {label || `Step ${index + 1}`}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </motion.button>
-                <p 
-                  className={`text-[9px] sm:text-xs font-medium leading-tight px-0.5 sm:px-1 ${isActive ? 'text-primary font-semibold' : isCompleted ? 'text-primary' : 'text-gray-400'}`}
-                >
-                  {label || `Step ${index + 1}`}
-                </p>
-              </div>
+              </motion.div>
               
               {index < labels.length - 1 && (
-                <div className="h-0.5 sm:h-1 mt-3 sm:mt-6 relative bg-gray-200 rounded-full flex-shrink-0" style={{width: labels.length <= 4 ? '6px' : labels.length <= 6 ? '5px' : '4px', minWidth: labels.length > 6 ? '4px' : '5px'}}>
+                <motion.div 
+                  className="h-0.5 sm:h-1 bg-gray-200 rounded-full flex-shrink-0"
+                  initial={{ width: 0 }}
+                  animate={{ 
+                    width: isCompleted ? '24px' : (isActive ? '12px' : (showLabel ? '8px' : '4px'))
+                  }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                >
                   <motion.div 
-                    className="absolute inset-y-0 left-0 bg-primary rounded-full"
+                    className="h-full bg-primary rounded-full"
                     initial={{ width: 0 }}
                     animate={{ width: isCompleted ? '100%' : (isActive ? '50%' : '0%') }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                   />
-                </div>
+                </motion.div>
               )}
             </React.Fragment>
           );

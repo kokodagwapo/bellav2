@@ -115,6 +115,14 @@ const StepTimeInJob: React.FC<StepTimeInJobProps> = ({
         subtitle="How long have you been in this job?"
       />
       
+      {/* Bella's Insight */}
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 text-blue-800 rounded-md flex items-start gap-3 mt-4 mb-6">
+        <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-1" />
+        <p className="text-sm">
+          <span className="font-semibold">Bella's Insight:</span> Lenders require a total of <strong>24 months of work history</strong>. If you've been in your current job for less than 24 months, we'll need information about your previous employment. Jobs don't need to be the same or continuous!
+        </p>
+      </div>
+      
       <div className="space-y-6 mt-6">
         <div>
           <div className="grid grid-cols-1 gap-4">

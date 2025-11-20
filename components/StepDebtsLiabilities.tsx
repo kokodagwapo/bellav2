@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import StepHeader from './StepHeader';
 import { SelectionButton } from './StepHeader';
 import StepNavigation from './StepNavigation';
-import { CreditCard, Car, GraduationCap, FileText, Users } from './icons';
+import { CreditCard, Car, GraduationCap, FileText, Users, Lightbulb } from './icons';
 import type { FormData } from '../types';
 
 interface StepDebtsLiabilitiesProps {
@@ -72,6 +72,14 @@ const StepDebtsLiabilities: React.FC<StepDebtsLiabilitiesProps> = ({
         title="Debts & Liabilities"
         subtitle="Do you have any of the following?"
       />
+      
+      {/* Bella's Insight */}
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 text-blue-800 rounded-md flex items-start gap-3 mt-4 mb-6">
+        <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-1" />
+        <p className="text-sm">
+          <span className="font-semibold">Bella's Insight:</span> Lenders consider your debt-to-income (DTI) ratio when evaluating your loan application. Be honest about all your debts - this helps us find the best loan options for you!
+        </p>
+      </div>
       
       <div className="space-y-6 mt-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

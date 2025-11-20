@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import StepHeader from './StepHeader';
 import StepNavigation from './StepNavigation';
+import { Lightbulb } from './icons';
 
 interface StepContactProps {
   data: { email: string; phoneNumber: string };
@@ -25,6 +26,15 @@ const StepContact: React.FC<StepContactProps> = ({ data, onChange, onNext, onBac
         title="How can we reach you?"
         subtitle="We'll use this to send your results and get in touch."
       />
+      
+      {/* Bella's Insight */}
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 text-blue-800 rounded-md flex items-start gap-3 mt-4 mb-6">
+        <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-1" />
+        <p className="text-sm">
+          <span className="font-semibold">Bella's Insight:</span> We'll use this information to send you personalized loan options and keep you updated on your application progress. Make sure your email and phone number are current!
+        </p>
+      </div>
+      
       <div className="space-y-4 mt-4 sm:mt-6">
         <div>
           <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Email Address</label>

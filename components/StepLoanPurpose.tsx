@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Goal } from '../types';
 import StepHeader from './StepHeader';
 import { SelectionButton } from './StepHeader';
-import { ShoppingCart, Repeat, Zap, TrendingUp } from './icons';
+import { ShoppingCart, Repeat, Zap, TrendingUp, Lightbulb } from './icons';
 import { generateBellaSpeech } from '../services/geminiService';
 import { decodeAudioData, decode } from '../utils/audioUtils';
 
@@ -85,10 +85,12 @@ const StepLoanPurpose: React.FC<StepLoanPurposeProps> = ({ data, onChange, onNex
     onChange('goal', value);
     setGamificationMessage(getRandomMessage());
     setShowGamification(true);
+    // Navigate immediately, gamification message will fade out on its own
     setTimeout(() => {
       setShowGamification(false);
-      setTimeout(onNext, 500);
-    }, 2000);
+    }, 1500);
+    // Small delay for visual feedback, then navigate
+    setTimeout(onNext, 250);
   };
 
   return (

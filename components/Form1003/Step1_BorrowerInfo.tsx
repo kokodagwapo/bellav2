@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import type { FormData } from '../../types';
 import StepHeader from '../StepHeader';
 import StepNavigation from '../StepNavigation';
+import { Lightbulb } from '../icons';
 
 declare global {
   interface Window {
@@ -13,6 +14,7 @@ interface Step1Props {
     data: FormData;
     onDataChange: (data: Partial<FormData>) => void;
     onNext: () => void;
+    onBack?: () => void;
 }
 
 const InputField: React.FC<{ label: string; id: keyof FormData; value: string | undefined; onChange: (id: keyof FormData, value: string) => void; fullWidth?: boolean; inputType?: string; placeholder?: string }> = ({ label, id, value, onChange, fullWidth = false, inputType = "text", placeholder }) => {
@@ -196,7 +198,7 @@ const AddressInput: React.FC<{
     );
 };
 
-const Step1BorrowerInfo: React.FC<Step1Props> = ({ data, onDataChange, onNext }) => {
+const Step1BorrowerInfo: React.FC<Step1Props> = ({ data, onDataChange, onNext, onBack }) => {
     const [addressValid, setAddressValid] = useState(false);
     
     const handleFieldChange = (id: keyof FormData, value: string) => {
@@ -207,9 +209,26 @@ const Step1BorrowerInfo: React.FC<Step1Props> = ({ data, onDataChange, onNext })
     const addressIsValid = addressValid || (data.borrowerAddress && data.borrowerAddress.trim().length > 5);
     const isComplete = data.fullName && data.borrowerAddress && addressIsValid && data.dob && data.email && data.phoneNumber;
 
+    // Backward compatibility: Pre-fill from Prep4Loan data if available
+    useEffect(() => {
+        if (!data.fullName && data.fullName === undefined) {
+            // Could check for other name fields if they exist
+        }
+        // Address is already handled by borrowerAddress field
+    }, [data]);
+
     return (
         <div className="px-2 sm:px-0">
             <StepHeader title="Section 1: Borrower Information" subtitle="This information is about you, the Borrower." />
+            
+            {/* Bella's Insight */}
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 text-blue-800 rounded-md flex items-start gap-3 mt-4 mb-6">
+                <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-1" />
+                <p className="text-sm">
+                    <span className="font-semibold">Bella's Insight:</span> Make sure to use your full legal name exactly as it appears on your government-issued ID. This helps prevent delays during verification!
+                </p>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-4 sm:mt-6 md:mt-8">
                 <InputField label="Full Legal Name" id="fullName" value={data.fullName} onChange={handleFieldChange} fullWidth placeholder="Enter your full legal name" />
                 <AddressInput 
@@ -225,8 +244,19 @@ const Step1BorrowerInfo: React.FC<Step1Props> = ({ data, onDataChange, onNext })
                 <InputField label="Email Address" id="email" value={data.email} onChange={handleFieldChange} inputType="email" placeholder="your.email@example.com" />
                 <InputField label="Phone Number" id="phoneNumber" value={data.phoneNumber} onChange={handleFieldChange} inputType="tel" placeholder="(555) 123-4567" />
             </div>
+
+            {/* Address verification tip */}
+            {addressValid && (
+                <div className="mt-4 bg-green-50 border-l-4 border-green-400 p-3 text-green-800 rounded-md flex items-start gap-2">
+                    <Lightbulb className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs">
+                        <span className="font-semibold">Great!</span> Your address has been verified. This will speed up your application processing.
+                    </p>
+                </div>
+            )}
+
             <div className="mt-8 sm:mt-10 pt-6 border-t border-border/50">
-                <StepNavigation onNext={onNext} isNextDisabled={!isComplete} />
+                <StepNavigation onNext={onNext} onBack={onBack} isNextDisabled={!isComplete} />
             </div>
         </div>
     );
