@@ -284,9 +284,9 @@ const App: React.FC = () => {
                             <RequirementsChecklist loanPurpose={formData.loanPurpose} formData={formData} />
                         </div>
                         <div className="w-full lg:col-span-2">
-                        <div className="bg-white rounded-2xl sm:rounded-3xl border border-border/60 transition-all duration-300 overflow-hidden shadow-xl sm:shadow-2xl hover:shadow-2xl">
-                            <div className="p-4 sm:p-6 md:p-8 lg:p-12 min-h-[400px] sm:min-h-[500px] md:min-h-[550px] flex flex-col justify-between bg-white">
-                                <div key={step} className="animate-fade-in w-full flex-1 flex flex-col justify-center">
+                        <div className="bg-white rounded-2xl sm:rounded-3xl border border-border/60 transition-all duration-300 overflow-hidden shadow-xl sm:shadow-2xl hover:shadow-2xl relative" style={{ zIndex: 10 }}>
+                            <div className="p-4 sm:p-6 md:p-8 lg:p-12 min-h-[400px] sm:min-h-[500px] md:min-h-[550px] flex flex-col justify-between bg-white relative" style={{ zIndex: 10, pointerEvents: 'auto' }}>
+                                <div key={step} className="animate-fade-in w-full flex-1 flex flex-col justify-center relative" style={{ zIndex: 10, pointerEvents: 'auto' }}>
                                     {renderPrepFlow()}
                                 </div>
                                 {/* Navigation Buttons */}
