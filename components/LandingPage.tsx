@@ -66,7 +66,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
         <HeroHighlight 
           containerClassName="h-auto min-h-[400px] sm:min-h-[450px] md:min-h-[500px] lg:min-h-[550px] rounded-none"
           className="w-full"
-          style={{ overflow: 'visible' }}
         >
           <div 
             className="relative w-full px-4 sm:px-6 lg:px-8 pb-8 sm:pb-6 md:pb-4" 
