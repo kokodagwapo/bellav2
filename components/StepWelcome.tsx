@@ -1,12 +1,48 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import StepNavigation from './StepNavigation';
+import { generateBellaSpeech } from '../services/geminiService';
+import { decodeAudioData, decode } from '../utils/audioUtils';
 
 interface StepWelcomeProps {
   onNext: () => void;
 }
 
 const StepWelcome: React.FC<StepWelcomeProps> = ({ onNext }) => {
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  useEffect(() => {
+    // Initialize audio context and play Bella voice
+    audioContextRef.current = new ((window as any).AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+    
+    const playBellaVoice = async () => {
+      try {
+        const audioContext = audioContextRef.current;
+        if (!audioContext) return;
+        
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+        }
+        
+        const audioData = await generateBellaSpeech("Let's get started!");
+        if (audioData && audioContext) {
+          const buffer = await decodeAudioData(decode(audioData), audioContext, 24000, 1);
+          const source = audioContext.createBufferSource();
+          source.buffer = buffer;
+          source.connect(audioContext.destination);
+          source.start();
+        }
+      } catch (error) {
+        console.error('Error playing Bella voice:', error);
+      }
+    };
+    playBellaVoice();
+    
+    return () => {
+      audioContextRef.current?.close().catch(console.error);
+    };
+  }, []);
+
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();

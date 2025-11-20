@@ -11,7 +11,7 @@ import Footer from './components/Footer';
 import { FormData, LoanPurpose } from './types';
 import { generateLoanSummary } from './services/geminiService';
 import { motion, AnimatePresence } from "framer-motion";
-import { appFlow, AppStep } from './appFlow';
+import { appFlow, AppStep, getFilteredFlow } from './appFlow';
 
 const LogoSection = () => {
   const { open, animate } = useSidebar();
@@ -105,10 +105,8 @@ const App: React.FC = () => {
   }, []);
 
   const filteredFlow = useMemo(() => {
-    return appFlow.filter(flowStep =>
-      flowStep.path === 'all' || flowStep.path === formData.loanPurpose
-    );
-  }, [formData.loanPurpose]);
+    return getFilteredFlow(appFlow, formData);
+  }, [formData]);
 
   const resetApplication = () => {
     setStep(0);
@@ -179,6 +177,21 @@ const App: React.FC = () => {
         StepLoanPurpose: { data: formData, onChange: (f: string, v: any) => handleDataChange({[f]:v}), onNext: nextStep },
         StepPropertyType: { data: formData, onChange: handleSelectionAndNext },
         StepPropertyUse: { data: formData, onChange: handleSelectionAndNext },
+        StepPrimaryResidenceConfirmation: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepSubjectProperty: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepCurrentHousingStatus: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepEmploymentStatus: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepTimeInJob: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepDebtsLiabilities: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepAssetsFunds: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepAddCoBorrower: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepCoBorrowerDetails: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepPrimaryBorrowerOptimization: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepPrepDocs: { onDataChange: handleDataChange, onNext: nextStep, onBack: prevStep },
+        StepDMVAddressVerification: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepAffordabilitySnapshot: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
+        StepReviewChecklist: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}), onEditStep: (idx: number) => setStep(idx) },
+        StepPrep4LoanSummary: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}), onProceedToApplication: handleProceedToApplication },
         StepPricing: { ...commonProps },
         StepRefinanceDetails: { ...commonProps },
         StepCreditScore: { data: formData, onChange: (f: string, v: any) => handleDataChange({[f]:v}), onNext: nextStep, onBack: prevStep },
@@ -186,7 +199,6 @@ const App: React.FC = () => {
         StepLocation: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
         StepFirstTimeBuyer: { data: formData, onChange: handleSelectionAndNext },
         StepMilitary: { data: formData, onChange: handleSelectionAndNext },
-        StepPrepDocs: { onDataChange: handleDataChange, onNext: nextStep, onBack: prevStep },
         StepName: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
         StepContact: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}), onNext: handleSubmit },
         StepConfirmation: { isLoading: isLoading, result: submissionResult, onProceed: handleProceedToApplication },

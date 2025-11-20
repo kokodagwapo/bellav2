@@ -1,15 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import type { FormData } from '../types';
+import { calculateProgress } from '../utils/progressCalculator';
 
 interface ProgressBarProps {
   currentStep: number;
   totalSteps: number;
+  formData?: FormData; // Optional for backward compatibility
 }
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps }) => {
-  const progressPercentage = totalSteps > 1
-    ? ((currentStep - 1) / (totalSteps - 1)) * 100
-    : (currentStep > 0 ? 100 : 0);
+const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, formData }) => {
+  // Use dynamic calculation if formData is provided, otherwise fall back to step-based
+  const progressPercentage = formData 
+    ? calculateProgress(formData)
+    : (totalSteps > 1
+        ? ((currentStep - 1) / (totalSteps - 1)) * 100
+        : (currentStep > 0 ? 100 : 0));
 
   return (
     <div className="w-full space-y-3">

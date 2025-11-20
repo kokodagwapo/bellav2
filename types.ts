@@ -1,6 +1,15 @@
 export enum LoanPurpose {
   PURCHASE = 'Purchase a Home',
   REFINANCE = 'Refinance',
+  CHECK_BUYING_POWER = 'Check My Buying Power',
+  QUALIFY_FASTER = 'See If I Qualify Faster',
+}
+
+export enum Goal {
+  BUY_HOME = 'Buy a Home',
+  REFINANCE_MORTGAGE = 'Refinance My Mortgage',
+  CHECK_BUYING_POWER = 'Check My Buying Power',
+  QUALIFY_FASTER = 'See If I Qualify Faster',
 }
 
 export enum PropertyType {
@@ -108,9 +117,52 @@ export interface LiabilityInfo {
     propertyType?: string;
 }
 
+// Address type
+export interface Address {
+  street?: string;
+  unit?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  country?: string;
+}
+
+// Co-Borrower Information
+export interface CoBorrowerInfo {
+  relationship?: string;
+  willLiveInHome?: boolean;
+  housingStatus?: string;
+  income?: number;
+  debts?: {
+    carLoan?: number;
+    creditCards?: number;
+    studentLoans?: number;
+    personalLoans?: number;
+    childSupport?: number;
+  };
+  estimatedCreditScore?: CreditScore | '';
+  assets?: {
+    bankAccount?: number;
+    savings?: number;
+    retirement?: number;
+    giftFunds?: number;
+    crypto?: number;
+  };
+}
+
+// Affordability Data
+export interface AffordabilityData {
+  currentHousingExpense?: number;
+  newEstimatedPayment?: number;
+  totalHousingObligation?: number;
+  estimatedDTIBand?: 'Low' | 'Moderate' | 'High';
+  approvalStrengthScore?: number;
+}
+
 export interface FormData {
   // Section 1a: Personal Information
   loanPurpose: LoanPurpose | '';
+  goal?: Goal | ''; // New: 4 goals from master flow
   propertyType: PropertyType | '';
   propertyUse: PropertyUse | '';
   purchasePrice: number;
@@ -127,6 +179,63 @@ export interface FormData {
   borrowerAddress?: string;
   dob?: string;
   estimatedPropertyValue: number;
+  
+  // New fields from master flow
+  primaryResidenceIntent?: {
+    moveInWithin60Days?: boolean;
+    liveAtLeast12Months?: boolean;
+  };
+  subjectProperty?: {
+    hasProperty?: boolean;
+    address?: Address;
+    value?: number;
+    budgetRange?: string;
+    targetZip?: string;
+  };
+  currentHousingStatus?: 'Rent' | 'Own With Mortgage' | 'Own Free & Clear' | 'Live With Family';
+  currentHousingDetails?: {
+    rentAmount?: number;
+    piti?: number;
+    loanBalance?: number;
+    homeValue?: number;
+    willSellOrRent?: 'Sell' | 'Rent';
+    expectedRentIncome?: number;
+  };
+  employmentStatus?: 'Employed' | 'Self-Employed' | 'Gig Worker' | 'Retired' | 'Not Working';
+  timeInJob?: 'Less than 1 year' | '1-2 years' | 'More than 2 years';
+  priorEmployment?: {
+    employerName?: string;
+    jobType?: string;
+    timeInPreviousJob?: string;
+  };
+  debts?: {
+    carLoan?: number;
+    creditCards?: number;
+    studentLoans?: number;
+    personalLoans?: number;
+    childSupport?: number;
+    none?: boolean;
+  };
+  assets?: {
+    bankAccount?: number;
+    savings?: number;
+    retirement?: number;
+    giftFunds?: number;
+    crypto?: number;
+    skip?: boolean;
+  };
+  coBorrower?: CoBorrowerInfo;
+  primaryBorrowerOptimization?: {
+    selected?: 'me' | 'coBorrower' | 'bellaDecide';
+    bellaRecommendation?: string;
+  };
+  dmvVerification?: {
+    idVerified?: boolean;
+    addressVerified?: boolean;
+    propertyVerified?: boolean;
+  };
+  affordabilitySnapshot?: AffordabilityData;
+  reviewChecklist?: Record<string, boolean>;
   
   // Section 1a: Extended Personal Information
   ssn?: string; // Social Security Number or ITIN
@@ -156,7 +265,6 @@ export interface FormData {
   };
   yearsAtCurrentAddress?: number;
   monthsAtCurrentAddress?: number;
-  currentHousingStatus?: HousingStatus | '';
   currentMonthlyHousingPayment?: number;
   
   // Former Address (if at current address < 2 years)
@@ -214,8 +322,8 @@ export interface FormData {
     monthlyAmount?: number;
   }>;
   
-  // Section 2a: Assets - Bank Accounts, Retirement, Other
-  assets?: AssetInfo[];
+  // Section 2a: Assets - Bank Accounts, Retirement, Other (legacy - use assets object above)
+  legacyAssets?: AssetInfo[];
   
   // Section 2b: Other Assets and Credits
   otherAssets?: Array<{

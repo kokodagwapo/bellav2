@@ -19,16 +19,19 @@ interface UploadedFile {
   message: string;
 }
 
-const requiredDocs = [
-    "Driver's License",
-    "W2 Form (Last 2 years)",
-    "Paystub (Covering a 30-day period)",
-    "Bank Statements (Last 3 months)",
+const documentCards = [
+    { key: 'driversLicense', label: "Driver's License", icon: <FileText className="h-6 w-6" /> },
+    { key: 'payStubs', label: "Pay Stubs", icon: <FileText className="h-6 w-6" /> },
+    { key: 'w2', label: "W-2", icon: <FileText className="h-6 w-6" /> },
+    { key: 'bankStatements', label: "Bank Statements", icon: <FileText className="h-6 w-6" /> },
+    { key: 'titleDeed', label: "Title/Deed (if paid off)", icon: <FileText className="h-6 w-6" />, optional: true },
+    { key: 'skip', label: "Skip", icon: <FileText className="h-6 w-6" />, optional: true },
 ];
 
 
 const StepPrepDocs: React.FC<StepPrepDocsProps> = ({ onDataChange, onNext, onBack }) => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [selectedDocType, setSelectedDocType] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (files: FileList | null) => {
@@ -162,40 +165,64 @@ const StepPrepDocs: React.FC<StepPrepDocsProps> = ({ onDataChange, onNext, onBac
   return (
     <div>
       <StepHeader
-        title="Prep for Your Loan"
-        subtitle="Gathering these documents now will speed up your final approval. You can upload them here or do it later."
+        title="Document Uploads"
+        subtitle="Upload your documents for OCR auto-extraction. You can upload them here or do it later."
       />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-secondary/50 p-6 rounded-lg border border-border">
-            <h3 className="font-semibold text-foreground mb-4">Required Documents</h3>
-            <ul className="space-y-3">
-                {requiredDocs.map(doc => (
-                    <li key={doc} className="flex items-center">
-                        <FileText className="h-4 w-4 mr-3 text-primary flex-shrink-0" />
-                        <span className="text-sm text-muted-foreground">{doc}</span>
-                    </li>
-                ))}
-            </ul>
+      <div className="space-y-6 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {documentCards.map((doc) => (
+            <button
+              key={doc.key}
+              onClick={() => {
+                if (doc.key === 'skip') {
+                  onNext();
+                } else {
+                  setSelectedDocType(doc.key);
+                  fileInputRef.current?.click();
+                }
+              }}
+              className={`p-4 rounded-lg border-2 text-left transition-all ${
+                selectedDocType === doc.key
+                  ? 'bg-primary/10 border-primary'
+                  : 'bg-white border-gray-300 hover:border-primary/50'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${
+                  selectedDocType === doc.key
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-100 text-primary'
+                }`}>
+                  {doc.icon}
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-foreground">{doc.label}</p>
+                  {doc.optional && (
+                    <p className="text-xs text-muted-foreground">Optional</p>
+                  )}
+                </div>
+              </div>
+            </button>
+          ))}
         </div>
 
-        <div className="flex flex-col">
-            <div 
-                onClick={() => fileInputRef.current?.click()}
-                className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:bg-secondary/50 transition-colors"
-            >
-                <UploadCloud className="h-10 w-10 text-muted-foreground mb-2" />
-                <p className="font-semibold text-foreground">Click to upload documents</p>
-                <p className="text-xs text-muted-foreground mt-1">PDF, JPG, or PNG</p>
-                <input 
-                    type="file" 
-                    ref={fileInputRef}
-                    multiple
-                    onChange={(e) => handleFileUpload(e.target.files)}
-                    className="hidden"
-                    accept="image/*,application/pdf"
-                />
-            </div>
+        <div 
+          onClick={() => fileInputRef.current?.click()}
+          className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:bg-secondary/50 transition-colors"
+        >
+          <UploadCloud className="h-12 w-12 text-muted-foreground mb-3" />
+          <p className="font-semibold text-foreground text-lg">Click to upload documents</p>
+          <p className="text-sm text-muted-foreground mt-2">PDF, JPG, or PNG</p>
+          <p className="text-xs text-muted-foreground mt-1">OCR will auto-extract: Address, DOB, Employer, Income, Balances</p>
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            multiple
+            onChange={(e) => handleFileUpload(e.target.files)}
+            className="hidden"
+            accept="image/*,application/pdf"
+          />
         </div>
       </div>
       

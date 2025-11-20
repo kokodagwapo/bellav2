@@ -180,8 +180,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
       >
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12">
-            {/* Empty space on left - Images hidden */}
-            <div className="hidden lg:block lg:w-1/2"></div>
+            {/* Image on left with fade-in animation */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="hidden lg:flex lg:w-1/2 items-center justify-center"
+            >
+              <img 
+                src={`${import.meta.env.BASE_URL}app-image-2.png`}
+                alt="Mobile app screenshots showcasing the mortgage application experience"
+                className="w-full h-auto max-w-lg object-contain"
+                style={{ filter: 'drop-shadow(0 10px 25px rgba(0, 0, 0, 0.1))' }}
+              />
+            </motion.div>
 
             {/* Title and Description Section - Centered */}
             <motion.div
