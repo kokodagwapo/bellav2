@@ -211,7 +211,11 @@ const App: React.FC = () => {
         StepConfirmation: { isLoading: isLoading, result: submissionResult, onProceed: handleProceedToApplication },
     };
     
-    return <CurrentStepComponent {...stepProps[CurrentStepComponent.name]} />;
+    // Get component name, with fallback to commonProps if not found
+    const componentName = CurrentStepComponent.name || CurrentStepComponent.displayName || '';
+    const props = stepProps[componentName] || commonProps;
+    
+    return <CurrentStepComponent {...props} />;
   };
   
   const indicatorSteps = useMemo(() => {
