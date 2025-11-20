@@ -224,7 +224,7 @@ const Hero: React.FC = () => {
 
       </div>
 
-      {/* Family with House and Beautiful Yard - Outside background container for visibility */}
+      {/* Family with House and Beautiful Yard - Hidden */}
       <motion.div
         className="absolute bottom-0 left-[2%] sm:left-[5%] md:left-[8%]"
         style={{ 
@@ -232,11 +232,12 @@ const Hero: React.FC = () => {
           height: 'clamp(250px, 30vw, 450px)',
           bottom: 'clamp(30px, 5vh, 90px)',
           zIndex: 9,
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          display: 'none' // Hidden
         }}
         initial={{ opacity: 0, scale: 0.8, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 1.5, delay: 0.8, ease: "easeOut" }}
+        animate={{ opacity: 0, scale: 0.8, y: 20 }}
+        transition={{ duration: 0 }}
       >
         <svg 
           viewBox="0 0 400 360" 
@@ -247,30 +248,30 @@ const Hero: React.FC = () => {
           }}
         >
           {/* Beautiful Yard - Grass */}
-          <rect x="0" y="280" width="400" height="80" fill="#10b981" opacity="0.4" />
+          <rect x="0" y="280" width="400" height="80" fill="#10b981" opacity="0.2" />
           <path
             d="M0,280 Q100,270 200,275 T400,280 L400,360 L0,360 Z"
             fill="#34d399"
-            opacity="0.3"
+            opacity="0.15"
           />
           
-          {/* Yard Flowers */}
-          {[
-            { x: 50, y: 300, size: 8 },
-            { x: 120, y: 310, size: 6 },
-            { x: 280, y: 305, size: 7 },
-            { x: 350, y: 315, size: 6 },
-          ].map((flower, i) => (
-            <g key={i}>
-              <circle cx={flower.x} cy={flower.y} r={flower.size} fill="#fbbf24" opacity="0.7" />
-              <circle cx={flower.x - 3} cy={flower.y - 2} r={flower.size * 0.6} fill="#f59e0b" opacity="0.8" />
-              <circle cx={flower.x + 3} cy={flower.y - 2} r={flower.size * 0.6} fill="#f59e0b" opacity="0.8" />
-              <circle cx={flower.x} cy={flower.y - 4} r={flower.size * 0.6} fill="#f59e0b" opacity="0.8" />
-            </g>
-          ))}
+            {/* Yard Flowers */}
+            {[
+              { x: 50, y: 300, size: 8 },
+              { x: 120, y: 310, size: 6 },
+              { x: 280, y: 305, size: 7 },
+              { x: 350, y: 315, size: 6 },
+            ].map((flower, i) => (
+              <g key={i}>
+                <circle cx={flower.x} cy={flower.y} r={flower.size} fill="#fbbf24" opacity="0.4" />
+                <circle cx={flower.x - 3} cy={flower.y - 2} r={flower.size * 0.6} fill="#f59e0b" opacity="0.45" />
+                <circle cx={flower.x + 3} cy={flower.y - 2} r={flower.size * 0.6} fill="#f59e0b" opacity="0.45" />
+                <circle cx={flower.x} cy={flower.y - 4} r={flower.size * 0.6} fill="#f59e0b" opacity="0.45" />
+              </g>
+            ))}
 
           {/* House */}
-          <g>
+          <g opacity="0.6">
             {/* House Base */}
             <rect x="120" y="180" width="160" height="100" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="2" />
             
@@ -301,7 +302,7 @@ const Hero: React.FC = () => {
           </g>
 
           {/* Tree */}
-          <g>
+          <g opacity="0.5">
             {/* Tree Trunk */}
             <rect x="320" y="200" width="20" height="80" fill="#92400e" />
             {/* Tree Foliage */}
@@ -311,7 +312,7 @@ const Hero: React.FC = () => {
           </g>
 
           {/* Family - Parents and Child */}
-          <g>
+          <g opacity="0.65">
             {/* Parent 1 (Left) */}
             <circle cx="80" cy="250" r="12" fill="#fbbf24" opacity="0.9" />
             <rect x="72" y="262" width="16" height="30" fill="#3b82f6" rx="2" />
@@ -335,6 +336,44 @@ const Hero: React.FC = () => {
             <line x1="110" y1="278" x2="118" y2="290" stroke="#6d28d9" strokeWidth="1.5" />
             <line x1="105" y1="298" x2="98" y2="310" stroke="#6d28d9" strokeWidth="1.5" />
             <line x1="105" y1="298" x2="112" y2="310" stroke="#6d28d9" strokeWidth="1.5" />
+            
+            {/* Brown Dog - Sitting near mom (parent 2) */}
+            <g>
+              {/* Dog Body - Light brown oval (sitting position, more horizontal) - moved away from mom */}
+              <ellipse cx="160" cy="295" rx="10" ry="7" fill="#d97706" stroke="#b45309" strokeWidth="1.2" opacity="0.95" />
+              
+              {/* Dog Head - Light brown circle */}
+              <circle cx="165" cy="288" r="7" fill="#d97706" stroke="#b45309" strokeWidth="1.2" opacity="0.95" />
+              
+              {/* Dog Snout - Small light brown extension */}
+              <ellipse cx="170" cy="288" rx="3" ry="2.5" fill="#f59e0b" stroke="#b45309" strokeWidth="0.8" opacity="0.95" />
+              
+              {/* Dog Ears - Floppy light brown ears */}
+              <ellipse cx="161" cy="283" rx="4" ry="5" fill="#b45309" stroke="#92400e" strokeWidth="0.8" opacity="0.95" />
+              <ellipse cx="169" cy="282" rx="4" ry="5" fill="#b45309" stroke="#92400e" strokeWidth="0.8" opacity="0.95" />
+              
+              {/* Dog Eyes - Brown/black eyes */}
+              <circle cx="163" cy="287" r="1.2" fill="#1f2937" />
+              <circle cx="167" cy="287" r="1.2" fill="#1f2937" />
+              
+              {/* Dog Nose - Black nose */}
+              <ellipse cx="171" cy="288" rx="1.5" ry="1" fill="#1f2937" />
+              
+              {/* Dog Tail - Curved light brown tail (wagging position) */}
+              <path d="M 150 295 Q 147 290 145 292" stroke="#d97706" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.95" />
+              <circle cx="145" cy="292" r="2.5" fill="#d97706" opacity="0.95" />
+              
+              {/* Dog Front Paws - Sitting position (front paws visible) */}
+              <ellipse cx="165" cy="300" rx="3" ry="4" fill="#b45309" stroke="#92400e" strokeWidth="1" opacity="0.95" />
+              <ellipse cx="170" cy="300" rx="3" ry="4" fill="#b45309" stroke="#92400e" strokeWidth="1" opacity="0.95" />
+              
+              {/* Dog Back Legs - Sitting position (back legs tucked) */}
+              <ellipse cx="155" cy="298" rx="2.5" ry="3.5" fill="#b45309" stroke="#92400e" strokeWidth="0.8" opacity="0.95" />
+              <ellipse cx="158" cy="299" rx="2.5" ry="3.5" fill="#b45309" stroke="#92400e" strokeWidth="0.8" opacity="0.95" />
+              
+              {/* Dog Chest Marking - Lighter brown chest */}
+              <ellipse cx="162" cy="293" rx="4" ry="3" fill="#f59e0b" opacity="0.7" />
+            </g>
           </g>
 
           {/* Yard Path */}
@@ -344,7 +383,7 @@ const Hero: React.FC = () => {
             strokeWidth="8"
             fill="none"
             strokeLinecap="round"
-            opacity="0.6"
+            opacity="0.4"
           />
         </svg>
       </motion.div>

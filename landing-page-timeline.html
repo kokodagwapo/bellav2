@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page Version Timeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .timeline {
+            padding: 30px;
+        }
+        
+        .version-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f9fafb;
+        }
+        
+        .version-item:hover {
+            border-color: #667eea;
+            background: #f3f4f6;
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .version-item.current {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+        
+        .version-item.current::before {
+            content: "✓ CURRENT";
+            position: absolute;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .version-item.has-hero::after {
+            content: "☀️ Hero Component";
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: #fbbf24;
+            color: #78350f;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .version-item.current.has-hero::after {
+            top: 50px;
+        }
+        
+        .version-item {
+            position: relative;
+        }
+        
+        .version-info {
+            flex: 1;
+        }
+        
+        .version-hash {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            color: #6b7280;
+            background: #e5e7eb;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .version-date {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-top: 5px;
+        }
+        
+        .version-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #111827;
+            margin-top: 5px;
+        }
+        
+        .restore-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .restore-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .restore-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .preview-btn {
+            background: #f3f4f6;
+            color: #374151;
+            border: 2px solid #e5e7eb;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            margin-right: 10px;
+        }
+        
+        .preview-btn:hover {
+            background: #e5e7eb;
+            border-color: #d1d5db;
+        }
+        
+        .actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .status-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Landing Page Version Timeline</h1>
+            <p>Click on any version to restore it</p>
+        </div>
+        <div class="timeline" id="timeline">
+            <!-- Versions will be loaded here -->
+        </div>
+    </div>
+    
+    <div class="status-message" id="statusMessage"></div>
+    
+    <script>
+        const versions = [
+            { hash: '51445b3', date: '2 minutes ago', title: 'WIP on (no branch): 2437d14 Add modern hero section with typewriter effect, animated elements, and AI chat input', isCurrent: false, hasHero: false },
+            { hash: '814640d', date: '14 minutes ago', title: 'Replace individual birds with flock of birds and add distant plane animation', isCurrent: false, hasHero: true },
+            { hash: '2437d14', date: '19 minutes ago', title: 'Add modern hero section with typewriter effect, animated elements, and AI chat input', isCurrent: false, hasHero: true },
+            { hash: '2dafd4f', date: '20 minutes ago', title: 'Add modern hero section with typewriter effect, animated elements, and AI chat input', isCurrent: true, hasHero: true },
+            { hash: 'd716070', date: '5 hours ago', title: 'Fix TypeScript error: Remove style prop from HeroHighlight component', isCurrent: false, hasHero: false },
+            { hash: 'a04f21b', date: '5 hours ago', title: 'Fix mobile navigation and hide hero section on mobile', isCurrent: false, hasHero: false },
+            { hash: 'c313269', date: '5 hours ago', title: 'Fix LandingPage.tsx syntax error and update files', isCurrent: false, hasHero: false },
+            { hash: 'c99b717', date: '9 hours ago', title: 'Update hero section: center content, restore Prep4Loan/Home Journey buttons, add subtle shadow', isCurrent: false, hasHero: false },
+            { hash: '5f3a8ad', date: '9 hours ago', title: 'Update hero section: center content, adjust image positioning, add Bella insights to Prep4Loan steps', isCurrent: false, hasHero: false },
+            { hash: 'e52829b', date: '19 hours ago', title: 'Implement Prep4Loan Master Flow: Add new steps, dynamic progress, Bella voice integration, and AI optimization', isCurrent: false, hasHero: false },
+            { hash: 'ec4217e', date: '19 hours ago', title: 'Hide rotating images and center See It In Action section', isCurrent: false, hasHero: false },
+            { hash: '2bd1924', date: '19 hours ago', title: 'Hide hero section and See It In Action section on mobile view', isCurrent: false, hasHero: false },
+            { hash: 'ac19a88', date: '19 hours ago', title: 'Improve mobile UX: hero spacing and compact step indicator', isCurrent: false, hasHero: false },
+            { hash: '105ad9e', date: '20 hours ago', title: 'Fix GitHub Pages deployment and optimize mobile experience', isCurrent: false, hasHero: false },
+            { hash: 'ce925f3', date: '25 hours ago', title: 'Update landing page: center hero content, add cascading images section with title/description, improve animations', isCurrent: false, hasHero: false },
+            { hash: '2267475', date: '33 hours ago', title: 'Transform hero images into elegant backdrop: extend beyond boundaries, center positioning, move text content left, integrate logo/badge into backdrop box', isCurrent: false, hasHero: false },
+            { hash: '06998a3', date: '35 hours ago', title: 'Modernize hero section UI: improve buttons, spacing, and visual design', isCurrent: false, hasHero: false },
+            { hash: 'c573a05', date: '35 hours ago', title: 'Fix StepWelcome button clickability and rename landing page buttons to Prep4Loan and Home Journey', isCurrent: false, hasHero: false },
+            { hash: 'c92f007', date: '35 hours ago', title: 'Make landing page mobile-first with touch-friendly buttons and clean layout', isCurrent: false, hasHero: false },
+            { hash: '413f13f', date: '35 hours ago', title: 'Update base path to /hj/ and change Mortgage Journey to Home Journey', isCurrent: false, hasHero: false }
+        ];
+        
+        const timeline = document.getElementById('timeline');
+        const statusMessage = document.getElementById('statusMessage');
+        
+        function showStatus(message, type = 'success') {
+            statusMessage.textContent = message;
+            statusMessage.style.display = 'block';
+            statusMessage.style.background = type === 'success' ? '#10b981' : '#ef4444';
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 3000);
+        }
+        
+        function restoreVersion(hash) {
+            if (confirm(`Are you sure you want to restore version ${hash}?\n\nThis will replace your current LandingPage.tsx file.\n\nA backup will be created automatically.`)) {
+                // Option 1: Use the Node.js script (recommended - creates backup)
+                const scriptCommand = `node restore-landing-page.js ${hash}`;
+                
+                // Option 2: Direct git command (faster, but no backup)
+                const gitCommand = `git checkout ${hash} -- components/LandingPage.tsx`;
+                
+                // Show both options
+                const message = `Choose a method:\n\n1. With backup (recommended):\n   ${scriptCommand}\n\n2. Direct restore:\n   ${gitCommand}`;
+                
+                // Copy the script command to clipboard (safer option)
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(scriptCommand).then(() => {
+                        showStatus(`Command copied! Run in terminal: ${scriptCommand}`, 'success');
+                    }).catch(() => {
+                        showStatus(`Run in terminal: ${scriptCommand}`, 'success');
+                    });
+                } else {
+                    showStatus(`Run in terminal: ${scriptCommand}`, 'success');
+                }
+                
+                // Log both options
+                console.log('Restore options:');
+                console.log(`1. With backup: ${scriptCommand}`);
+                console.log(`2. Direct: ${gitCommand}`);
+            }
+        }
+        
+        function previewVersion(hash) {
+            // Show preview options
+            const gitCommand = `git show ${hash}:components/LandingPage.tsx`;
+            const scriptCommand = `./view-landing-version.sh ${hash}`;
+            
+            const message = `Preview options:\n\n1. Quick view:\n   ${gitCommand}\n\n2. Using script:\n   ${scriptCommand}`;
+            
+            // Copy git command to clipboard
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(gitCommand).then(() => {
+                    showStatus(`Command copied! Run: ${gitCommand}`, 'success');
+                });
+            } else {
+                showStatus(`Run: ${gitCommand}`, 'success');
+            }
+            
+            console.log(message);
+        }
+        
+        versions.forEach((version, index) => {
+            const item = document.createElement('div');
+            item.className = `version-item ${version.isCurrent ? 'current' : ''} ${version.hasHero ? 'has-hero' : ''}`;
+            
+            item.innerHTML = `
+                <div class="version-info">
+                    <div>
+                        <span class="version-hash">${version.hash}</span>
+                        <span class="version-date">${version.date}</span>
+                    </div>
+                    <div class="version-title">${version.title}</div>
+                </div>
+                <div class="actions">
+                    <button class="preview-btn" onclick="previewVersion('${version.hash}')" title="View file content">Preview</button>
+                    <button class="restore-btn" onclick="restoreVersion('${version.hash}')" title="Restore this version">Restore</button>
+                </div>
+            `;
+            
+            timeline.appendChild(item);
+        });
+        
+        // Make restoreVersion and previewVersion available globally
+        window.restoreVersion = restoreVersion;
+        window.previewVersion = previewVersion;
+    </script>
+</body>
+</html>
+
