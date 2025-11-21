@@ -18,82 +18,152 @@ interface DemoScriptStep {
 
 // Script variations for each demo step (11 variations per step)
 const demoScriptVariations: { [key: number]: DemoScriptStep[] } = {
-  // Step 0: Landing Page
+  // Step 0: Landing Page - Storytelling & Heartfelt Introductions
   0: [
     {
       time: 0,
       action: "Landing Page & Scroll",
-      text: "Hi! Welcome to the 'not-boring' way to get a mortgage. This is Prep4Loan. Think of it as the warm-up lap before the marathon... except we make the marathon feel like a walk in the park.",
+      text: "You know, I've been thinking about this moment a lot. There's something really special about helping someone take that first step toward their dream home. I'm Bella, and I'm genuinely excited to be part of your journey. Whether you're buying your first place together, upgrading for a growing family, or finally getting that home you've been saving for—this is a big deal, and I'm here to make sure it feels amazing, not overwhelming.",
       navigateTo: 'home',
       scrollTarget: "top"
     },
     {
       time: 0,
       action: "Landing Page & Scroll",
-      text: "Hey there! Welcome to Prep4Loan—where getting a mortgage doesn't have to feel like pulling teeth. We're here to make this whole process actually enjoyable. No cap!",
+      text: "Hi there. I'm Bella, and I have to tell you—I get really excited when I meet people who are ready to buy a home. It's such a meaningful step in your life, you know? Whether you're a young couple starting out, planning for kids, or just ready for that next chapter, I want you to know that I'm genuinely here to help. This process doesn't have to be stressful. Let's make it something you actually look back on fondly.",
       navigateTo: 'home',
       scrollTarget: "top"
     },
     {
       time: 0,
       action: "Landing Page & Scroll",
-      text: "Welcome! You've found the easiest way to get pre-qualified for a mortgage. I'm Bella, and I'm about to show you how we turn this typically stressful process into something smooth and simple.",
+      text: "Welcome! I'm Bella, and honestly? I'm so happy you're here. Buying a home is one of those life moments that should feel exciting and hopeful, not scary and complicated. I've seen so many couples go through this journey, and I know how much it means to you. That's why I'm here—to make sure you feel supported, understood, and confident every step of the way. Let's do this together.",
       navigateTo: 'home',
       scrollTarget: "top"
     },
     {
       time: 0,
       action: "Landing Page & Scroll",
-      text: "Hi! So you're thinking about buying a home? Smart move! Prep4Loan is here to guide you through every step. Think of me as your friendly mortgage coach who actually makes sense.",
+      text: "Hey, I'm Bella. Can I be real with you for a second? I love what I do because I get to be part of something really meaningful. When you're buying a home, you're not just getting a house—you're creating a space for your life, your memories, your future. That matters to me. I'm here to guide you through this with care, understanding, and a genuine desire to see you succeed. Ready to start?",
       navigateTo: 'home',
       scrollTarget: "top"
     },
     {
       time: 0,
       action: "Landing Page & Scroll",
-      text: "Welcome to Prep4Loan! I'm Bella, and I'm here to prove that getting a mortgage doesn't have to be complicated. We've taken all the confusing parts and made them... well, not confusing!",
+      text: "Welcome! I'm Bella, and I want you to know something: I'm genuinely excited to be part of your home buying journey. I know this can feel overwhelming—there's so much to think about, so many decisions to make. But here's the thing: you don't have to figure it all out alone. I'm here to walk alongside you, answer your questions, and make sure you feel confident and supported. Let's make this process something you'll actually enjoy.",
       navigateTo: 'home',
       scrollTarget: "top"
     },
     {
       time: 0,
       action: "Landing Page & Scroll",
-      text: "Hey bestie! Welcome to the future of mortgage applications. No more endless paperwork, no more confusion. Just you, me, and a straightforward path to your dream home. Let's do this!",
+      text: "Hi there! I'm Bella, and I'm honestly thrilled you're here. You know, buying a home is such a personal journey. Whether you're planning your first home together, making room for a growing family, or just ready for that next step—this is your moment, and I want to make sure it feels right. I'm here to listen, to understand your situation, and to guide you through this with empathy and care. Let's start this journey together.",
       navigateTo: 'home',
       scrollTarget: "top"
     },
     {
       time: 0,
       action: "Landing Page & Scroll",
-      text: "Welcome! You're about to experience the most user-friendly mortgage process out there. Prep4Loan takes all the guesswork out of getting pre-qualified. Ready to see how easy this can be?",
+      text: "Welcome! I'm Bella, and I have to say—I'm genuinely excited to help you with this. Buying a home is one of those big life moments, you know? It's about more than just a mortgage or paperwork. It's about creating a space where your life happens, where memories are made. I want you to feel supported and understood throughout this process. Let's make this journey something you'll look back on with a smile.",
       navigateTo: 'home',
       scrollTarget: "top"
     },
     {
       time: 0,
       action: "Landing Page & Scroll",
-      text: "Hi there! I'm Bella, and I'm here to show you that mortgage applications don't have to be a nightmare. We've built something special here—something that actually makes sense and saves you time.",
+      text: "Hey, I'm Bella. Can I share something with you? Every time I help someone start their home buying journey, I get this feeling—like I'm witnessing something really special. This is your moment. Whether you're buying your first place together, upgrading for your family, or just ready for that next chapter, I want you to know I'm here with genuine care and excitement. Let's make this process feel as meaningful as it actually is.",
       navigateTo: 'home',
       scrollTarget: "top"
     },
     {
       time: 0,
       action: "Landing Page & Scroll",
-      text: "Welcome to Prep4Loan! If you've ever thought 'there has to be a better way' when dealing with mortgage stuff, you're in the right place. This is that better way. Let me show you!",
+      text: "Hi! I'm Bella, and I'm so glad you're here. You know what? I love helping people through this journey because I know how much it means to you. Buying a home isn't just a transaction—it's about creating a foundation for your life together. Whether you're planning for your first home, making space for kids, or just ready for that next step, I'm genuinely excited to be part of this with you. Let's make it amazing.",
       navigateTo: 'home',
       scrollTarget: "top"
     },
     {
       time: 0,
       action: "Landing Page & Scroll",
-      text: "Hey! Welcome to Prep4Loan. We're here to change how you think about mortgage applications. No jargon, no confusion—just clear steps and helpful guidance. Sound good? Let's go!",
+      text: "Welcome! I'm Bella, and honestly, I'm thrilled you're taking this step. I know this can feel like a lot—there's so much to consider, so many decisions. But here's what I want you to know: you're not alone in this. I'm here to guide you with understanding, patience, and genuine care. Whether you're buying your first home together or upgrading for your family, this is your journey, and I'm excited to be part of it.",
       navigateTo: 'home',
       scrollTarget: "top"
     },
     {
       time: 0,
       action: "Landing Page & Scroll",
-      text: "Welcome! I'm Bella, and I'm about to walk you through the easiest mortgage pre-qualification process you've ever seen. We've taken everything that's annoying about this and fixed it. You're gonna love it!",
+      text: "Hi there! I'm Bella, and I want you to know how genuinely excited I am to help you with this. Buying a home is such a meaningful milestone—it's about creating a space for your life, your dreams, your future together. I know this process can feel overwhelming, but I'm here to make sure you feel supported, understood, and confident. Let's take this journey together, one step at a time.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hey! I'm Bella, and I'm honestly so happy you're here. You know, I've helped so many couples through this journey, and every time, I'm reminded of how special this moment is. Whether you're buying your first home together, planning for a growing family, or just ready for that next chapter—this is a big deal, and I want to make sure it feels amazing. I'm here with genuine care and excitement. Let's do this!",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Welcome! I'm Bella, and I have to tell you—I get really excited when I meet people ready to buy a home. This is such a meaningful step in your life together. Whether you're planning your first place, making room for kids, or just ready for that next adventure, I want you to know I'm genuinely here for you. This process doesn't have to be stressful. Let's make it something you'll actually remember fondly.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hi! I'm Bella, and I'm so genuinely excited to be part of your home buying journey. You know what? I love what I do because I get to witness these beautiful moments in people's lives. Buying a home is about more than just a mortgage—it's about creating a space where your life happens, where memories are made. I'm here to guide you with care, understanding, and real excitement. Let's start this journey together.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hey there! I'm Bella, and honestly? I'm thrilled you're here. Buying a home is one of those life moments that should feel exciting and hopeful, not scary and complicated. I've seen so many couples go through this, and I know how much it means to you. That's why I'm here—to make sure you feel supported, understood, and confident every step of the way. This is your moment, and I'm genuinely excited to be part of it.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Welcome! I'm Bella, and I want you to know something: I'm genuinely excited to help you with this. You know, buying a home is such a personal journey. Whether you're planning your first home together, making space for a growing family, or just ready for that next step—this is your moment, and I want to make sure it feels right. I'm here to listen, to understand, and to guide you with empathy and care. Let's make this amazing.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hi! I'm Bella, and I'm so glad you're here. Can I be real with you? I love helping people through this journey because I know how much it means. Buying a home isn't just about paperwork or numbers—it's about creating a foundation for your life together. Whether you're buying your first place, planning for kids, or just ready for that next chapter, I'm genuinely excited to be part of this with you. Let's do this!",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hey, I'm Bella. You know what? Every time I help someone start their home buying journey, I get this feeling—like I'm witnessing something really special. This is your moment. Whether you're buying your first home together, upgrading for your family, or just ready for that next adventure, I want you to know I'm here with genuine care and excitement. Let's make this process feel as meaningful as it actually is.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Welcome! I'm Bella, and I'm honestly so happy you're taking this step. I know this can feel like a lot—there's so much to consider, so many decisions. But here's what I want you to know: you're not alone. I'm here to guide you with understanding, patience, and genuine care. Whether you're planning your first home or upgrading for your family, this is your journey, and I'm excited to be part of it.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hi there! I'm Bella, and I want you to know how genuinely excited I am to help you with this. Buying a home is such a meaningful milestone—it's about creating a space for your life, your dreams, your future together. I know this process can feel overwhelming, but I'm here to make sure you feel supported, understood, and confident. Let's take this journey together, one step at a time, with care and excitement.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hey! I'm Bella, and I'm genuinely thrilled you're here. You know, I've helped so many couples through this journey, and every time, I'm reminded of how special this moment is. Whether you're buying your first home together, planning for a growing family, or just ready for that next chapter—this is a big deal, and I want to make sure it feels amazing. I'm here with genuine care and excitement. Let's make this something you'll remember fondly!",
       navigateTo: 'home',
       scrollTarget: "top"
     }
