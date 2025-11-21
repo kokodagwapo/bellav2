@@ -92,9 +92,32 @@ const AddressInput: React.FC<{
                 }
             });
             
-            // Build full formatted address
-            const formattedAddress = properties.full_address || properties.place_name || 
-                `${street}${street && city ? ', ' : ''}${city}${city && state ? ', ' : ''}${state} ${zip}`.trim();
+            // Build full formatted address - ensure it's never empty
+            let formattedAddress = properties.full_address || properties.place_name || '';
+            
+            // If no full_address, build from components
+            if (!formattedAddress) {
+                const parts = [];
+                if (street) parts.push(street);
+                if (city) parts.push(city);
+                if (state) parts.push(state);
+                if (zip) parts.push(zip);
+                formattedAddress = parts.join(', ');
+            }
+            
+            // Fallback: use the feature's text/name if still empty
+            if (!formattedAddress || formattedAddress.trim() === '') {
+                formattedAddress = feature.text || feature.place_name || properties.name || properties.address_line || '';
+            }
+            
+            // Ensure we have a valid address before proceeding
+            if (!formattedAddress || formattedAddress.trim() === '') {
+                console.warn('No address found in Mapbox response');
+                return; // Don't clear the field if we can't extract an address
+            }
+            
+            // Update the field immediately with the formatted address (before verification)
+            onChange(id, formattedAddress.trim());
             
             // Verify address with Mapbox
             try {
@@ -107,14 +130,16 @@ const AddressInput: React.FC<{
                 });
                 
                 // Prepare address details for modal
+                const verifiedFullAddress = verification.isValid && verification.normalizedAddress
+                    ? `${verification.normalizedAddress.street}, ${verification.normalizedAddress.city}, ${verification.normalizedAddress.state} ${verification.normalizedAddress.zip}`
+                    : formattedAddress;
+                
                 const addressDetails: AddressDetails = {
                     street: verification.normalizedAddress?.street || street,
                     city: verification.normalizedAddress?.city || city,
                     state: verification.normalizedAddress?.state || state,
                     zip: verification.normalizedAddress?.zip || zip,
-                    fullAddress: verification.normalizedAddress 
-                        ? `${verification.normalizedAddress.street}, ${verification.normalizedAddress.city}, ${verification.normalizedAddress.state} ${verification.normalizedAddress.zip}`
-                        : formattedAddress,
+                    fullAddress: verifiedFullAddress,
                     coordinates: coordinates.length >= 2 ? {
                         longitude: coordinates[0],
                         latitude: coordinates[1]
@@ -122,16 +147,15 @@ const AddressInput: React.FC<{
                     verified: verification.isValid
                 };
                 
+                // Update with verified address if different
+                if (verification.isValid && verification.normalizedAddress) {
+                    onChange(id, verifiedFullAddress);
+                }
+                
                 // Show preview modal
                 setAddressPreview(addressDetails);
                 setShowAddressModal(true);
                 
-                // Update form field with verified address
-                const finalAddress = verification.isValid && verification.normalizedAddress
-                    ? `${verification.normalizedAddress.street}, ${verification.normalizedAddress.city}, ${verification.normalizedAddress.state} ${verification.normalizedAddress.zip}`
-                    : formattedAddress;
-                
-                onChange(id, finalAddress);
                 isVerifiedRef.current = true;
                 setIsVerified(true);
                 if (onValidationChange) {
@@ -139,15 +163,7 @@ const AddressInput: React.FC<{
                 }
             } catch (error) {
                 console.error('Error verifying address:', error);
-                // Still update with unverified address
-                onChange(id, formattedAddress);
-                isVerifiedRef.current = true;
-                setIsVerified(true);
-                if (onValidationChange) {
-                    onValidationChange(true);
-                }
-                
-                // Show modal with unverified address
+                // Address is already set above, just show modal with unverified address
                 const addressDetails: AddressDetails = {
                     street,
                     city,
@@ -162,6 +178,12 @@ const AddressInput: React.FC<{
                 };
                 setAddressPreview(addressDetails);
                 setShowAddressModal(true);
+                
+                isVerifiedRef.current = true;
+                setIsVerified(true);
+                if (onValidationChange) {
+                    onValidationChange(true);
+                }
             }
         }
     };
