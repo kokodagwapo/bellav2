@@ -32,14 +32,14 @@ const SelectionButton: React.FC<SelectionButtonProps> = ({ label, icon, isSelect
             onClick={onClick}
             className={`w-full p-3 sm:p-6 border rounded-lg sm:rounded-xl text-left transition-all duration-200 flex items-center gap-3 sm:gap-4 focus:outline-none focus:ring-2 focus:ring-primary/50 relative touch-manipulation min-h-[56px] sm:min-h-[64px] ${
                 isSelected
-                ? 'bg-primary/5 border-primary border-2'
-                : 'bg-white border-gray-300 hover:border-primary/50 active:bg-gray-50'
+                ? 'bg-primary/10 border-primary border-2 shadow-md shadow-primary/20'
+                : 'bg-white border-gray-300 hover:border-primary/50 hover:bg-gray-50 active:bg-gray-100'
             }`}
         >
             {icon && (
-              <div className={`p-2 sm:p-3 rounded-lg flex-shrink-0 ${
+              <div className={`p-2 sm:p-3 rounded-lg flex-shrink-0 transition-colors ${
                 isSelected 
-                  ? 'bg-primary text-white' 
+                  ? 'bg-primary text-white shadow-sm' 
                   : 'bg-gray-100 text-primary'
               }`}>
                 <div className="w-5 h-5 sm:w-8 sm:h-8 flex items-center justify-center">
@@ -47,16 +47,16 @@ const SelectionButton: React.FC<SelectionButtonProps> = ({ label, icon, isSelect
                 </div>
               </div>
             )}
-            <span className={`font-light text-base sm:text-lg md:text-xl flex-1 ${
-              isSelected ? 'text-primary' : 'text-gray-900'
+            <span className={`font-medium text-base sm:text-lg md:text-xl flex-1 transition-colors ${
+              isSelected ? 'text-primary font-semibold' : 'text-gray-900'
             }`}>
               {label}
             </span>
-            <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center ${
+            <div className={`flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-all ${
               isSelected 
-                ? 'border-primary bg-primary' 
+                ? 'border-primary bg-primary shadow-sm scale-110' 
                 : 'border-gray-300 bg-white'
-            }">
+            }`}>
               {isSelected && (
                 <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />

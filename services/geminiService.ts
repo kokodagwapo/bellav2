@@ -4,7 +4,41 @@ import { knowledgeBase } from '../bellaKnowledgeBase';
 
 const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY || '' });
 
-const systemInstruction = `You are Bella, an AI mortgage assistant. Your personality is friendly, informal, conversational, and occasionally humorous. Your goal is to make the mortgage process feel less stressful and more human. You are an expert in all aspects of mortgage lending.
+const systemInstruction = `You are Bella, an AI mortgage assistant. Your personality is SUPER friendly, casual, fun, and lighthearted. You're like that cool friend who knows everything about mortgages but never makes you feel dumb or stressed. You're NOT serious or corporate - you're warm, approachable, and make everything feel easy.
+
+IMPORTANT - SPEAK LIKE A REAL PERSON, NOT A ROBOT: When responding, talk like you're texting a friend or having coffee together. Be natural and relaxed:
+- ALWAYS use contractions (I'm, you're, don't, can't, won't, it's, that's, we'll, etc.) - never use formal language
+- Mix up your sentence length - throw in short punchy sentences with longer ones
+- Use casual phrases naturally: "you know", "actually", "so", "well", "I mean", "honestly", "seriously", "like"
+- Sound excited and enthusiastic when it's good news, empathetic when it's tough
+- Use casual expressions: "no worries", "totally", "absolutely", "for sure", "yeah", "yep"
+- Add personality - be a little playful, use humor when appropriate
+- Never sound like you're reading from a script - be spontaneous
+- Use "um" or "uh" very occasionally if it feels natural (but don't overdo it)
+- Speak directly and personally - use "you" and "I" a lot
+- Keep it light and fun - mortgages are boring, but you're not!
+- Don't be overly formal or professional-sounding - be yourself!
+
+CONVERSATION STYLE - BE INTERACTIVE AND ENGAGING:
+- Ask questions to keep the conversation flowing naturally
+- Show genuine interest in the borrower's situation
+- Respond to what they say, don't just give generic answers
+- If they ask a question, answer it directly and then maybe ask a follow-up
+- Make it feel like a real conversation, not a Q&A session
+- Be curious about their goals, concerns, and preferences
+- Use their name if they've shared it
+- Reference things they've mentioned earlier in the conversation
+- Keep responses conversational length (2-4 sentences typically, unless they ask for more detail)
+
+LIVE AGENTIC MODE - BE PROACTIVE AND CONTEXTUAL:
+- When in live guide mode, observe what the user is doing and provide helpful context
+- If they're on the landing page, offer to help them get started
+- If they're filling out forms, explain what each section means
+- If they're looking at documents, explain what they need
+- If they seem confused or stuck, proactively offer help
+- Guide them naturally through the process without being pushy
+- Celebrate their progress and make them feel accomplished
+- Be their friendly guide, not a scripted narrator
 
 You operate with dual expertise:
 1. SILENT UNDERWRITER: You work behind the scenes to ensure loan applications are complete, accurate, and ready for approval. You review documentation, verify calculations, check requirements, and catch issues early.
@@ -33,7 +67,7 @@ export const getBellaChatReply = async (chatHistory: { role: 'user' | 'model', t
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: "gemini-1.5-flash",
             contents: contents,
             config: { systemInstruction: systemInstruction },
         });
@@ -50,7 +84,7 @@ export const analyzeTextForData = async (text: string): Promise<Partial<FormData
     const prompt = `Analyze the following text from a user and extract any information that matches the loan application schema. Text: "${text}"`;
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-1.5-flash",
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -83,11 +117,55 @@ export const analyzeTextForData = async (text: string): Promise<Partial<FormData
     }
 };
 
-// New function for TTS
+// New function for TTS - tries OpenAI first (more natural), falls back to Gemini
 export const generateBellaSpeech = async (text: string): Promise<string | null> => {
+    // Try OpenAI first if available
+    const openAiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const hasValidOpenAiKey = openAiKey && 
+                               openAiKey !== 'your_openai_api_key_here' && 
+                               openAiKey.trim().length > 0 &&
+                               openAiKey.startsWith('sk-');
+    
+    if (hasValidOpenAiKey) {
+        try {
+            console.log("🎯 Attempting OpenAI TTS (Nova voice - most natural)...");
+            const { generateBellaSpeechOpenAI } = await import('./openaiTtsService');
+            const openAiAudio = await generateBellaSpeechOpenAI(text);
+            if (openAiAudio) {
+                console.log("✅ OpenAI TTS successful! Using Nova voice.");
+                return openAiAudio;
+            } else {
+                console.log("⚠️ OpenAI TTS returned null, falling back to Gemini TTS");
+            }
+        } catch (error: any) {
+            console.error("❌ OpenAI TTS error:", error?.message || error);
+            console.log("   Falling back to Gemini TTS");
+        }
+    } else {
+        if (!openAiKey) {
+            console.log("ℹ️ OpenAI API key not set in .env file, using Gemini TTS");
+        } else if (openAiKey === 'your_openai_api_key_here') {
+            console.log("ℹ️ OpenAI API key placeholder detected, using Gemini TTS");
+        } else if (!openAiKey.startsWith('sk-')) {
+            console.warn("⚠️ OpenAI API key format invalid (should start with 'sk-'), using Gemini TTS");
+            console.warn("   Get a valid key from: https://platform.openai.com/api-keys");
+        } else {
+            console.log("ℹ️ OpenAI API key appears invalid, using Gemini TTS");
+        }
+    }
+
+    // Fallback to Gemini TTS
+    const geminiKey = import.meta.env.VITE_API_KEY;
+    if (!geminiKey || geminiKey.trim().length === 0) {
+        const errorMsg = "❌ Gemini API key (VITE_API_KEY) is missing. Please check your .env file.";
+        console.error(errorMsg);
+        throw new Error("API key is missing. Please check your .env file. Both OpenAI and Gemini keys are missing.");
+    }
+
     try {
+        console.log("🎯 Attempting Gemini TTS (Kore voice)...");
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash-preview-tts",
+            model: "gemini-2.0-flash-exp",
             contents: [{ parts: [{ text: text }] }],
             config: {
                 responseModalities: [Modality.AUDIO],
@@ -97,12 +175,19 @@ export const generateBellaSpeech = async (text: string): Promise<string | null> 
             },
         });
         if (!response.candidates) {
-            return null;
+            throw new Error("No candidates returned from Gemini API.");
         }
-        return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data ?? null;
-    } catch (error) {
-        console.error("Error generating speech:", error);
-        return null;
+        const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data ?? null;
+        if (audioData) {
+            console.log("✅ Gemini TTS successful! Using Kore voice.");
+        } else {
+            console.error("❌ Gemini TTS returned null audio data");
+        }
+        return audioData;
+    } catch (error: any) {
+        console.error("❌ Error generating Gemini speech:", error?.message || error);
+        console.error("   This may be due to: invalid API key, rate limit, or network issue");
+        throw error; // Re-throw to be handled by caller
     }
 }
 
@@ -111,7 +196,7 @@ export const extractDataFromDocument = async (file: { data: string, mimeType: st
     // Validate MIME type
     const validMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'application/pdf', 'image/webp'];
     const normalizedMimeType = file.mimeType.toLowerCase();
-    
+
     if (!validMimeTypes.some(type => normalizedMimeType.includes(type.split('/')[1]))) {
         throw new Error(`Unsupported file type: ${file.mimeType}. Please upload PDF, JPG, or PNG files.`);
     }
@@ -122,7 +207,7 @@ export const extractDataFromDocument = async (file: { data: string, mimeType: st
     }
 
     const documentPart = { inlineData: { data: file.data, mimeType: normalizedMimeType } };
-    const textPart = { 
+    const textPart = {
         text: `Analyze the attached document using OCR (Optical Character Recognition). The document could be:
 - Driver's License or State ID
 - W-2 Form (tax document)
@@ -135,33 +220,33 @@ Extract ALL visible text and information, then identify and extract the followin
 3. Address: Current home/residential address (street, city, state, zip code)
 4. Date of Birth (DOB): Birth date in MM/DD/YYYY format
 
-Be thorough in reading all text on the document. If a field is not found, return null for that field. Only return data that you can clearly identify from the document.` 
+Be thorough in reading all text on the document. If a field is not found, return null for that field. Only return data that you can clearly identify from the document.`
     };
 
     try {
         const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-1.5-flash",
             contents: { parts: [textPart, documentPart] },
             config: {
                 responseMimeType: "application/json",
                 responseSchema: {
                     type: Type.OBJECT,
                     properties: {
-                        fullName: { 
-                            type: Type.STRING, 
-                            description: "The full legal name of the person as it appears on the document. Return null if not found." 
+                        fullName: {
+                            type: Type.STRING,
+                            description: "The full legal name of the person as it appears on the document. Return null if not found."
                         },
-                        income: { 
-                            type: Type.NUMBER, 
-                            description: "The primary gross income/wage. For W-2: annual income. For paystub: calculate monthly income. Return null if not found." 
+                        income: {
+                            type: Type.NUMBER,
+                            description: "The primary gross income/wage. For W-2: annual income. For paystub: calculate monthly income. Return null if not found."
                         },
-                        borrowerAddress: { 
-                            type: Type.STRING, 
-                            description: "The person's full residential/home address including street, city, state, and zip code. Return null if not found." 
+                        borrowerAddress: {
+                            type: Type.STRING,
+                            description: "The person's full residential/home address including street, city, state, and zip code. Return null if not found."
                         },
-                        dob: { 
-                            type: Type.STRING, 
-                            description: "The person's date of birth in MM/DD/YYYY format. Return null if not found." 
+                        dob: {
+                            type: Type.STRING,
+                            description: "The person's date of birth in MM/DD/YYYY format. Return null if not found."
                         }
                     },
                 },
@@ -173,22 +258,22 @@ Be thorough in reading all text on the document. If a field is not found, return
         }
 
         const parsedData = JSON.parse(response.text.trim()) as Partial<FormData>;
-        
+
         // Validate and clean the parsed data
         const cleanedData: Partial<FormData> = {};
-        
+
         if (parsedData.fullName && typeof parsedData.fullName === 'string' && parsedData.fullName.trim() !== 'null') {
             cleanedData.fullName = parsedData.fullName.trim();
         }
-        
+
         if (parsedData.income && typeof parsedData.income === 'number' && parsedData.income > 0) {
             cleanedData.income = parsedData.income;
         }
-        
+
         if (parsedData.borrowerAddress && typeof parsedData.borrowerAddress === 'string' && parsedData.borrowerAddress.trim() !== 'null') {
             cleanedData.borrowerAddress = parsedData.borrowerAddress.trim();
         }
-        
+
         if (parsedData.dob && typeof parsedData.dob === 'string' && parsedData.dob.trim() !== 'null') {
             cleanedData.dob = parsedData.dob.trim();
         }
@@ -196,7 +281,7 @@ Be thorough in reading all text on the document. If a field is not found, return
         return cleanedData;
     } catch (error: any) {
         console.error("Error extracting data from document:", error);
-        
+
         // Provide more specific error messages
         if (error.message?.includes('API key')) {
             throw new Error("API configuration error. Please check your API key.");
@@ -213,7 +298,7 @@ Be thorough in reading all text on the document. If a field is not found, return
 };
 
 export const generateLoanSummary = async (data: FormData): Promise<string> => {
-  const prompt = `You are Bella, an AI mortgage assistant. Your personality is friendly, informal, conversational, and encouraging.
+    const prompt = `You are Bella, an AI mortgage assistant. Your personality is friendly, informal, conversational, and encouraging.
   
   A user has just completed a pre-evaluation form. Based on the data below, generate a personalized and optimistic summary for them.
   - Highlight their strengths (e.g., "Great credit score!", "Solid down payment!").
@@ -226,15 +311,15 @@ export const generateLoanSummary = async (data: FormData): Promise<string> => {
   ${JSON.stringify(data, (key, value) => value || undefined, 2)}
   `;
 
-  try {
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: { systemInstruction: systemInstruction },
-    });
-    return response.text;
-  } catch (error) {
-    console.error("Error generating loan summary:", error);
-    return "Thank you for your submission! Based on the information you provided, you're in a great position to move forward. We'll be in touch soon with your personalized options.";
-  }
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-1.5-flash',
+            contents: prompt,
+            config: { systemInstruction: systemInstruction },
+        });
+        return response.text;
+    } catch (error) {
+        console.error("Error generating loan summary:", error);
+        return "Thank you for your submission! Based on the information you provided, you're in a great position to move forward. We'll be in touch soon with your personalized options.";
+    }
 };

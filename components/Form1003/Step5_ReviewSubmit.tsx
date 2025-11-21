@@ -91,7 +91,7 @@ const Step5ReviewSubmit: React.FC<Step5Props> = ({ data, onBack }) => {
                     </button>
                     <button
                         onClick={onBack}
-                        className="w-full flex-1 text-primary-foreground font-medium py-3 sm:py-3 px-6 rounded-xl sm:rounded-xl bg-primary hover:bg-primary/90 transition duration-300 inline-flex items-center justify-center shadow-sm hover:shadow-md touch-manipulation min-h-[48px] sm:min-h-[44px]"
+                        className="w-full flex-1 text-primary font-medium py-3 sm:py-3 px-6 rounded-xl sm:rounded-xl bg-white border-2 border-gray-300 hover:border-primary/50 hover:bg-primary/5 active:bg-primary/10 transition-all duration-200 inline-flex items-center justify-center shadow-sm hover:shadow-md touch-manipulation min-h-[48px] sm:min-h-[44px] focus:outline-none focus:ring-2 focus:ring-primary/50"
                     >
                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

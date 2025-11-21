@@ -8,6 +8,7 @@ import BellaChatWidget from './components/ChatWidget';
 import DocumentList from './components/DocumentList';
 import LandingPage from './components/LandingPage';
 import Footer from './components/Footer';
+import BellaVoiceAssistant from './components/BellaVoiceAssistant';
 import { FormData, LoanPurpose } from './types';
 import { generateLoanSummary } from './services/geminiService';
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,9 +25,9 @@ const LogoSection = () => {
         }}
         className="flex flex-col items-center gap-2"
       >
-        <img 
+        <img
           src={`${import.meta.env.BASE_URL}TeraTrans.png`}
-          alt="TERAVERDE Logo" 
+          alt="TERAVERDE Logo"
           className="w-auto h-auto max-w-[120px] sm:max-w-[140px] object-contain"
           style={{ maxHeight: '60px', width: 'auto', height: 'auto' }}
           onError={(e) => {
@@ -124,6 +125,72 @@ const App: React.FC = () => {
   const nextStep = () => setStep(prev => Math.min(prev + 1, filteredFlow.length - 1));
   const prevStep = () => setStep(prev => Math.max(prev - 1, 0));
 
+  // Listen for Bella Demo Actions
+  useEffect(() => {
+    const handleDemoAction = (e: any) => {
+      const action = e.detail;
+      if (!action) return;
+
+      console.log("Demo Action:", action);
+
+      // Handle Navigation FIRST (before scrolling)
+      if (action.targetUrl === '/') {
+        setCurrentView('home');
+        // Wait for navigation, then scroll
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          if (mainContentRef.current) mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 300);
+      }
+
+      // Handle Clicks (Simulated by state changes)
+      if (action.clickTarget === 'Start Pre-Evaluation') {
+        resetApplication();
+      } else if (action.clickTarget === 'Get Started') {
+        // If we're in prep view and on step 0 (Welcome), advance to next step
+        if (currentView === 'prep' && step === 0) {
+          setTimeout(() => {
+            setStep(1);
+          }, 500);
+        }
+      } else if (action.clickTarget === 'Document List') {
+        setCurrentView('documents');
+        setTimeout(() => {
+          if (mainContentRef.current) {
+            mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 300);
+      } else if (action.clickTarget === 'Home Journey') {
+        setCurrentView('form1003');
+        setTimeout(() => {
+          if (mainContentRef.current) {
+            mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }, 300);
+      }
+
+      // Handle Scrolling (only if no navigation happened)
+      if (!action.targetUrl && !action.clickTarget) {
+        if (action.scrollTarget === 'top') {
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (mainContentRef.current) mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 300);
+        } else if (action.scrollTarget === 'form-content') {
+          // Scroll down in the main content
+          setTimeout(() => {
+            if (mainContentRef.current) {
+              mainContentRef.current.scrollTo({ top: 500, behavior: 'smooth' });
+            }
+          }, 500);
+        }
+      }
+    };
+
+    window.addEventListener('bella-demo-action', handleDemoAction);
+    return () => window.removeEventListener('bella-demo-action', handleDemoAction);
+  }, [currentView, step, filteredFlow]);
+
   const handleDataChange = (newData: Partial<FormData>) => {
     setFormData((prev) => {
       const updatedData = { ...prev, ...newData };
@@ -136,15 +203,15 @@ const App: React.FC = () => {
           updatedData.loanAmount = Math.max(0, updatedData.purchasePrice - updatedData.downPayment);
         }
       }
-      
+
       return updatedData;
     });
   };
-  
+
   const handleSelectionAndNext = (field: keyof FormData, value: any) => {
     handleDataChange({ [field]: value });
     if (field !== 'loanPurpose') {
-        setTimeout(nextStep, 200);
+      setTimeout(nextStep, 200);
     }
   }
 
@@ -162,9 +229,9 @@ const App: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
+
   const handleProceedToApplication = () => {
-      setCurrentView('form1003');
+    setCurrentView('form1003');
   }
 
   const renderPrepFlow = () => {
@@ -177,57 +244,57 @@ const App: React.FC = () => {
       onBack: prevStep,
       onChange: handleDataChange,
     };
-    
+
     // Customize props based on component needs
     const stepProps: { [key: string]: any } = {
-        StepWelcome: { onNext: nextStep },
-        StepLoanPurpose: { data: formData, onChange: (f: string, v: any) => handleDataChange({[f]:v}), onNext: nextStep },
-        StepPropertyType: { data: formData, onChange: handleSelectionAndNext },
-        StepPropertyUse: { data: formData, onChange: handleSelectionAndNext },
-        StepPrimaryResidenceConfirmation: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepSubjectProperty: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepCurrentHousingStatus: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepEmploymentStatus: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepTimeInJob: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepDebtsLiabilities: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepAssetsFunds: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepAddCoBorrower: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepCoBorrowerDetails: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepPrimaryBorrowerOptimization: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepPrepDocs: { onDataChange: handleDataChange, onNext: nextStep, onBack: prevStep },
-        StepDMVAddressVerification: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepAffordabilitySnapshot: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepReviewChecklist: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}), onEditStep: (idx: number) => setStep(idx) },
-        StepPrep4LoanSummary: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}), onProceedToApplication: handleProceedToApplication },
-        StepPricing: { ...commonProps },
-        StepRefinanceDetails: { ...commonProps },
-        StepCreditScore: { data: formData, onChange: (f: string, v: any) => handleDataChange({[f]:v}), onNext: nextStep, onBack: prevStep },
-        StepBorrowAmount: { ...commonProps },
-        StepLocation: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepFirstTimeBuyer: { data: formData, onChange: handleSelectionAndNext },
-        StepMilitary: { data: formData, onChange: handleSelectionAndNext },
-        StepName: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}) },
-        StepContact: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({[f]:v}), onNext: handleSubmit },
-        StepConfirmation: { isLoading: isLoading, result: submissionResult, onProceed: handleProceedToApplication },
+      StepWelcome: { onNext: nextStep },
+      StepLoanPurpose: { data: formData, onChange: (f: string, v: any) => handleDataChange({ [f]: v }), onNext: nextStep },
+      StepPropertyType: { data: formData, onChange: handleSelectionAndNext },
+      StepPropertyUse: { data: formData, onChange: handleSelectionAndNext },
+      StepPrimaryResidenceConfirmation: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepSubjectProperty: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepCurrentHousingStatus: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepEmploymentStatus: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepTimeInJob: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepDebtsLiabilities: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepAssetsFunds: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepAddCoBorrower: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepCoBorrowerDetails: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepPrimaryBorrowerOptimization: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepPrepDocs: { onDataChange: handleDataChange, onNext: nextStep, onBack: prevStep },
+      StepDMVAddressVerification: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepAffordabilitySnapshot: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepReviewChecklist: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }), onEditStep: (idx: number) => setStep(idx) },
+      StepPrep4LoanSummary: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }), onProceedToApplication: handleProceedToApplication },
+      StepPricing: { ...commonProps },
+      StepRefinanceDetails: { ...commonProps },
+      StepCreditScore: { data: formData, onChange: (f: string, v: any) => handleDataChange({ [f]: v }), onNext: nextStep, onBack: prevStep },
+      StepBorrowAmount: { ...commonProps },
+      StepLocation: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepFirstTimeBuyer: { data: formData, onChange: handleSelectionAndNext },
+      StepMilitary: { data: formData, onChange: handleSelectionAndNext },
+      StepName: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }) },
+      StepContact: { ...commonProps, onChange: (f: string, v: any) => handleDataChange({ [f]: v }), onNext: handleSubmit },
+      StepConfirmation: { isLoading: isLoading, result: submissionResult, onProceed: handleProceedToApplication },
     };
-    
+
     // Get component name, with fallback to commonProps if not found
     const componentName = CurrentStepComponent.name || CurrentStepComponent.displayName || '';
     const props = stepProps[componentName] || commonProps;
-    
+
     return <CurrentStepComponent {...props} />;
   };
-  
+
   const indicatorSteps = useMemo(() => {
-      const labels: string[] = [];
-      const indices: number[] = [];
-      filteredFlow.forEach((s, i) => {
-          if (s.indicatorLabel) {
-              labels.push(s.indicatorLabel);
-              indices.push(i);
-          }
-      });
-      return { labels, indices };
+    const labels: string[] = [];
+    const indices: number[] = [];
+    filteredFlow.forEach((s, i) => {
+      if (s.indicatorLabel) {
+        labels.push(s.indicatorLabel);
+        indices.push(i);
+      }
+    });
+    return { labels, indices };
   }, [filteredFlow]);
 
   const currentIndicatorIndex = indicatorSteps.indices.filter(index => index <= step).length - 1;
@@ -239,7 +306,7 @@ const App: React.FC = () => {
     { label: "Prep4Loan", action: resetApplication, icon: <FilePlus2 className="h-6 w-6 flex-shrink-0" /> },
     { label: "Home Journey", action: () => setCurrentView('form1003'), icon: <FileText className="h-6 w-6 flex-shrink-0" /> },
     { label: "Document List", action: () => setCurrentView('documents'), icon: <LayoutList className="h-6 w-6 flex-shrink-0" /> },
-    { label: "My Loan", action: () => {}, icon: <Landmark className="h-6 w-6 flex-shrink-0" /> },
+    { label: "My Loan", action: () => { }, icon: <Landmark className="h-6 w-6 flex-shrink-0" /> },
   ];
 
   return (
@@ -250,109 +317,111 @@ const App: React.FC = () => {
             {/* Logo */}
             <LogoSection />
             <div className="flex flex-col gap-1 md:gap-2">
-              {links.map((link, idx) => ( 
-                <button 
-                  key={idx} 
+              {links.map((link, idx) => (
+                <button
+                  key={idx}
                   onClick={() => {
                     link.action();
                     if (window.innerWidth < 768) {
                       // Close mobile sidebar after clicking
                       setOpen(false);
                     }
-                  }} 
+                  }}
                   className="w-full text-left touch-manipulation"
                   style={{ color: '#000000' }}
                 >
-                  <SidebarLink link={{...link, href: "#"}} className="w-full" />
-                </button> 
+                  <SidebarLink link={{ ...link, href: "#" }} className="w-full" />
+                </button>
               ))}
             </div>
           </div>
           <div style={{ color: '#000000' }}>
-            <SidebarLink link={{ label: "Jane Doe", href: "#", icon: ( <div className="h-7 w-7 flex-shrink-0 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs">JD</div> )}} />
+            <SidebarLink link={{ label: "Jane Doe", href: "#", icon: (<div className="h-7 w-7 flex-shrink-0 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-semibold text-xs">JD</div>) }} />
           </div>
         </SidebarBody>
       </Sidebar>
       <main ref={mainContentRef} className="flex-1 h-full overflow-y-auto custom-scrollbar relative" style={{ backgroundColor: 'transparent', zIndex: 1 }}>
         <div className="min-h-full flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-10 relative z-10">
-            {currentView === 'home' ? (
-                <LandingPage 
-                  onNavigateToPrep={resetApplication}
-                  onNavigateToForm1003={() => setCurrentView('form1003')}
-                />
-            ) : currentView === 'form1003' ? (
-                <Form1003 initialData={formData} />
-            ) : currentView === 'documents' ? (
-                <DocumentList formData={formData} />
-            ) : (
-                <div className="w-full max-w-[1088px] mx-auto">
-                    {/* Step Indicator at the top */}
-                    {showStepIndicator && (
-                        <div className="mb-2 sm:mb-6 md:mb-8 mt-1 sm:mt-4 md:mt-6">
-                            <StepIndicator 
-                                labels={indicatorSteps.labels} 
-                                currentStepIndex={currentIndicatorIndex}
-                                onStepClick={(stepIndex: number) => {
-                                    // Validate step index is within bounds
-                                    if (stepIndex >= 0 && stepIndex < filteredFlow.length) {
-                                        setStep(stepIndex);
-                                    }
-                                }}
-                                stepIndices={indicatorSteps.indices}
-                            />
-                        </div>
-                    )}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-12 xl:gap-16 items-start">
-                        <div className="hidden lg:block lg:col-span-1 pt-6 lg:pt-12">
-                            <RequirementsChecklist loanPurpose={formData.loanPurpose} formData={formData} />
-                        </div>
-                        <div className="w-full lg:col-span-2">
-                        <div className="bg-white rounded-2xl sm:rounded-3xl border border-border/60 transition-all duration-300 overflow-hidden shadow-xl sm:shadow-2xl hover:shadow-2xl relative" style={{ zIndex: 10 }}>
-                            <div className="p-4 sm:p-6 md:p-8 lg:p-12 min-h-[400px] sm:min-h-[500px] md:min-h-[550px] flex flex-col justify-between bg-white relative" style={{ zIndex: 10, pointerEvents: 'auto' }}>
-                                <div key={step} className="animate-fade-in w-full flex-1 flex flex-col justify-center relative" style={{ zIndex: 10, pointerEvents: 'auto' }}>
-                                    {renderPrepFlow()}
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
+          {currentView === 'home' ? (
+            <LandingPage
+              onNavigateToPrep={resetApplication}
+              onNavigateToForm1003={() => setCurrentView('form1003')}
+            />
+          ) : currentView === 'form1003' ? (
+            <Form1003 initialData={formData} />
+          ) : currentView === 'documents' ? (
+            <DocumentList formData={formData} />
+          ) : (
+            <div className="w-full max-w-[1088px] mx-auto">
+              {/* Step Indicator at the top */}
+              {showStepIndicator && (
+                <div className="mb-2 sm:mb-6 md:mb-8 mt-1 sm:mt-4 md:mt-6">
+                  <StepIndicator
+                    labels={indicatorSteps.labels}
+                    currentStepIndex={currentIndicatorIndex}
+                    onStepClick={(stepIndex: number) => {
+                      // Validate step index is within bounds
+                      if (stepIndex >= 0 && stepIndex < filteredFlow.length) {
+                        setStep(stepIndex);
+                      }
+                    }}
+                    stepIndices={indicatorSteps.indices}
+                  />
                 </div>
-            )}
+              )}
+              <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-12 xl:gap-16 items-start">
+                <div className="hidden lg:block lg:col-span-1 pt-6 lg:pt-12">
+                  <RequirementsChecklist loanPurpose={formData.loanPurpose} formData={formData} />
+                </div>
+                <div className="w-full lg:col-span-2">
+                  <div className="bg-white rounded-2xl sm:rounded-3xl border border-border/60 transition-all duration-300 overflow-hidden shadow-xl sm:shadow-2xl hover:shadow-2xl relative" style={{ zIndex: 10 }}>
+                    <div className="p-4 sm:p-6 md:p-8 lg:p-12 min-h-[400px] sm:min-h-[500px] md:min-h-[550px] flex flex-col justify-between bg-white relative" style={{ zIndex: 10, pointerEvents: 'auto' }}>
+                      <div key={step} className="animate-fade-in w-full flex-1 flex flex-col justify-center relative" style={{ zIndex: 10, pointerEvents: 'auto' }}>
+                        {renderPrepFlow()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         <Footer />
       </main>
-      
+
       {isChatOpen && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/30 z-40 hidden sm:block touch-none" 
+          className="fixed inset-0 bg-black/30 z-40 hidden sm:block touch-none"
           onClick={() => setIsChatOpen(false)}
         />
       )}
 
-      <AnimatePresence>
-      {isChatOpen ? (
-        <BellaChatWidget
-          onClose={() => setIsChatOpen(false)}
-          onDataExtracted={handleDataChange}
-          formData={formData}
-        />
-      ) : (
-        <motion.button
-          initial={{ scale: 0, y: 50 }}
-          animate={{ scale: 1, y: 0 }}
-          exit={{ scale: 0, y: 50 }}
-          onClick={() => setIsChatOpen(true)}
-          className="fixed bottom-6 right-6 z-30 h-16 w-16 sm:h-14 sm:w-14 rounded-full bg-white shadow-lg border border-border flex items-center justify-center hover:scale-110 active:scale-95 transition-transform touch-manipulation"
-          style={{ minHeight: '64px', minWidth: '64px' }}
-          aria-label="Open Bella AI Assistant"
-        >
-          <AiIcon className="w-8 h-8 sm:w-7 sm:h-7 text-foreground" />
-        </motion.button>
-      )}
-      </AnimatePresence>
+      {/* <AnimatePresence>
+        {isChatOpen ? (
+          <BellaChatWidget
+            onClose={() => setIsChatOpen(false)}
+            onDataExtracted={handleDataChange}
+            formData={formData}
+          />
+        ) : (
+          <motion.button
+            initial={{ scale: 0, y: 50 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0, y: 50 }}
+            onClick={() => setIsChatOpen(true)}
+            className="fixed bottom-6 right-6 z-30 h-16 w-16 sm:h-14 sm:w-14 rounded-full bg-white shadow-lg border border-border flex items-center justify-center hover:scale-110 active:scale-95 transition-transform touch-manipulation"
+            style={{ minHeight: '64px', minWidth: '64px' }}
+            aria-label="Open Bella AI Assistant"
+          >
+            <AiIcon className="w-8 h-8 sm:w-7 sm:h-7 text-foreground" />
+          </motion.button>
+        )}
+      </AnimatePresence> */}
+
+      <BellaVoiceAssistant />
     </>
   );
 };
