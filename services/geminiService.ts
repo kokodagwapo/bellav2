@@ -75,7 +75,6 @@ export const getBellaChatReply = async (chatHistory: { role: 'user' | 'model', t
             contents: contents,
             config: { 
                 systemInstruction: systemInstruction,
-                temperature: 0.8, // Slightly higher for more natural, human-like responses
             },
         });
         return response.text;
