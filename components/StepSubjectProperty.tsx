@@ -5,6 +5,7 @@ import { SelectionButton } from './StepHeader';
 import StepNavigation from './StepNavigation';
 import { Home, Lightbulb } from './icons';
 import { AddressAutofill } from '@mapbox/search-js-react';
+import AddressPreviewModal, { AddressDetails } from './ui/AddressPreviewModal';
 import type { FormData, Address } from '../types';
 
 interface StepSubjectPropertyProps {
@@ -41,6 +42,8 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
   const [zipError, setZipError] = useState('');
   const [targetZipVerified, setTargetZipVerified] = useState(false);
   const [targetZipError, setTargetZipError] = useState('');
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [addressPreview, setAddressPreview] = useState<AddressDetails | null>(null);
 
   const handleHasProperty = (value: boolean) => {
     setHasProperty(value);
@@ -233,30 +236,103 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
               </label>
               <AddressAutofill
                 accessToken={import.meta.env.VITE_MAPBOX_API_KEY || ''}
-                onRetrieve={(res: any) => {
+                onRetrieve={async (res: any) => {
                   const feature = res.features[0];
                   if (feature) {
                     const properties = feature.properties || {};
                     const context = feature.context || [];
+                    const coordinates = feature.geometry?.coordinates || [];
                     
-                    // Extract street address
+                    // Extract address components
                     const street = properties.address_line || properties.name || '';
-                    if (street) {
-                      handleAddressChange('street', street);
-                    }
+                    let city = '';
+                    let state = '';
+                    let zip = '';
                     
-                    // Extract city and state
+                    // Extract city, state, and ZIP from context
                     context.forEach((item: any) => {
                       if (item.id?.startsWith('place')) {
-                        handleAddressChange('city', item.text || '');
+                        city = item.text || '';
                       }
                       if (item.id?.startsWith('region')) {
-                        handleAddressChange('state', item.short_code?.replace('US-', '') || '');
+                        state = item.short_code?.replace('US-', '') || '';
                       }
                       if (item.id?.startsWith('postcode')) {
-                        handleAddressChange('zip', item.text || '');
+                        zip = item.text || '';
                       }
                     });
+                    
+                    // Build full address
+                    const fullAddress = properties.full_address || properties.place_name || 
+                      `${street}${street && city ? ', ' : ''}${city}${city && state ? ', ' : ''}${state} ${zip}`.trim();
+                    
+                    // Verify address with Mapbox
+                    try {
+                      const { verifyAddress } = await import('../services/addressVerificationService');
+                      const verification = await verifyAddress({
+                        street,
+                        city,
+                        state,
+                        zip
+                      });
+                      
+                      // Prepare address details for modal
+                      const addressDetails: AddressDetails = {
+                        street: verification.normalizedAddress?.street || street,
+                        city: verification.normalizedAddress?.city || city,
+                        state: verification.normalizedAddress?.state || state,
+                        zip: verification.normalizedAddress?.zip || zip,
+                        fullAddress: verification.normalizedAddress 
+                          ? `${verification.normalizedAddress.street}, ${verification.normalizedAddress.city}, ${verification.normalizedAddress.state} ${verification.normalizedAddress.zip}`
+                          : fullAddress,
+                        coordinates: coordinates.length >= 2 ? {
+                          longitude: coordinates[0],
+                          latitude: coordinates[1]
+                        } : undefined,
+                        verified: verification.isValid
+                      };
+                      
+                      // Show preview modal
+                      setAddressPreview(addressDetails);
+                      setShowAddressModal(true);
+                      
+                      // Update form fields if verified
+                      if (verification.isValid && verification.normalizedAddress) {
+                        handleAddressChange('street', verification.normalizedAddress.street);
+                        handleAddressChange('city', verification.normalizedAddress.city);
+                        handleAddressChange('state', verification.normalizedAddress.state);
+                        handleAddressChange('zip', verification.normalizedAddress.zip);
+                      } else {
+                        // Still update with what we have
+                        if (street) handleAddressChange('street', street);
+                        if (city) handleAddressChange('city', city);
+                        if (state) handleAddressChange('state', state);
+                        if (zip) handleAddressChange('zip', zip);
+                      }
+                    } catch (error) {
+                      console.error('Error verifying address:', error);
+                      // Still show modal with unverified address
+                      const addressDetails: AddressDetails = {
+                        street,
+                        city,
+                        state,
+                        zip,
+                        fullAddress,
+                        coordinates: coordinates.length >= 2 ? {
+                          longitude: coordinates[0],
+                          latitude: coordinates[1]
+                        } : undefined,
+                        verified: false
+                      };
+                      setAddressPreview(addressDetails);
+                      setShowAddressModal(true);
+                      
+                      // Update form fields
+                      if (street) handleAddressChange('street', street);
+                      if (city) handleAddressChange('city', city);
+                      if (state) handleAddressChange('state', state);
+                      if (zip) handleAddressChange('zip', zip);
+                    }
                   }
                 }}
                 options={{
@@ -425,6 +501,17 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
       </div>
 
       <StepNavigation onNext={canProceed ? onNext : undefined} onBack={onBack} />
+      
+      {/* Address Preview Modal */}
+      <AddressPreviewModal
+        isOpen={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        address={addressPreview}
+        onConfirm={() => {
+          // Address is already confirmed when modal is shown
+          setShowAddressModal(false);
+        }}
+      />
     </div>
   );
 };

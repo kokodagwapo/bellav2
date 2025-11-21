@@ -4,6 +4,7 @@ import StepHeader from '../StepHeader';
 import StepNavigation from '../StepNavigation';
 import { Lightbulb } from '../icons';
 import { AddressAutofill } from '@mapbox/search-js-react';
+import AddressPreviewModal, { AddressDetails } from '../ui/AddressPreviewModal';
 
 
 interface Step1Props {
@@ -50,6 +51,8 @@ const AddressInput: React.FC<{
     const isVerifiedRef = useRef(false);
     const [isVerified, setIsVerified] = useState(false);
     const [mapboxLoaded, setMapboxLoaded] = useState(false);
+    const [showAddressModal, setShowAddressModal] = useState(false);
+    const [addressPreview, setAddressPreview] = useState<AddressDetails | null>(null);
 
     // Initialize Mapbox
     useEffect(() => {
@@ -62,23 +65,103 @@ const AddressInput: React.FC<{
         }
     }, []);
 
-    // Handle Mapbox address retrieval - improved to extract all address components
-    const handleRetrieve = (res: any) => {
+    // Handle Mapbox address retrieval - improved to extract all address components and show preview modal
+    const handleRetrieve = async (res: any) => {
         const feature = res.features[0];
         if (feature) {
             const properties = feature.properties || {};
             const context = feature.context || [];
+            const coordinates = feature.geometry?.coordinates || [];
             
-            // Extract full formatted address (best practice: use full_address or place_name)
-            const formattedAddress = properties.full_address || properties.place_name || properties.address_line || '';
+            // Extract address components
+            const street = properties.address_line || properties.name || '';
+            let city = '';
+            let state = '';
+            let zip = '';
             
-            if (formattedAddress) {
+            // Extract from context
+            context.forEach((item: any) => {
+                if (item.id?.startsWith('place')) {
+                    city = item.text || '';
+                }
+                if (item.id?.startsWith('region')) {
+                    state = item.short_code?.replace('US-', '') || '';
+                }
+                if (item.id?.startsWith('postcode')) {
+                    zip = item.text || '';
+                }
+            });
+            
+            // Build full formatted address
+            const formattedAddress = properties.full_address || properties.place_name || 
+                `${street}${street && city ? ', ' : ''}${city}${city && state ? ', ' : ''}${state} ${zip}`.trim();
+            
+            // Verify address with Mapbox
+            try {
+                const { verifyAddress } = await import('../../services/addressVerificationService');
+                const verification = await verifyAddress({
+                    street,
+                    city,
+                    state,
+                    zip
+                });
+                
+                // Prepare address details for modal
+                const addressDetails: AddressDetails = {
+                    street: verification.normalizedAddress?.street || street,
+                    city: verification.normalizedAddress?.city || city,
+                    state: verification.normalizedAddress?.state || state,
+                    zip: verification.normalizedAddress?.zip || zip,
+                    fullAddress: verification.normalizedAddress 
+                        ? `${verification.normalizedAddress.street}, ${verification.normalizedAddress.city}, ${verification.normalizedAddress.state} ${verification.normalizedAddress.zip}`
+                        : formattedAddress,
+                    coordinates: coordinates.length >= 2 ? {
+                        longitude: coordinates[0],
+                        latitude: coordinates[1]
+                    } : undefined,
+                    verified: verification.isValid
+                };
+                
+                // Show preview modal
+                setAddressPreview(addressDetails);
+                setShowAddressModal(true);
+                
+                // Update form field with verified address
+                const finalAddress = verification.isValid && verification.normalizedAddress
+                    ? `${verification.normalizedAddress.street}, ${verification.normalizedAddress.city}, ${verification.normalizedAddress.state} ${verification.normalizedAddress.zip}`
+                    : formattedAddress;
+                
+                onChange(id, finalAddress);
+                isVerifiedRef.current = true;
+                setIsVerified(true);
+                if (onValidationChange) {
+                    onValidationChange(true);
+                }
+            } catch (error) {
+                console.error('Error verifying address:', error);
+                // Still update with unverified address
                 onChange(id, formattedAddress);
                 isVerifiedRef.current = true;
                 setIsVerified(true);
                 if (onValidationChange) {
                     onValidationChange(true);
                 }
+                
+                // Show modal with unverified address
+                const addressDetails: AddressDetails = {
+                    street,
+                    city,
+                    state,
+                    zip,
+                    fullAddress: formattedAddress,
+                    coordinates: coordinates.length >= 2 ? {
+                        longitude: coordinates[0],
+                        latitude: coordinates[1]
+                    } : undefined,
+                    verified: false
+                };
+                setAddressPreview(addressDetails);
+                setShowAddressModal(true);
             }
         }
     };
@@ -162,6 +245,16 @@ const AddressInput: React.FC<{
                     Address verified
                 </p>
             )}
+            
+            {/* Address Preview Modal */}
+            <AddressPreviewModal
+                isOpen={showAddressModal}
+                onClose={() => setShowAddressModal(false)}
+                address={addressPreview}
+                onConfirm={() => {
+                    setShowAddressModal(false);
+                }}
+            />
         </div>
     );
 };
