@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import StepHeader from './StepHeader';
 import { SelectionButton } from './StepHeader';
 import StepNavigation from './StepNavigation';
-import { Home, Lightbulb } from './icons';
+import { Home, Lightbulb, Eye, CheckCircle2, Sparkles } from 'lucide-react';
 import { AddressAutofill } from '@mapbox/search-js-react';
 import AddressPreviewModal, { AddressDetails } from './ui/AddressPreviewModal';
 import type { FormData, Address } from '../types';
@@ -38,12 +38,12 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
   const [value, setValue] = useState<number>(data.subjectProperty?.value || 0);
   const [budgetRange, setBudgetRange] = useState<string>(data.subjectProperty?.budgetRange || '');
   const [targetZip, setTargetZip] = useState<string>(data.subjectProperty?.targetZip || '');
-  const [zipVerified, setZipVerified] = useState(false);
-  const [zipError, setZipError] = useState('');
   const [targetZipVerified, setTargetZipVerified] = useState(false);
-  const [targetZipError, setTargetZipError] = useState('');
+  const [targetZipError, setTargetZipError] = useState<string | null>(null);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [addressPreview, setAddressPreview] = useState<AddressDetails | null>(null);
+  const [addressConfirmed, setAddressConfirmed] = useState(false);
+  const [showConfirmationBanner, setShowConfirmationBanner] = useState(false);
 
   const handleHasProperty = (value: boolean) => {
     setHasProperty(value);
@@ -75,12 +75,20 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
         const { getCityStateFromZip } = await import('../services/addressVerificationService');
         const cityState = await getCityStateFromZip(zip);
         if (cityState) {
-          handleAddressChange('city', cityState.city);
-          handleAddressChange('state', cityState.state);
+          setTargetZipVerified(true);
+          setTargetZipError(null);
+        } else {
+          setTargetZipVerified(false);
+          setTargetZipError('ZIP code not found. Please verify the ZIP code.');
         }
       } catch (error) {
         console.error('Error fetching city/state from ZIP:', error);
+        setTargetZipVerified(false);
+        setTargetZipError('Unable to verify ZIP code. Please check your connection.');
       }
+    } else {
+      setTargetZipVerified(false);
+      setTargetZipError('');
     }
   };
 
@@ -100,10 +108,29 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
     });
   };
 
+  const handleConfirmAddress = () => {
+    if (addressPreview) {
+      // Update all fields with confirmed address
+      if (addressPreview.street) handleAddressChange('street', addressPreview.street);
+      if (addressPreview.city) handleAddressChange('city', addressPreview.city);
+      if (addressPreview.state) handleAddressChange('state', addressPreview.state);
+      if (addressPreview.zip) handleAddressChange('zip', addressPreview.zip);
+      
+      setAddressConfirmed(true);
+      setShowAddressModal(false);
+      setShowConfirmationBanner(true);
+      
+      // Auto-hide banner after 5 seconds
+      setTimeout(() => {
+        setShowConfirmationBanner(false);
+      }, 5000);
+    }
+  };
+
   const canProceed = hasProperty !== null && (
     hasProperty 
-      ? (address.street && address.zip && value > 0)
-      : (budgetRange && targetZip)
+      ? (address.street && address.city && address.state && address.zip && value > 0 && addressConfirmed)
+      : (budgetRange && targetZip && targetZipVerified)
   );
 
   return (
@@ -126,15 +153,14 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Do you already have a property in mind?
           </h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col sm:flex-row gap-3">
             <SelectionButton
-              label="Yes"
-              icon={<Home className="h-6 w-6" />}
+              label="Yes, I have a property"
               isSelected={hasProperty === true}
               onClick={() => handleHasProperty(true)}
             />
             <SelectionButton
-              label="Not Yet"
+              label="No, I'm still looking"
               isSelected={hasProperty === false}
               onClick={() => handleHasProperty(false)}
             />
@@ -147,117 +173,191 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4"
           >
+            {/* Address Confirmation Banner - Gamification Style */}
+            <AnimatePresence>
+              {showConfirmationBanner && addressConfirmed && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-400 rounded-xl p-4 shadow-lg"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-green-500 rounded-full">
+                      <Sparkles className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-green-800 text-base mb-1 flex items-center gap-2">
+                        <CheckCircle2 className="h-5 w-5" />
+                        Address Confirmed! 🎉
+                      </h4>
+                      <p className="text-sm text-green-700">
+                        <span className="font-semibold">Bella's Insight:</span> Great job! Your property address has been verified and confirmed. This helps us provide you with the most accurate loan estimates and property valuations. You're one step closer to your dream home!
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowConfirmationBanner(false)}
+                      className="text-green-600 hover:text-green-800 transition-colors"
+                      aria-label="Close banner"
+                    >
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Street Address with Mapbox Autosuggest */}
             <div>
               <label className="block text-sm font-medium text-black mb-2">
-                ZIP Code *
+                Street Address *
               </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={address.zip || ''}
-                onChange={(e) => {
-                  // Allow only digits, limit to 5 characters
-                  const zip = e.target.value.replace(/\D/g, '').slice(0, 5);
-                  
-                  // Update ZIP code immediately (synchronous)
-                  handleAddressChange('zip', zip);
-                  
-                  // Clear city/state if ZIP is incomplete
-                  if (zip.length < 5) {
-                    setZipVerified(false);
-                    setZipError('');
-                    handleAddressChange('city', '');
-                    handleAddressChange('state', '');
-                  }
-                  
-                  // Auto-fill city and state from ZIP code with Mapbox when 5 digits are entered (async)
-                  if (zip.length === 5) {
-                    (async () => {
-                      try {
-                        const { getCityStateFromZip } = await import('../services/addressVerificationService');
-                        const cityState = await getCityStateFromZip(zip);
-                        if (cityState) {
-                          handleAddressChange('city', cityState.city);
-                          handleAddressChange('state', cityState.state);
-                          // ZIP code is verified
-                          setZipVerified(true);
-                          setZipError('');
-                        } else {
-                          // ZIP code not found in Mapbox
-                          setZipVerified(false);
-                          setZipError('ZIP code not found. Please verify the ZIP code.');
-                          // Clear city/state if ZIP is invalid
-                          handleAddressChange('city', '');
-                          handleAddressChange('state', '');
+              <div className="relative">
+                <AddressAutofill
+                  accessToken={import.meta.env.VITE_MAPBOX_API_KEY || ''}
+                  onRetrieve={async (res: any) => {
+                    const feature = res.features[0];
+                    if (feature) {
+                      const properties = feature.properties || {};
+                      const context = feature.context || [];
+                      const coordinates = feature.geometry?.coordinates || [];
+                      
+                      // Extract address components
+                      const street = properties.address_line || properties.name || '';
+                      let city = '';
+                      let state = '';
+                      let zip = '';
+                      let unit = '';
+                      
+                      // Extract from context
+                      context.forEach((item: any) => {
+                        if (item.id?.startsWith('place')) {
+                          city = item.text || '';
                         }
+                        if (item.id?.startsWith('region')) {
+                          state = item.short_code?.replace('US-', '') || '';
+                        }
+                        if (item.id?.startsWith('postcode')) {
+                          zip = item.text || '';
+                        }
+                      });
+                      
+                      // Try to extract unit from street address
+                      const unitMatch = street.match(/\b(?:apt|apartment|unit|suite|ste|#)\s*([a-z0-9-]+)\b/i);
+                      if (unitMatch) {
+                        unit = unitMatch[1];
+                      }
+                      
+                      // Build full address
+                      const fullAddress = properties.full_address || properties.place_name || 
+                        `${street}${street && city ? ', ' : ''}${city}${city && state ? ', ' : ''}${state} ${zip}`.trim();
+                      
+                      // Update all form fields immediately
+                      if (street) handleAddressChange('street', street);
+                      if (city) handleAddressChange('city', city);
+                      if (state) handleAddressChange('state', state);
+                      if (zip) handleAddressChange('zip', zip);
+                      if (unit) handleAddressChange('unit', unit);
+                      
+                      // Verify address with Mapbox
+                      try {
+                        const { verifyAddress } = await import('../services/addressVerificationService');
+                        const verification = await verifyAddress({
+                          street,
+                          city,
+                          state,
+                          zip
+                        });
+                        
+                        // Prepare address details for modal
+                        const addressDetails: AddressDetails = {
+                          street: verification.normalizedAddress?.street || street,
+                          city: verification.normalizedAddress?.city || city,
+                          state: verification.normalizedAddress?.state || state,
+                          zip: verification.normalizedAddress?.zip || zip,
+                          fullAddress: verification.normalizedAddress 
+                            ? `${verification.normalizedAddress.street}, ${verification.normalizedAddress.city}, ${verification.normalizedAddress.state} ${verification.normalizedAddress.zip}`
+                            : fullAddress,
+                          coordinates: coordinates.length >= 2 ? {
+                            longitude: coordinates[0],
+                            latitude: coordinates[1]
+                          } : undefined,
+                          verified: verification.isValid
+                        };
+                        
+                        // Update with verified address if different
+                        if (verification.isValid && verification.normalizedAddress) {
+                          handleAddressChange('street', verification.normalizedAddress.street);
+                          handleAddressChange('city', verification.normalizedAddress.city);
+                          handleAddressChange('state', verification.normalizedAddress.state);
+                          handleAddressChange('zip', verification.normalizedAddress.zip);
+                        }
+                        
+                        // Store address details for modal (don't show automatically)
+                        setAddressPreview(addressDetails);
+                        setAddressConfirmed(false); // Reset confirmation state
                       } catch (error) {
-                        console.error('Error verifying ZIP code with Mapbox:', error);
-                        setZipVerified(false);
-                        setZipError('Unable to verify ZIP code. Please check your connection.');
-                        // Clear city/state on error
-                        handleAddressChange('city', '');
-                        handleAddressChange('state', '');
+                        console.error('Error verifying address:', error);
+                        // Store unverified address for modal
+                        const addressDetails: AddressDetails = {
+                          street,
+                          city,
+                          state,
+                          zip,
+                          fullAddress,
+                          coordinates: coordinates.length >= 2 ? {
+                            longitude: coordinates[0],
+                            latitude: coordinates[1]
+                          } : undefined,
+                          verified: false
+                        };
+                        setAddressPreview(addressDetails);
+                        setAddressConfirmed(false);
                       }
-                    })();
-                  }
-                }}
-                onBlur={async (e) => {
-                  // Verify ZIP on blur if 5 digits
-                  const zip = e.target.value.replace(/\D/g, '');
-                  if (zip.length === 5 && !zipVerified) {
-                    try {
-                      const { getCityStateFromZip } = await import('../services/addressVerificationService');
-                      const cityState = await getCityStateFromZip(zip);
-                      if (cityState) {
-                        handleAddressChange('city', cityState.city);
-                        handleAddressChange('state', cityState.state);
-                        setZipVerified(true);
-                        setZipError('');
-                      }
-                    } catch (error) {
-                      // Silent fail on blur
                     }
-                  }
-                }}
-                placeholder="12345"
-                className={`w-full px-4 py-3 bg-white border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400 ${
-                  zipVerified ? 'border-green-500' : zipError ? 'border-red-500' : 'border-gray-300'
-                }`}
-                maxLength={5}
-                autoComplete="postal-code"
-                disabled={false}
-                readOnly={false}
-                style={{ 
-                  pointerEvents: 'auto',
-                  userSelect: 'text',
-                  WebkitUserSelect: 'text',
-                  MozUserSelect: 'text',
-                  touchAction: 'manipulation',
-                  WebkitAppearance: 'none',
-                  appearance: 'none'
-                }}
-              />
-              {zipVerified && address.zip?.length === 5 && (
-                <p className="mt-1.5 text-xs text-green-600 flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  ZIP code verified - City and State auto-filled
-                </p>
-              )}
-              {zipError && (
-                <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  {zipError}
-                </p>
-              )}
+                  }}
+                  options={{
+                    country: 'US',
+                    language: 'en'
+                  }}
+                >
+                  <input
+                    type="text"
+                    name="street"
+                    value={address.street || ''}
+                    onChange={(e) => {
+                      handleAddressChange('street', e.target.value);
+                      // Clear confirmation when manually editing
+                      if (addressConfirmed) {
+                        setAddressConfirmed(false);
+                        setShowConfirmationBanner(false);
+                        setAddressPreview(null);
+                      }
+                    }}
+                    placeholder="Start typing your address..."
+                    className="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
+                    autoComplete="address-line1"
+                  />
+                </AddressAutofill>
+                {/* Modern icon button to view/confirm address */}
+                {addressPreview && address.street && address.street.trim().length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddressModal(true)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    aria-label="View and confirm address"
+                    title="View and confirm address on map"
+                  >
+                    <Eye className="h-5 w-5" />
+                  </button>
+                )}
+              </div>
             </div>
 
-            {/* City and State Fields - Auto-filled from ZIP */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Auto-populated fields from Mapbox */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
                   City *
@@ -265,16 +365,16 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                 <input
                   type="text"
                   value={address.city || ''}
-                  onChange={(e) => handleAddressChange('city', e.target.value)}
+                  onChange={(e) => {
+                    handleAddressChange('city', e.target.value);
+                    if (addressConfirmed) {
+                      setAddressConfirmed(false);
+                      setShowConfirmationBanner(false);
+                    }
+                  }}
                   placeholder="City"
-                  className={`w-full px-4 py-3 bg-white border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400 ${
-                    address.city && zipVerified ? 'border-green-500' : 'border-gray-300'
-                  }`}
-                  readOnly={zipVerified && address.zip?.length === 5} // Read-only if auto-filled from ZIP
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
                 />
-                {zipVerified && address.city && (
-                  <p className="mt-1 text-xs text-gray-500">Auto-filled from ZIP code</p>
-                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-black mb-2">
@@ -286,202 +386,55 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                   onChange={(e) => {
                     const state = e.target.value.toUpperCase().slice(0, 2);
                     handleAddressChange('state', state);
+                    if (addressConfirmed) {
+                      setAddressConfirmed(false);
+                      setShowConfirmationBanner(false);
+                    }
                   }}
                   placeholder="State"
                   maxLength={2}
-                  className={`w-full px-4 py-3 bg-white border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400 ${
-                    address.state && zipVerified ? 'border-green-500' : 'border-gray-300'
-                  }`}
-                  readOnly={zipVerified && address.zip?.length === 5} // Read-only if auto-filled from ZIP
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
                 />
-                {zipVerified && address.state && (
-                  <p className="mt-1 text-xs text-gray-500">Auto-filled from ZIP code</p>
-                )}
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-black mb-2">
-                Street Address *
-              </label>
-              <AddressAutofill
-                accessToken={import.meta.env.VITE_MAPBOX_API_KEY || ''}
-                onRetrieve={async (res: any) => {
-                  const feature = res.features[0];
-                  if (feature) {
-                    const properties = feature.properties || {};
-                    const context = feature.context || [];
-                    const coordinates = feature.geometry?.coordinates || [];
-                    
-                    // Extract address components
-                    const street = properties.address_line || properties.name || '';
-                    let city = '';
-                    let state = '';
-                    let zip = '';
-                    
-                    // Extract city, state, and ZIP from context
-                    context.forEach((item: any) => {
-                      if (item.id?.startsWith('place')) {
-                        city = item.text || '';
-                      }
-                      if (item.id?.startsWith('region')) {
-                        state = item.short_code?.replace('US-', '') || '';
-                      }
-                      if (item.id?.startsWith('postcode')) {
-                        zip = item.text || '';
-                      }
-                    });
-                    
-                    // Use existing city/state from ZIP if already filled, otherwise use from address autocomplete
-                    const finalCity = address.city || city;
-                    const finalState = address.state || state;
-                    const finalZip = address.zip || zip;
-                    
-                    // Build full address
-                    const fullAddress = properties.full_address || properties.place_name || 
-                      `${street}${street && finalCity ? ', ' : ''}${finalCity}${finalCity && finalState ? ', ' : ''}${finalState} ${finalZip}`.trim();
-                    
-                    // Verify address with Mapbox
-                    try {
-                      const { verifyAddress } = await import('../services/addressVerificationService');
-                      const verification = await verifyAddress({
-                        street,
-                        city: finalCity,
-                        state: finalState,
-                        zip: finalZip
-                      });
-                      
-                      // Prepare address details for modal
-                      const addressDetails: AddressDetails = {
-                        street: verification.normalizedAddress?.street || street,
-                        city: verification.normalizedAddress?.city || finalCity,
-                        state: verification.normalizedAddress?.state || finalState,
-                        zip: verification.normalizedAddress?.zip || finalZip,
-                        fullAddress: verification.normalizedAddress 
-                          ? `${verification.normalizedAddress.street}, ${verification.normalizedAddress.city}, ${verification.normalizedAddress.state} ${verification.normalizedAddress.zip}`
-                          : fullAddress,
-                        coordinates: coordinates.length >= 2 ? {
-                          longitude: coordinates[0],
-                          latitude: coordinates[1]
-                        } : undefined,
-                        verified: verification.isValid
-                      };
-                      
-                      // Show preview modal
-                      setAddressPreview(addressDetails);
-                      setShowAddressModal(true);
-                      
-                      // Update form fields if verified
-                      if (verification.isValid && verification.normalizedAddress) {
-                        handleAddressChange('street', verification.normalizedAddress.street);
-                        // Only update city/state if they weren't already filled from ZIP
-                        if (!address.city) {
-                          handleAddressChange('city', verification.normalizedAddress.city);
-                        }
-                        if (!address.state) {
-                          handleAddressChange('state', verification.normalizedAddress.state);
-                        }
-                        if (!address.zip) {
-                          handleAddressChange('zip', verification.normalizedAddress.zip);
-                        }
-                      } else {
-                        // Still update with what we have
-                        if (street) handleAddressChange('street', street);
-                        // Only update city/state if they weren't already filled from ZIP
-                        if (city && !address.city) {
-                          handleAddressChange('city', city);
-                        }
-                        if (state && !address.state) {
-                          handleAddressChange('state', state);
-                        }
-                        if (zip && !address.zip) {
-                          handleAddressChange('zip', zip);
-                        }
-                      }
-                    } catch (error) {
-                      console.error('Error verifying address:', error);
-                      // Still show modal with unverified address
-                      const addressDetails: AddressDetails = {
-                        street,
-                        city: finalCity,
-                        state: finalState,
-                        zip: finalZip,
-                        fullAddress,
-                        coordinates: coordinates.length >= 2 ? {
-                          longitude: coordinates[0],
-                          latitude: coordinates[1]
-                        } : undefined,
-                        verified: false
-                      };
-                      setAddressPreview(addressDetails);
-                      setShowAddressModal(true);
-                      
-                      // Update form fields
-                      if (street) handleAddressChange('street', street);
-                      // Only update city/state if they weren't already filled from ZIP
-                      if (city && !address.city) {
-                        handleAddressChange('city', city);
-                      }
-                      if (state && !address.state) {
-                        handleAddressChange('state', state);
-                      }
-                      if (zip && !address.zip) {
-                        handleAddressChange('zip', zip);
-                      }
-                    }
-                  }
-                }}
-                options={{
-                  country: 'US',
-                  language: 'en',
-                  // If city/state are already filled from ZIP, use them to improve suggestions
-                  proximity: address.city && address.state ? undefined : undefined
-                }}
-              >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">
+                  ZIP Code *
+                </label>
                 <input
                   type="text"
-                  name="street"
-                  value={address.street || ''}
-                  onChange={(e) => handleAddressChange('street', e.target.value)}
-                  placeholder="123 Main St"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={address.zip || ''}
+                  onChange={(e) => {
+                    const zip = e.target.value.replace(/\D/g, '').slice(0, 5);
+                    handleAddressChange('zip', zip);
+                    if (addressConfirmed) {
+                      setAddressConfirmed(false);
+                      setShowConfirmationBanner(false);
+                    }
+                  }}
+                  placeholder="12345"
+                  maxLength={5}
                   className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
-                  autoComplete="address-line1"
+                  autoComplete="postal-code"
                 />
-              </AddressAutofill>
-              {address.city && address.state && (
-                <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Address suggestions will use {address.city}, {address.state}
-                </p>
-              )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">
+                  Unit (optional)
+                </label>
+                <input
+                  type="text"
+                  value={address.unit || ''}
+                  onChange={(e) => handleAddressChange('unit', e.target.value)}
+                  placeholder="Apt 4B"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
+                />
+              </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-black mb-2">
-                Unit (optional)
-              </label>
-              <input
-                type="text"
-                value={address.unit || ''}
-                onChange={(e) => handleAddressChange('unit', e.target.value)}
-                placeholder="Apt 4B"
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
-              />
-            </div>
-
-            {(address.zip && address.zip.length === 5) && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-sm text-gray-600"
-              >
-                {address.city && address.state && (
-                  <p className="text-black">{address.city}, {address.state}</p>
-                )}
-              </motion.div>
-            )}
 
             <div>
               <label className="block text-sm font-medium text-black mb-2">
@@ -506,27 +459,6 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
             className="space-y-4"
           >
             <div>
-              <label className="block text-sm font-medium text-foreground mb-3">
-                Budget Range *
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {budgetRanges.map((range) => (
-                  <button
-                    key={range}
-                    onClick={() => handleBudgetSelect(range)}
-                    className={`px-4 py-3 border rounded-lg text-sm font-medium transition-all ${
-                      budgetRange === range
-                        ? 'bg-primary text-white border-primary'
-                        : 'bg-white border-gray-300 hover:border-primary'
-                    }`}
-                  >
-                    {range}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
               <label className="block text-sm font-medium text-black mb-2">
                 Target ZIP Code *
               </label>
@@ -535,35 +467,11 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                 inputMode="numeric"
                 pattern="[0-9]*"
                 value={targetZip}
-                onChange={async (e) => {
-                  // Allow only digits, limit to 5 characters
+                onChange={(e) => {
                   const zip = e.target.value.replace(/\D/g, '').slice(0, 5);
                   handleZipChange(zip);
-                  
-                  // Verify ZIP code with Mapbox when 5 digits are entered
-                  if (zip.length === 5) {
-                    try {
-                      const { getCityStateFromZip } = await import('../services/addressVerificationService');
-                      const cityState = await getCityStateFromZip(zip);
-                      if (cityState) {
-                        setTargetZipVerified(true);
-                        setTargetZipError('');
-                      } else {
-                        setTargetZipVerified(false);
-                        setTargetZipError('ZIP code not found. Please verify the ZIP code.');
-                      }
-                    } catch (error) {
-                      console.error('Error verifying ZIP code with Mapbox:', error);
-                      setTargetZipVerified(false);
-                      setTargetZipError('Unable to verify ZIP code. Please check your connection.');
-                    }
-                  } else {
-                    setTargetZipVerified(false);
-                    setTargetZipError('');
-                  }
                 }}
                 onBlur={async (e) => {
-                  // Verify ZIP on blur if 5 digits
                   const zip = e.target.value.replace(/\D/g, '');
                   if (zip.length === 5 && !targetZipVerified) {
                     try {
@@ -571,7 +479,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                       const cityState = await getCityStateFromZip(zip);
                       if (cityState) {
                         setTargetZipVerified(true);
-                        setTargetZipError('');
+                        setTargetZipError(null);
                       }
                     } catch (error) {
                       // Silent fail on blur
@@ -589,7 +497,9 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                   userSelect: 'text',
                   WebkitUserSelect: 'text',
                   MozUserSelect: 'text',
-                  touchAction: 'manipulation'
+                  touchAction: 'manipulation',
+                  WebkitAppearance: 'none',
+                  appearance: 'none'
                 }}
               />
               {targetZipVerified && targetZip.length === 5 && (
@@ -609,6 +519,22 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                 </p>
               )}
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-black mb-2">
+                Estimated Budget Range *
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {budgetRanges.map((range) => (
+                  <SelectionButton
+                    key={range}
+                    label={range}
+                    isSelected={budgetRange === range}
+                    onClick={() => handleBudgetSelect(range)}
+                  />
+                ))}
+              </div>
+            </div>
           </motion.div>
         )}
       </div>
@@ -620,14 +546,10 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
         isOpen={showAddressModal}
         onClose={() => setShowAddressModal(false)}
         address={addressPreview}
-        onConfirm={() => {
-          // Address is already confirmed when modal is shown
-          setShowAddressModal(false);
-        }}
+        onConfirm={handleConfirmAddress}
       />
     </div>
   );
 };
 
 export default StepSubjectProperty;
-
