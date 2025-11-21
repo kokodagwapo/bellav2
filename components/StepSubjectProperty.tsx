@@ -44,6 +44,8 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
   const [addressPreview, setAddressPreview] = useState<AddressDetails | null>(null);
   const [addressConfirmed, setAddressConfirmed] = useState(false);
   const [showConfirmationBanner, setShowConfirmationBanner] = useState(false);
+  const [addressVerified, setAddressVerified] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
 
   const handleHasProperty = (value: boolean) => {
     setHasProperty(value);
@@ -214,7 +216,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
               <label className="block text-sm font-medium text-black mb-2">
                 Property Address *
               </label>
-              <div className="relative">
+              <div className="relative mb-6">
                 <AddressAutofill
                   accessToken={import.meta.env.VITE_MAPBOX_API_KEY || ''}
                   onRetrieve={async (res: any) => {
@@ -315,6 +317,19 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                         
                         // Store address details for satellite view
                         setAddressPreview(addressDetails);
+                        
+                        // Show verification message if address is verified
+                        if (verification.isValid) {
+                          setAddressVerified(true);
+                          setVerificationMessage('Address verified ✓');
+                          // Auto-hide verification message after 5 seconds
+                          setTimeout(() => {
+                            setVerificationMessage(null);
+                          }, 5000);
+                        } else {
+                          setAddressVerified(false);
+                          setVerificationMessage(null);
+                        }
                         setAddressConfirmed(false);
                       } catch (error) {
                         console.error('Error verifying address:', error);
@@ -332,6 +347,8 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                           verified: false
                         };
                         setAddressPreview(addressDetails);
+                        setAddressVerified(false);
+                        setVerificationMessage(null);
                         setAddressConfirmed(false);
                       }
                     }
@@ -357,18 +374,38 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                         ...data.subjectProperty,
                         address: newAddress
                       });
-                      // Clear confirmation when manually editing
+                      // Clear confirmation and verification when manually editing
                       if (addressConfirmed) {
                         setAddressConfirmed(false);
                         setShowConfirmationBanner(false);
                         setAddressPreview(null);
                       }
+                      if (addressVerified) {
+                        setAddressVerified(false);
+                        setVerificationMessage(null);
+                      }
                     }}
                     placeholder="Start typing your address (e.g., 123 Main St, City, State ZIP)"
-                    className="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
+                    className={`w-full px-4 py-3 pr-12 bg-white border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400 transition-colors ${
+                      addressVerified ? 'border-green-500 bg-green-50/30' : 'border-gray-300'
+                    }`}
                     autoComplete="address-line1"
                   />
                 </AddressAutofill>
+                {/* Verification message */}
+                {verificationMessage && addressVerified && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="absolute -bottom-6 left-0 text-xs text-green-600 font-medium flex items-center gap-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {verificationMessage}
+                  </motion.div>
+                )}
                 {/* Modern icon button to view/confirm address */}
                 {(address.fullAddress || address.street) && ((address.fullAddress && address.fullAddress.trim().length > 5) || (address.street && address.street.trim().length > 5)) && (
                   <button
