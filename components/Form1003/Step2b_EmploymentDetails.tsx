@@ -242,11 +242,14 @@ const Step2bEmploymentDetails: React.FC<Step2bProps> = ({ data, onDataChange, on
                         <div>
                             <input
                                 type="text"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
                                 value={data.currentEmployment?.employerAddress?.zip || ''}
                                 onChange={async (e) => {
+                                    // Allow only digits, limit to 5 characters
                                     const zip = e.target.value.replace(/\D/g, '').slice(0, 5);
                                     handleAddressChange('zip', zip);
-                                    // Auto-fill city/state from ZIP when 5 digits entered
+                                    // Auto-fill city/state from ZIP when 5 digits entered and verify with Mapbox
                                     if (zip.length === 5) {
                                         try {
                                             const { getCityStateFromZip } = await import('../../services/addressVerificationService');
@@ -256,12 +259,13 @@ const Step2bEmploymentDetails: React.FC<Step2bProps> = ({ data, onDataChange, on
                                                 handleAddressChange('state', cityState.state);
                                             }
                                         } catch (error) {
-                                            console.error('Error fetching city/state from ZIP:', error);
+                                            console.error('Error verifying ZIP code with Mapbox:', error);
                                         }
                                     }
                                 }}
                                 placeholder="ZIP Code"
                                 maxLength={5}
+                                minLength={5}
                                 className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto]"
                             />
                         </div>

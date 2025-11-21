@@ -37,6 +37,10 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
   const [value, setValue] = useState<number>(data.subjectProperty?.value || 0);
   const [budgetRange, setBudgetRange] = useState<string>(data.subjectProperty?.budgetRange || '');
   const [targetZip, setTargetZip] = useState<string>(data.subjectProperty?.targetZip || '');
+  const [zipVerified, setZipVerified] = useState(false);
+  const [zipError, setZipError] = useState('');
+  const [targetZipVerified, setTargetZipVerified] = useState(false);
+  const [targetZipError, setTargetZipError] = useState('');
 
   const handleHasProperty = (value: boolean) => {
     setHasProperty(value);
@@ -146,28 +150,81 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
               </label>
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={address.zip || ''}
                 onChange={async (e) => {
+                  // Allow only digits, limit to 5 characters
                   const zip = e.target.value.replace(/\D/g, '').slice(0, 5);
                   handleAddressChange('zip', zip);
+                  
+                  // Verify ZIP code with Mapbox when 5 digits are entered
                   if (zip.length === 5) {
-                    // Auto-fill city/state from ZIP
                     try {
                       const { getCityStateFromZip } = await import('../services/addressVerificationService');
                       const cityState = await getCityStateFromZip(zip);
                       if (cityState) {
                         handleAddressChange('city', cityState.city);
                         handleAddressChange('state', cityState.state);
+                        // ZIP code is verified
+                        setZipVerified(true);
+                        setZipError('');
+                      } else {
+                        // ZIP code not found in Mapbox
+                        setZipVerified(false);
+                        setZipError('ZIP code not found. Please verify the ZIP code.');
                       }
                     } catch (error) {
-                      console.error('Error fetching city/state from ZIP:', error);
+                      console.error('Error verifying ZIP code with Mapbox:', error);
+                      setZipVerified(false);
+                      setZipError('Unable to verify ZIP code. Please check your connection.');
+                    }
+                  } else {
+                    setZipVerified(false);
+                    setZipError('');
+                  }
+                }}
+                onBlur={async (e) => {
+                  // Verify ZIP on blur if 5 digits
+                  const zip = e.target.value.replace(/\D/g, '');
+                  if (zip.length === 5 && !zipVerified) {
+                    try {
+                      const { getCityStateFromZip } = await import('../services/addressVerificationService');
+                      const cityState = await getCityStateFromZip(zip);
+                      if (cityState) {
+                        handleAddressChange('city', cityState.city);
+                        handleAddressChange('state', cityState.state);
+                        setZipVerified(true);
+                        setZipError('');
+                      }
+                    } catch (error) {
+                      // Silent fail on blur
                     }
                   }
                 }}
                 placeholder="12345"
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
+                className={`w-full px-4 py-3 bg-white border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400 ${
+                  zipVerified ? 'border-green-500' : zipError ? 'border-red-500' : 'border-gray-300'
+                }`}
                 maxLength={5}
+                minLength={5}
               />
+              {zipVerified && address.zip?.length === 5 && (
+                <p className="mt-1.5 text-xs text-green-600 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  ZIP code verified
+                </p>
+              )}
+              {zipError && (
+                <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  {zipError}
+                </p>
+              )}
             </div>
 
             <div>
@@ -293,15 +350,75 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
               </label>
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={targetZip}
-                onChange={(e) => {
+                onChange={async (e) => {
+                  // Allow only digits, limit to 5 characters
                   const zip = e.target.value.replace(/\D/g, '').slice(0, 5);
                   handleZipChange(zip);
+                  
+                  // Verify ZIP code with Mapbox when 5 digits are entered
+                  if (zip.length === 5) {
+                    try {
+                      const { getCityStateFromZip } = await import('../services/addressVerificationService');
+                      const cityState = await getCityStateFromZip(zip);
+                      if (cityState) {
+                        setTargetZipVerified(true);
+                        setTargetZipError('');
+                      } else {
+                        setTargetZipVerified(false);
+                        setTargetZipError('ZIP code not found. Please verify the ZIP code.');
+                      }
+                    } catch (error) {
+                      console.error('Error verifying ZIP code with Mapbox:', error);
+                      setTargetZipVerified(false);
+                      setTargetZipError('Unable to verify ZIP code. Please check your connection.');
+                    }
+                  } else {
+                    setTargetZipVerified(false);
+                    setTargetZipError('');
+                  }
+                }}
+                onBlur={async (e) => {
+                  // Verify ZIP on blur if 5 digits
+                  const zip = e.target.value.replace(/\D/g, '');
+                  if (zip.length === 5 && !targetZipVerified) {
+                    try {
+                      const { getCityStateFromZip } = await import('../services/addressVerificationService');
+                      const cityState = await getCityStateFromZip(zip);
+                      if (cityState) {
+                        setTargetZipVerified(true);
+                        setTargetZipError('');
+                      }
+                    } catch (error) {
+                      // Silent fail on blur
+                    }
+                  }
                 }}
                 placeholder="12345"
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
+                className={`w-full px-4 py-3 bg-white border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400 ${
+                  targetZipVerified ? 'border-green-500' : targetZipError ? 'border-red-500' : 'border-gray-300'
+                }`}
                 maxLength={5}
+                minLength={5}
               />
+              {targetZipVerified && targetZip.length === 5 && (
+                <p className="mt-1.5 text-xs text-green-600 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  ZIP code verified
+                </p>
+              )}
+              {targetZipError && (
+                <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  {targetZipError}
+                </p>
+              )}
             </div>
           </motion.div>
         )}
