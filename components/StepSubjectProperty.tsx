@@ -161,7 +161,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                   const zip = e.target.value.replace(/\D/g, '').slice(0, 5);
                   handleAddressChange('zip', zip);
                   
-                  // Verify ZIP code with Mapbox when 5 digits are entered
+                  // Auto-fill city and state from ZIP code with Mapbox when 5 digits are entered
                   if (zip.length === 5) {
                     try {
                       const { getCityStateFromZip } = await import('../services/addressVerificationService');
@@ -176,15 +176,26 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                         // ZIP code not found in Mapbox
                         setZipVerified(false);
                         setZipError('ZIP code not found. Please verify the ZIP code.');
+                        // Clear city/state if ZIP is invalid
+                        handleAddressChange('city', '');
+                        handleAddressChange('state', '');
                       }
                     } catch (error) {
                       console.error('Error verifying ZIP code with Mapbox:', error);
                       setZipVerified(false);
                       setZipError('Unable to verify ZIP code. Please check your connection.');
+                      // Clear city/state on error
+                      handleAddressChange('city', '');
+                      handleAddressChange('state', '');
                     }
                   } else {
                     setZipVerified(false);
                     setZipError('');
+                    // Clear city/state if ZIP is incomplete
+                    if (zip.length < 5) {
+                      handleAddressChange('city', '');
+                      handleAddressChange('state', '');
+                    }
                   }
                 }}
                 onBlur={async (e) => {
@@ -217,7 +228,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  ZIP code verified
+                  ZIP code verified - City and State auto-filled
                 </p>
               )}
               {zipError && (
@@ -228,6 +239,50 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                   {zipError}
                 </p>
               )}
+            </div>
+
+            {/* City and State Fields - Auto-filled from ZIP */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">
+                  City *
+                </label>
+                <input
+                  type="text"
+                  value={address.city || ''}
+                  onChange={(e) => handleAddressChange('city', e.target.value)}
+                  placeholder="City"
+                  className={`w-full px-4 py-3 bg-white border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400 ${
+                    address.city && zipVerified ? 'border-green-500' : 'border-gray-300'
+                  }`}
+                  readOnly={zipVerified && address.zip?.length === 5} // Read-only if auto-filled from ZIP
+                />
+                {zipVerified && address.city && (
+                  <p className="mt-1 text-xs text-gray-500">Auto-filled from ZIP code</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-black mb-2">
+                  State *
+                </label>
+                <input
+                  type="text"
+                  value={address.state || ''}
+                  onChange={(e) => {
+                    const state = e.target.value.toUpperCase().slice(0, 2);
+                    handleAddressChange('state', state);
+                  }}
+                  placeholder="State"
+                  maxLength={2}
+                  className={`w-full px-4 py-3 bg-white border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400 ${
+                    address.state && zipVerified ? 'border-green-500' : 'border-gray-300'
+                  }`}
+                  readOnly={zipVerified && address.zip?.length === 5} // Read-only if auto-filled from ZIP
+                />
+                {zipVerified && address.state && (
+                  <p className="mt-1 text-xs text-gray-500">Auto-filled from ZIP code</p>
+                )}
+              </div>
             </div>
 
             <div>
@@ -262,26 +317,31 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                       }
                     });
                     
+                    // Use existing city/state from ZIP if already filled, otherwise use from address autocomplete
+                    const finalCity = address.city || city;
+                    const finalState = address.state || state;
+                    const finalZip = address.zip || zip;
+                    
                     // Build full address
                     const fullAddress = properties.full_address || properties.place_name || 
-                      `${street}${street && city ? ', ' : ''}${city}${city && state ? ', ' : ''}${state} ${zip}`.trim();
+                      `${street}${street && finalCity ? ', ' : ''}${finalCity}${finalCity && finalState ? ', ' : ''}${finalState} ${finalZip}`.trim();
                     
                     // Verify address with Mapbox
                     try {
                       const { verifyAddress } = await import('../services/addressVerificationService');
                       const verification = await verifyAddress({
                         street,
-                        city,
-                        state,
-                        zip
+                        city: finalCity,
+                        state: finalState,
+                        zip: finalZip
                       });
                       
                       // Prepare address details for modal
                       const addressDetails: AddressDetails = {
                         street: verification.normalizedAddress?.street || street,
-                        city: verification.normalizedAddress?.city || city,
-                        state: verification.normalizedAddress?.state || state,
-                        zip: verification.normalizedAddress?.zip || zip,
+                        city: verification.normalizedAddress?.city || finalCity,
+                        state: verification.normalizedAddress?.state || finalState,
+                        zip: verification.normalizedAddress?.zip || finalZip,
                         fullAddress: verification.normalizedAddress 
                           ? `${verification.normalizedAddress.street}, ${verification.normalizedAddress.city}, ${verification.normalizedAddress.state} ${verification.normalizedAddress.zip}`
                           : fullAddress,
@@ -299,24 +359,38 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                       // Update form fields if verified
                       if (verification.isValid && verification.normalizedAddress) {
                         handleAddressChange('street', verification.normalizedAddress.street);
-                        handleAddressChange('city', verification.normalizedAddress.city);
-                        handleAddressChange('state', verification.normalizedAddress.state);
-                        handleAddressChange('zip', verification.normalizedAddress.zip);
+                        // Only update city/state if they weren't already filled from ZIP
+                        if (!address.city) {
+                          handleAddressChange('city', verification.normalizedAddress.city);
+                        }
+                        if (!address.state) {
+                          handleAddressChange('state', verification.normalizedAddress.state);
+                        }
+                        if (!address.zip) {
+                          handleAddressChange('zip', verification.normalizedAddress.zip);
+                        }
                       } else {
                         // Still update with what we have
                         if (street) handleAddressChange('street', street);
-                        if (city) handleAddressChange('city', city);
-                        if (state) handleAddressChange('state', state);
-                        if (zip) handleAddressChange('zip', zip);
+                        // Only update city/state if they weren't already filled from ZIP
+                        if (city && !address.city) {
+                          handleAddressChange('city', city);
+                        }
+                        if (state && !address.state) {
+                          handleAddressChange('state', state);
+                        }
+                        if (zip && !address.zip) {
+                          handleAddressChange('zip', zip);
+                        }
                       }
                     } catch (error) {
                       console.error('Error verifying address:', error);
                       // Still show modal with unverified address
                       const addressDetails: AddressDetails = {
                         street,
-                        city,
-                        state,
-                        zip,
+                        city: finalCity,
+                        state: finalState,
+                        zip: finalZip,
                         fullAddress,
                         coordinates: coordinates.length >= 2 ? {
                           longitude: coordinates[0],
@@ -329,15 +403,24 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                       
                       // Update form fields
                       if (street) handleAddressChange('street', street);
-                      if (city) handleAddressChange('city', city);
-                      if (state) handleAddressChange('state', state);
-                      if (zip) handleAddressChange('zip', zip);
+                      // Only update city/state if they weren't already filled from ZIP
+                      if (city && !address.city) {
+                        handleAddressChange('city', city);
+                      }
+                      if (state && !address.state) {
+                        handleAddressChange('state', state);
+                      }
+                      if (zip && !address.zip) {
+                        handleAddressChange('zip', zip);
+                      }
                     }
                   }
                 }}
                 options={{
                   country: 'US',
-                  language: 'en'
+                  language: 'en',
+                  // If city/state are already filled from ZIP, use them to improve suggestions
+                  proximity: address.city && address.state ? undefined : undefined
                 }}
               >
                 <input
@@ -350,6 +433,14 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                   autoComplete="address-line1"
                 />
               </AddressAutofill>
+              {address.city && address.state && (
+                <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Address suggestions will use {address.city}, {address.state}
+                </p>
+              )}
             </div>
 
             <div>
