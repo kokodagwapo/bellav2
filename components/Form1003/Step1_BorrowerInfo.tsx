@@ -253,13 +253,83 @@ const AddressInput: React.FC<{
                     />
                 )}
                 {/* Modern icon button to view/confirm address */}
-                {addressPreview && value && value.trim().length > 0 && (
+                {value && value.trim().length > 5 && (
                     <button
                         type="button"
-                        onClick={() => setShowAddressModal(true)}
+                        onClick={async () => {
+                            // If addressPreview exists, use it; otherwise, geocode the current address
+                            if (addressPreview) {
+                                setShowAddressModal(true);
+                            } else {
+                                // Geocode the manually entered address
+                                try {
+                                    const { verifyAddress } = await import('../../services/addressVerificationService');
+                                    const verification = await verifyAddress({
+                                        street: value,
+                                        city: '',
+                                        state: '',
+                                        zip: ''
+                                    });
+                                    
+                                    // Try to get coordinates using Mapbox Geocoding API
+                                    const apiKey = import.meta.env.VITE_MAPBOX_API_KEY;
+                                    let coordinates: { longitude: number; latitude: number } | undefined;
+                                    
+                                    if (apiKey) {
+                                        try {
+                                            const geocodeResponse = await fetch(
+                                                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(value)}.json?access_token=${apiKey}&country=US&limit=1`
+                                            );
+                                            const geocodeData = await geocodeResponse.json();
+                                            
+                                            if (geocodeData.features && geocodeData.features.length > 0) {
+                                                const coords = geocodeData.features[0].geometry?.coordinates;
+                                                if (coords && coords.length >= 2) {
+                                                    coordinates = {
+                                                        longitude: coords[0],
+                                                        latitude: coords[1]
+                                                    };
+                                                }
+                                            }
+                                        } catch (geocodeError) {
+                                            console.warn('Could not geocode address for map:', geocodeError);
+                                        }
+                                    }
+                                    
+                                    const addressDetails: AddressDetails = {
+                                        street: verification.normalizedAddress?.street || value.split(',')[0] || value,
+                                        city: verification.normalizedAddress?.city || '',
+                                        state: verification.normalizedAddress?.state || '',
+                                        zip: verification.normalizedAddress?.zip || '',
+                                        fullAddress: verification.normalizedAddress 
+                                            ? `${verification.normalizedAddress.street}, ${verification.normalizedAddress.city}, ${verification.normalizedAddress.state} ${verification.normalizedAddress.zip}`
+                                            : value,
+                                        coordinates: coordinates,
+                                        verified: verification.isValid
+                                    };
+                                    
+                                    setAddressPreview(addressDetails);
+                                    setShowAddressModal(true);
+                                } catch (error) {
+                                    console.error('Error processing address:', error);
+                                    // Still show modal with basic address info
+                                    const addressDetails: AddressDetails = {
+                                        street: value.split(',')[0] || value,
+                                        city: '',
+                                        state: '',
+                                        zip: '',
+                                        fullAddress: value,
+                                        coordinates: undefined,
+                                        verified: false
+                                    };
+                                    setAddressPreview(addressDetails);
+                                    setShowAddressModal(true);
+                                }
+                            }
+                        }}
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                         aria-label="View and confirm address"
-                        title="View and confirm address"
+                        title="View and confirm address on map"
                     >
                         <Eye className="h-5 w-5" />
                     </button>
