@@ -252,6 +252,10 @@ const AddressInput: React.FC<{
                 onClose={() => setShowAddressModal(false)}
                 address={addressPreview}
                 onConfirm={() => {
+                    // Address is already set in handleRetrieve, just close modal
+                    if (addressPreview?.fullAddress) {
+                        onChange(id, addressPreview.fullAddress);
+                    }
                     setShowAddressModal(false);
                 }}
             />
