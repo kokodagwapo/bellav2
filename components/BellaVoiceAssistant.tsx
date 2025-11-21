@@ -28,9 +28,7 @@ const BellaVoiceAssistant: React.FC<BellaVoiceAssistantProps> = ({ onStartDemo }
     const [micPermissionGranted, setMicPermissionGranted] = useState<boolean | null>(null);
     const [micError, setMicError] = useState<string | null>(null);
     const [isMinimized, setIsMinimized] = useState(false);
-    // Voice preference: 'auto' uses best available (OpenAI Nova preferred, Gemini Kore fallback)
-    // This ensures Bella uses the best human-like female voice from both APIs
-    const [voicePreference, setVoicePreference] = useState<'auto' | 'gemini' | 'openai'>('auto');
+    const [voicePreference, setVoicePreference] = useState<'auto' | 'gemini' | 'openai'>('auto'); // Voice preference: 'auto' uses best available (OpenAI Nova preferred, Gemini Kore fallback), 'gemini' uses only Gemini Kore, 'openai' uses only OpenAI Nova
 
     // Audio Refs
     const audioContextRef = useRef<AudioContext | null>(null);
@@ -338,17 +336,16 @@ const BellaVoiceAssistant: React.FC<BellaVoiceAssistantProps> = ({ onStartDemo }
         }
 
         try {
-            // Use best available voice: OpenAI Nova (GPT-4o) preferred, Gemini Kore as fallback
-            // This ensures Bella always uses the best human-like female voice
+            // Use best available voice: OpenAI Nova (GPT-5.1 compatible) preferred, Gemini Kore as fallback
+            // Both are excellent female human-like voices
             const useGeminiOnly = voicePreference === 'gemini';
-            const useOpenAIOnly = voicePreference === 'openai';
             
             if (useGeminiOnly) {
-                console.log("🔊 Using Gemini Kore voice (best Gemini female voice)");
-            } else if (useOpenAIOnly) {
-                console.log("🔊 Using OpenAI Nova voice (best GPT-4o female voice - most human-like)");
+                console.log("🔊 Using Gemini Kore voice - Best female human-like voice from Gemini");
+            } else if (voicePreference === 'openai') {
+                console.log("🔊 Using OpenAI Nova voice - Best female human-like voice (GPT-5.1 compatible)");
             } else {
-                console.log("🔊 Using best available voice: OpenAI Nova (GPT-4o) preferred, Gemini Kore fallback");
+                console.log("🔊 Using best available voice: OpenAI Nova (preferred) or Gemini Kore (fallback) - Both are excellent female human-like voices");
             }
             
             console.log("🔊 Requesting TTS for text:", text.substring(0, 50) + "...");
@@ -743,8 +740,8 @@ const BellaVoiceAssistant: React.FC<BellaVoiceAssistantProps> = ({ onStartDemo }
         setMicError(null);
         setConversationHistory([]);
         
-        // Use best available voice: OpenAI Nova (GPT-4o) preferred, Gemini Kore fallback
-        // Both are excellent female human-like voices - ensures Bella always sounds natural
+        // When starting agentic mode, use auto voice selection (OpenAI first, Gemini fallback)
+        // This allows best quality voice when available, but falls back gracefully
         setVoicePreference('auto');
 
         // Resume Audio Context on user interaction

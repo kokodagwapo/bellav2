@@ -163,12 +163,11 @@ export const analyzeTextForData = async (text: string): Promise<Partial<FormData
     }
 };
 
-// TTS function - uses BEST available voice: OpenAI Nova (GPT-4o) preferred, Gemini Kore fallback
-// Both are excellent female human-like voices - OpenAI Nova is the most natural and emotionally intelligent
+// New function for TTS - uses Gemini voice (Kore) for demo, can use OpenAI for live mode
 export const generateBellaSpeech = async (text: string, useGeminiOnly: boolean = false): Promise<string | null> => {
-    // If useGeminiOnly is false, try OpenAI first (best voice), then fallback to Gemini
+    // If useGeminiOnly is true (for demo), skip OpenAI and go straight to Gemini
     if (!useGeminiOnly) {
-        // Try OpenAI Nova voice first (BEST human-like female voice)
+        // Try OpenAI first if available (for live mode)
         const openAiKey = import.meta.env.VITE_OPENAI_API_KEY;
         const hasValidOpenAiKey = openAiKey && 
                                    openAiKey !== 'your_openai_api_key_here' && 
@@ -177,33 +176,32 @@ export const generateBellaSpeech = async (text: string, useGeminiOnly: boolean =
         
         if (hasValidOpenAiKey) {
             try {
-                console.log("🎯 Attempting OpenAI TTS (GPT-4o compatible, Nova voice - BEST human-like female voice)...");
+                console.log("🎤 Attempting OpenAI TTS (GPT-5.1 compatible) - Nova voice: Best female human-like voice...");
                 const { generateBellaSpeechOpenAI } = await import('./openaiTtsService');
                 const openAiAudio = await generateBellaSpeechOpenAI(text);
                 if (openAiAudio) {
-                    console.log("✅ OpenAI TTS successful! Using Nova voice - most natural, human-like female voice.");
+                    console.log("✅ OpenAI TTS successful! Using Nova voice - best female human-like voice (GPT-5.1 compatible).");
                     return openAiAudio;
                 } else {
-                    console.log("⚠️ OpenAI TTS returned null, falling back to Gemini Kore voice");
+                    console.log("⚠️ OpenAI TTS returned null, falling back to Gemini TTS (Kore voice)");
                 }
             } catch (error: any) {
                 console.error("❌ OpenAI TTS error:", error?.message || error);
-                console.log("   Falling back to Gemini Kore voice (excellent female voice)");
+                console.log("   Falling back to Gemini TTS (Kore voice - excellent female human-like voice)");
             }
         } else {
             if (!openAiKey) {
-                console.log("ℹ️ OpenAI API key not set, using Gemini Kore voice (excellent female voice)");
+                console.log("ℹ️ OpenAI API key not set, using Gemini TTS (Kore voice)");
             } else if (openAiKey === 'your_openai_api_key_here') {
-                console.log("ℹ️ OpenAI API key placeholder detected, using Gemini Kore voice");
+                console.log("ℹ️ OpenAI API key placeholder detected, using Gemini TTS (Kore voice)");
             } else if (!openAiKey.startsWith('sk-')) {
-                console.warn("⚠️ OpenAI API key format invalid, using Gemini Kore voice");
-                console.warn("   Get a valid key from: https://platform.openai.com/api-keys");
+                console.warn("⚠️ OpenAI API key format invalid, using Gemini TTS (Kore voice)");
             } else {
-                console.log("ℹ️ OpenAI API key appears invalid, using Gemini Kore voice");
+                console.log("ℹ️ OpenAI API key appears invalid, using Gemini TTS (Kore voice)");
             }
         }
     } else {
-        console.log("🎯 Using Gemini Kore voice (excellent female human-like voice)");
+        console.log("🎤 Using Gemini TTS (Kore voice) - Best female human-like voice from Gemini");
     }
 
     // Fallback to Gemini TTS
@@ -215,14 +213,14 @@ export const generateBellaSpeech = async (text: string, useGeminiOnly: boolean =
     }
 
     try {
-        console.log("🎯 Attempting Gemini TTS (Kore voice - best Gemini female human-like voice)...");
+        console.log("🎯 Attempting Gemini TTS (Kore voice - best female human-like voice)...");
         const response = await ai.models.generateContent({
-            model: "gemini-2.0-flash-exp", // Latest Gemini model
+            model: "gemini-2.0-flash-exp", // Latest Gemini model with best voice quality
             contents: [{ parts: [{ text: text }] }],
             config: {
                 responseModalities: [Modality.AUDIO],
                 speechConfig: {
-                    voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }, // Best Gemini female voice - natural, human-like, US accent
+                    voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }, // Best female human-like voice - natural, conversational, US accent
                 },
             },
         });
@@ -231,7 +229,7 @@ export const generateBellaSpeech = async (text: string, useGeminiOnly: boolean =
         }
         const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data ?? null;
         if (audioData) {
-            console.log("✅ Gemini TTS successful! Using Kore voice - excellent female human-like voice.");
+            console.log("✅ Gemini TTS successful! Using Kore voice - best female human-like voice from Gemini.");
         } else {
             console.error("❌ Gemini TTS returned null audio data");
         }

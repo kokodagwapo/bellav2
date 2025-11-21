@@ -872,10 +872,10 @@ const DemoController: React.FC<DemoControllerProps> = ({
           }
         }
 
-        // Use best available voice for demo: OpenAI Nova (GPT-4o) preferred, Gemini Kore fallback
-        // Both are excellent female human-like voices - OpenAI Nova is most natural
-        console.log("🎤 Generating speech with best available voice (OpenAI Nova preferred, Gemini Kore fallback)...");
-        const audioData = await generateBellaSpeech(step.text, false); // false = use best available (OpenAI Nova first)
+        // Use best available voice for demo: OpenAI Nova (best quality) preferred, Gemini Kore as fallback
+        // Both are excellent female human-like voices - using auto selection for best quality
+        console.log("🎤 Generating speech with best available female human-like voice (OpenAI Nova preferred, Gemini Kore fallback)...");
+        const audioData = await generateBellaSpeech(step.text, false); // false = use best available (OpenAI Nova first, then Gemini Kore)
         
         if (audioData && audioContextRef.current) {
           // Properly stop and fade out previous audio to prevent noise

@@ -65,17 +65,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
 
       {/* Main Products Section */}
       <div className="mb-20 sm:mb-24 md:mb-28 lg:mb-32 px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="text-center mb-12 sm:mb-16 md:mb-20"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="text-center mb-12 sm:mb-16 md:mb-20"
             style={{ marginTop: '1.5in' }}
-          >
+        >
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-foreground mb-4 sm:mb-5 tracking-tight">
-              Business Process Solutions
-            </h2>
+            Business Process Solutions
+          </h2>
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light" style={{ color: '#6b7280' }}>
             Streamline your mortgage process with our comprehensive suite of tools designed to simplify every step from pre-qualification to final approval
           </p>
