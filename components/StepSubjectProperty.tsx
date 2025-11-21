@@ -4,6 +4,7 @@ import StepHeader from './StepHeader';
 import { SelectionButton } from './StepHeader';
 import StepNavigation from './StepNavigation';
 import { Home, Lightbulb } from './icons';
+import { AddressAutofill } from '@mapbox/search-js-react';
 import type { FormData, Address } from '../types';
 
 interface StepSubjectPropertyProps {
@@ -61,14 +62,18 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
       targetZip: zip
     });
     
-    // Auto-fill city/state from ZIP (would integrate with address API)
+    // Auto-fill city/state from ZIP using Mapbox API
     if (zip.length === 5) {
-      // Placeholder for API integration
-      // const cityState = await getCityStateFromZip(zip);
-      // if (cityState) {
-      //   handleAddressChange('city', cityState.city);
-      //   handleAddressChange('state', cityState.state);
-      // }
+      try {
+        const { getCityStateFromZip } = await import('../services/addressVerificationService');
+        const cityState = await getCityStateFromZip(zip);
+        if (cityState) {
+          handleAddressChange('city', cityState.city);
+          handleAddressChange('state', cityState.state);
+        }
+      } catch (error) {
+        console.error('Error fetching city/state from ZIP:', error);
+      }
     }
   };
 
@@ -142,11 +147,21 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
               <input
                 type="text"
                 value={address.zip || ''}
-                onChange={(e) => {
+                onChange={async (e) => {
                   const zip = e.target.value.replace(/\D/g, '').slice(0, 5);
                   handleAddressChange('zip', zip);
                   if (zip.length === 5) {
-                    handleZipChange(zip);
+                    // Auto-fill city/state from ZIP
+                    try {
+                      const { getCityStateFromZip } = await import('../services/addressVerificationService');
+                      const cityState = await getCityStateFromZip(zip);
+                      if (cityState) {
+                        handleAddressChange('city', cityState.city);
+                        handleAddressChange('state', cityState.state);
+                      }
+                    } catch (error) {
+                      console.error('Error fetching city/state from ZIP:', error);
+                    }
                   }
                 }}
                 placeholder="12345"
@@ -159,13 +174,49 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
               <label className="block text-sm font-medium text-black mb-2">
                 Street Address *
               </label>
-              <input
-                type="text"
-                value={address.street || ''}
-                onChange={(e) => handleAddressChange('street', e.target.value)}
-                placeholder="123 Main St"
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
-              />
+              <AddressAutofill
+                accessToken={import.meta.env.VITE_MAPBOX_API_KEY || ''}
+                onRetrieve={(res: any) => {
+                  const feature = res.features[0];
+                  if (feature) {
+                    const properties = feature.properties || {};
+                    const context = feature.context || [];
+                    
+                    // Extract street address
+                    const street = properties.address_line || properties.name || '';
+                    if (street) {
+                      handleAddressChange('street', street);
+                    }
+                    
+                    // Extract city and state
+                    context.forEach((item: any) => {
+                      if (item.id?.startsWith('place')) {
+                        handleAddressChange('city', item.text || '');
+                      }
+                      if (item.id?.startsWith('region')) {
+                        handleAddressChange('state', item.short_code?.replace('US-', '') || '');
+                      }
+                      if (item.id?.startsWith('postcode')) {
+                        handleAddressChange('zip', item.text || '');
+                      }
+                    });
+                  }
+                }}
+                options={{
+                  country: 'US',
+                  language: 'en'
+                }}
+              >
+                <input
+                  type="text"
+                  name="street"
+                  value={address.street || ''}
+                  onChange={(e) => handleAddressChange('street', e.target.value)}
+                  placeholder="123 Main St"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
+                  autoComplete="address-line1"
+                />
+              </AddressAutofill>
             </div>
 
             <div>

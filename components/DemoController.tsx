@@ -878,10 +878,44 @@ const DemoController: React.FC<DemoControllerProps> = ({
         const audioData = await generateBellaSpeech(step.text, false); // false = use best available (OpenAI first)
         
         if (audioData && audioContextRef.current) {
+          // Properly stop and fade out previous audio to prevent noise
           if (currentSourceRef.current) {
-            currentSourceRef.current.stop();
-            currentSourceRef.current.disconnect();
+            try {
+              // Fade out smoothly before stopping to prevent clicks/pops
+              const gainNode = audioContextRef.current.createGain();
+              const currentTime = audioContextRef.current.currentTime;
+              gainNode.gain.setValueAtTime(1, currentTime);
+              gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.1); // 100ms fade out
+              
+              // Disconnect old source and connect through gain node
+              currentSourceRef.current.disconnect();
+              currentSourceRef.current.connect(gainNode);
+              gainNode.connect(audioContextRef.current.destination);
+              
+              // Stop after fade out
+              setTimeout(() => {
+                try {
+                  currentSourceRef.current?.stop();
+                  currentSourceRef.current?.disconnect();
+                  gainNode.disconnect();
+                } catch (e) {
+                  // Ignore errors if already stopped
+                }
+              }, 100);
+            } catch (e) {
+              // If fade fails, just stop directly
+              try {
+                currentSourceRef.current.stop();
+                currentSourceRef.current.disconnect();
+              } catch (stopError) {
+                // Ignore if already stopped
+              }
+            }
+            currentSourceRef.current = null;
           }
+          
+          // Small delay to ensure previous audio is fully stopped
+          await new Promise(resolve => setTimeout(resolve, 150));
           
           // Decode audio - handle both OpenAI (MP3) and Gemini (PCM) formats
           let audioBuffer: AudioBuffer;
@@ -907,12 +941,25 @@ const DemoController: React.FC<DemoControllerProps> = ({
             throw new Error(`Failed to decode audio: ${decodeError.message}`);
           }
           
+          // Create gain node for smooth fade in/out
+          const gainNode = audioContextRef.current.createGain();
+          gainNode.gain.setValueAtTime(0, audioContextRef.current.currentTime);
+          gainNode.gain.linearRampToValueAtTime(1, audioContextRef.current.currentTime + 0.05); // 50ms fade in
+          gainNode.connect(audioContextRef.current.destination);
+          
           const source = audioContextRef.current.createBufferSource();
           source.buffer = audioBuffer;
-          source.connect(audioContextRef.current.destination);
+          source.connect(gainNode);
           
           source.onended = () => {
             console.log(`✅ Audio playback completed for step ${index + 1}`);
+            // Clean up gain node
+            try {
+              gainNode.disconnect();
+            } catch (e) {
+              // Ignore if already disconnected
+            }
+            
             if (isPlaying && currentStep === index) {
               // Calculate delay until next step - use actual audio duration
               const nextStep = demoScript[index + 1];
@@ -941,6 +988,12 @@ const DemoController: React.FC<DemoControllerProps> = ({
           } catch (playError: any) {
             console.error("❌ Audio playback error:", playError);
             setIsLoadingAudio(false);
+            // Clean up on error
+            try {
+              gainNode.disconnect();
+            } catch (e) {
+              // Ignore
+            }
             // Continue to next step even if audio fails
             const nextStep = demoScript[index + 1];
             const delay = nextStep ? (nextStep.time - step.time) * 1000 : 2000;
@@ -992,9 +1045,37 @@ const DemoController: React.FC<DemoControllerProps> = ({
   const togglePlay = async () => {
     if (isPlaying) {
       setIsPlaying(false);
-      if (currentSourceRef.current) {
-        currentSourceRef.current.stop();
-        currentSourceRef.current.disconnect();
+      if (currentSourceRef.current && audioContextRef.current) {
+        try {
+          // Fade out smoothly before stopping
+          const gainNode = audioContextRef.current.createGain();
+          const currentTime = audioContextRef.current.currentTime;
+          gainNode.gain.setValueAtTime(1, currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.1);
+          
+          currentSourceRef.current.disconnect();
+          currentSourceRef.current.connect(gainNode);
+          gainNode.connect(audioContextRef.current.destination);
+          
+          setTimeout(() => {
+            try {
+              currentSourceRef.current?.stop();
+              currentSourceRef.current?.disconnect();
+              gainNode.disconnect();
+            } catch (e) {
+              // Ignore if already stopped
+            }
+          }, 100);
+        } catch (e) {
+          // Fallback: just stop directly
+          try {
+            currentSourceRef.current.stop();
+            currentSourceRef.current.disconnect();
+          } catch (stopError) {
+            // Ignore if already stopped
+          }
+        }
+        currentSourceRef.current = null;
       }
       if (stepTimeoutRef.current) {
         clearTimeout(stepTimeoutRef.current);
@@ -1021,16 +1102,78 @@ const DemoController: React.FC<DemoControllerProps> = ({
     if (stepTimeoutRef.current) {
       clearTimeout(stepTimeoutRef.current);
     }
-    if (currentSourceRef.current) {
-      currentSourceRef.current.stop();
+    if (currentSourceRef.current && audioContextRef.current) {
+      try {
+        // Fade out smoothly before stopping
+        const gainNode = audioContextRef.current.createGain();
+        const currentTime = audioContextRef.current.currentTime;
+        gainNode.gain.setValueAtTime(1, currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.1);
+        
+        currentSourceRef.current.disconnect();
+        currentSourceRef.current.connect(gainNode);
+        gainNode.connect(audioContextRef.current.destination);
+        
+        setTimeout(() => {
+          try {
+            currentSourceRef.current?.stop();
+            currentSourceRef.current?.disconnect();
+            gainNode.disconnect();
+          } catch (e) {
+            // Ignore if already stopped
+          }
+          currentSourceRef.current = null;
+          playStep(currentStep + 1);
+        }, 100);
+      } catch (e) {
+        // Fallback: just stop directly
+        try {
+          currentSourceRef.current.stop();
+          currentSourceRef.current.disconnect();
+        } catch (stopError) {
+          // Ignore if already stopped
+        }
+        currentSourceRef.current = null;
+        playStep(currentStep + 1);
+      }
+    } else {
+      playStep(currentStep + 1);
     }
-    playStep(currentStep + 1);
   };
 
   const stopDemo = () => {
     setIsPlaying(false);
-    if (currentSourceRef.current) {
-      currentSourceRef.current.stop();
+    if (currentSourceRef.current && audioContextRef.current) {
+      try {
+        // Fade out smoothly before stopping
+        const gainNode = audioContextRef.current.createGain();
+        const currentTime = audioContextRef.current.currentTime;
+        gainNode.gain.setValueAtTime(1, currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.1);
+        
+        currentSourceRef.current.disconnect();
+        currentSourceRef.current.connect(gainNode);
+        gainNode.connect(audioContextRef.current.destination);
+        
+        setTimeout(() => {
+          try {
+            currentSourceRef.current?.stop();
+            currentSourceRef.current?.disconnect();
+            gainNode.disconnect();
+          } catch (e) {
+            // Ignore if already stopped
+          }
+        }, 100);
+      } catch (e) {
+        // Fallback: just stop directly
+        try {
+          currentSourceRef.current.stop();
+          currentSourceRef.current.disconnect();
+        } catch (stopError) {
+          // Ignore if already stopped
+        }
+      }
+      currentSourceRef.current = null;
     }
     if (stepTimeoutRef.current) {
       clearTimeout(stepTimeoutRef.current);
@@ -1046,9 +1189,37 @@ const DemoController: React.FC<DemoControllerProps> = ({
   const resetDemo = () => {
     setCurrentStep(0);
     setIsPlaying(false);
-    if (currentSourceRef.current) {
-      currentSourceRef.current.stop();
-      currentSourceRef.current.disconnect();
+    if (currentSourceRef.current && audioContextRef.current) {
+      try {
+        // Fade out smoothly before stopping
+        const gainNode = audioContextRef.current.createGain();
+        const currentTime = audioContextRef.current.currentTime;
+        gainNode.gain.setValueAtTime(1, currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.1);
+        
+        currentSourceRef.current.disconnect();
+        currentSourceRef.current.connect(gainNode);
+        gainNode.connect(audioContextRef.current.destination);
+        
+        setTimeout(() => {
+          try {
+            currentSourceRef.current?.stop();
+            currentSourceRef.current?.disconnect();
+            gainNode.disconnect();
+          } catch (e) {
+            // Ignore if already stopped
+          }
+        }, 100);
+      } catch (e) {
+        // Fallback: just stop directly
+        try {
+          currentSourceRef.current.stop();
+          currentSourceRef.current.disconnect();
+        } catch (stopError) {
+          // Ignore if already stopped
+        }
+      }
+      currentSourceRef.current = null;
     }
     if (stepTimeoutRef.current) {
       clearTimeout(stepTimeoutRef.current);
