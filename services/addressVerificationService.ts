@@ -1,5 +1,4 @@
-// Address Verification Service
-// This service integrates with real address verification APIs
+// Address Verification Service using Mapbox Geocoding API
 
 export interface AddressVerificationResult {
   isValid: boolean;
@@ -22,52 +21,67 @@ export interface DMVVerificationResult {
   errors?: string[];
 }
 
-// ZIP to City/State lookup
-// In production, this would use a real API like SmartyStreets, USPS, or Google Maps Geocoding
+// ZIP to City/State lookup using Mapbox
 export const getCityStateFromZip = async (zip: string): Promise<{ city: string; state: string } | null> => {
-  // Placeholder: In production, replace with actual API call
-  // Example: SmartyStreets API
-  // const response = await fetch(`https://us-zipcode.api.smartystreets.com/lookup?auth-id=${AUTH_ID}&auth-token=${AUTH_TOKEN}&zipcode=${zip}`);
-  
-  // For now, return a mock response structure
-  // In production, implement real API integration
+  const apiKey = import.meta.env.VITE_MAPBOX_API_KEY;
+  if (!apiKey) {
+    console.warn('Mapbox API key not found for ZIP lookup');
+    return null;
+  }
+
   try {
-    // Mock implementation - replace with real API
-    const mockData: Record<string, { city: string; state: string }> = {
-      '90210': { city: 'Beverly Hills', state: 'CA' },
-      '10001': { city: 'New York', state: 'NY' },
-      '60601': { city: 'Chicago', state: 'IL' },
-      '75201': { city: 'Dallas', state: 'TX' },
-    };
+    const response = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(zip)}.json?country=us&types=postcode&access_token=${apiKey}`
+    );
     
-    return mockData[zip] || null;
+    if (!response.ok) {
+      throw new Error(`Mapbox API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (data.features && data.features.length > 0) {
+      const feature = data.features[0];
+      const context = feature.context || [];
+      
+      let city = '';
+      let state = '';
+      
+      context.forEach((item: any) => {
+        if (item.id?.startsWith('place')) {
+          city = item.text || '';
+        }
+        if (item.id?.startsWith('region')) {
+          state = item.short_code?.replace('US-', '') || '';
+        }
+      });
+
+      if (city && state) {
+        return { city, state };
+      }
+    }
+    
+    return null;
   } catch (error) {
-    console.error('Error fetching city/state from ZIP:', error);
+    console.error('Error fetching city/state from ZIP using Mapbox:', error);
     return null;
   }
 };
 
-// Verify address using real API
+// Verify address using Mapbox Geocoding API
 export const verifyAddress = async (address: {
   street?: string;
   city?: string;
   state?: string;
   zip?: string;
 }): Promise<AddressVerificationResult> => {
-  // Placeholder: In production, replace with actual API call
-  // Example: SmartyStreets Address API
-  // const response = await fetch('https://us-street.api.smartystreets.com/street-address', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify([{
-  //     street: address.street,
-  //     city: address.city,
-  //     state: address.state,
-  //     zipcode: address.zip,
-  //   }])
-  // });
-  
-  // Mock implementation - replace with real API
+  const apiKey = import.meta.env.VITE_MAPBOX_API_KEY;
+  if (!apiKey) {
+    return {
+      isValid: false,
+      errors: ['Mapbox API key not configured'],
+    };
+  }
+
   try {
     // Basic validation
     if (!address.street || !address.zip) {
@@ -77,19 +91,63 @@ export const verifyAddress = async (address: {
       };
     }
 
-    // In production, this would make the actual API call
-    // For now, return a mock successful response
+    // Build query string for Mapbox Geocoding API
+    const queryParts = [];
+    if (address.street) queryParts.push(address.street);
+    if (address.city) queryParts.push(address.city);
+    if (address.state) queryParts.push(address.state);
+    if (address.zip) queryParts.push(address.zip);
+    
+    const query = queryParts.join(', ');
+    
+    const response = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?country=us&types=address&access_token=${apiKey}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Mapbox API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.features && data.features.length > 0) {
+      const feature = data.features[0];
+      const properties = feature.properties || {};
+      const context = feature.context || [];
+      
+      let city = '';
+      let state = '';
+      let zip = '';
+      
+      context.forEach((item: any) => {
+        if (item.id?.startsWith('place')) {
+          city = item.text || '';
+        }
+        if (item.id?.startsWith('region')) {
+          state = item.short_code?.replace('US-', '') || '';
+        }
+        if (item.id?.startsWith('postcode')) {
+          zip = item.text || '';
+        }
+      });
+
+      return {
+        isValid: true,
+        normalizedAddress: {
+          street: properties.address_line || address.street || '',
+          city: city || address.city || '',
+          state: state || address.state || '',
+          zip: zip || address.zip || '',
+        },
+      };
+    }
+
     return {
-      isValid: true,
-      normalizedAddress: {
-        street: address.street || '',
-        city: address.city || '',
-        state: address.state || '',
-        zip: address.zip || '',
-      },
+      isValid: false,
+      errors: ['Address not found. Please verify the address and try again.'],
     };
   } catch (error) {
-    console.error('Error verifying address:', error);
+    console.error('Error verifying address with Mapbox:', error);
     return {
       isValid: false,
       errors: ['Failed to verify address. Please check your connection and try again.'],

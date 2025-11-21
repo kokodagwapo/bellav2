@@ -3,12 +3,8 @@ import type { FormData } from '../../types';
 import StepHeader from '../StepHeader';
 import StepNavigation from '../StepNavigation';
 import { Lightbulb } from '../icons';
+import { AddressAutofill } from '@mapbox/search-js-react';
 
-declare global {
-  interface Window {
-    google: any;
-  }
-}
 
 interface Step1Props {
     data: FormData;
@@ -51,100 +47,36 @@ const AddressInput: React.FC<{
     onValidationChange?: (isValid: boolean) => void;
 }> = ({ label, id, value, onChange, fullWidth = false, placeholder, onValidationChange }) => {
     const addressInputRef = useRef<HTMLInputElement>(null);
-    const autocompleteRef = useRef<any>(null);
     const isVerifiedRef = useRef(false);
     const [isVerified, setIsVerified] = useState(false);
-    const [mapsLoaded, setMapsLoaded] = useState(false);
+    const [mapboxLoaded, setMapboxLoaded] = useState(false);
 
-    // Load Google Maps API script
+    // Initialize Mapbox
     useEffect(() => {
-        if (window.google?.maps?.places) {
-            setMapsLoaded(true);
-            return;
+        const apiKey = import.meta.env.VITE_MAPBOX_API_KEY || '';
+        if (apiKey) {
+            setMapboxLoaded(true);
+        } else {
+            console.warn('Mapbox API key not found. Please set VITE_MAPBOX_API_KEY in your environment variables.');
+            setMapboxLoaded(false);
         }
-
-        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-        if (!apiKey) {
-            setMapsLoaded(false);
-            return;
-        }
-
-        const existingScript = document.querySelector(`script[src*="maps.googleapis.com"]`);
-        if (existingScript) {
-            const checkInterval = setInterval(() => {
-                if (window.google?.maps?.places) {
-                    setMapsLoaded(true);
-                    clearInterval(checkInterval);
-                }
-            }, 100);
-            setTimeout(() => clearInterval(checkInterval), 10000);
-            return () => clearInterval(checkInterval);
-        }
-
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => {
-            if (window.google?.maps?.places) {
-                setMapsLoaded(true);
-            }
-        };
-        script.onerror = () => setMapsLoaded(false);
-        document.head.appendChild(script);
     }, []);
 
-    // Initialize autocomplete when maps loads (only once)
-    useEffect(() => {
-        if (!addressInputRef.current || !mapsLoaded || !window.google?.maps?.places || autocompleteRef.current) {
-            return;
+    // Handle Mapbox address retrieval
+    const handleRetrieve = (res: any) => {
+        const feature = res.features[0];
+        if (feature) {
+            const formattedAddress = feature.properties.full_address || feature.properties.place_name || '';
+            if (formattedAddress) {
+                onChange(id, formattedAddress);
+                isVerifiedRef.current = true;
+                setIsVerified(true);
+                if (onValidationChange) {
+                    onValidationChange(true);
+                }
+            }
         }
-
-        const inputElement = addressInputRef.current;
-        
-        try {
-            const autocomplete = new window.google.maps.places.Autocomplete(
-                inputElement,
-                {
-                    types: ['address'],
-                    componentRestrictions: { country: 'us' },
-                    fields: ['formatted_address', 'geometry']
-                }
-            );
-
-            autocompleteRef.current = autocomplete;
-
-            const handlePlaceChanged = () => {
-                const place = autocomplete.getPlace();
-                
-                if (place.formatted_address && place.geometry?.location) {
-                    onChange(id, place.formatted_address);
-                    isVerifiedRef.current = true;
-                    setIsVerified(true);
-                    if (onValidationChange) {
-                        onValidationChange(true);
-                    }
-                } else {
-                    isVerifiedRef.current = false;
-                    setIsVerified(false);
-                    if (onValidationChange) {
-                        onValidationChange(false);
-                    }
-                }
-            };
-
-            autocomplete.addListener('place_changed', handlePlaceChanged);
-
-            return () => {
-                if (window.google && autocompleteRef.current) {
-                    window.google.maps.event.clearInstanceListeners(autocompleteRef.current);
-                    autocompleteRef.current = null;
-                }
-            };
-        } catch (error) {
-            console.error('Error initializing autocomplete:', error);
-        }
-    }, [mapsLoaded, id]); // Include id to ensure proper initialization
+    };
 
     // Validate address on value change
     useEffect(() => {
@@ -160,24 +92,55 @@ const AddressInput: React.FC<{
                 {label}
             </label>
             <div className="relative">
-                <input
-                    ref={addressInputRef}
-                    type="text"
-                    id={id}
-                    value={value || ''}
-                    onChange={(e) => {
-                        const newValue = e.target.value;
-                        onChange(id, newValue);
-                        // Reset verification when manually editing (only if it was verified)
-                        if (isVerifiedRef.current) {
-                            isVerifiedRef.current = false;
-                            setIsVerified(false);
-                        }
-                    }}
-                    placeholder={placeholder || "Street address, City, State ZIP"}
-                    className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto] pr-10"
-                    autoComplete="address-line1"
-                />
+                {mapboxLoaded ? (
+                    <AddressAutofill
+                        accessToken={import.meta.env.VITE_MAPBOX_API_KEY || ''}
+                        onRetrieve={handleRetrieve}
+                        options={{
+                            country: 'US',
+                            language: 'en'
+                        }}
+                    >
+                        <input
+                            ref={addressInputRef}
+                            type="text"
+                            id={id}
+                            name={id}
+                            value={value || ''}
+                            onChange={(e) => {
+                                const newValue = e.target.value;
+                                onChange(id, newValue);
+                                // Reset verification when manually editing (only if it was verified)
+                                if (isVerifiedRef.current) {
+                                    isVerifiedRef.current = false;
+                                    setIsVerified(false);
+                                }
+                            }}
+                            placeholder={placeholder || "Street address, City, State ZIP"}
+                            className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto] pr-10"
+                            autoComplete="address-line1"
+                        />
+                    </AddressAutofill>
+                ) : (
+                    <input
+                        ref={addressInputRef}
+                        type="text"
+                        id={id}
+                        value={value || ''}
+                        onChange={(e) => {
+                            const newValue = e.target.value;
+                            onChange(id, newValue);
+                            // Reset verification when manually editing (only if it was verified)
+                            if (isVerifiedRef.current) {
+                                isVerifiedRef.current = false;
+                                setIsVerified(false);
+                            }
+                        }}
+                        placeholder={placeholder || "Street address, City, State ZIP"}
+                        className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto] pr-10"
+                        autoComplete="address-line1"
+                    />
+                )}
                 {isVerified && (
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                         <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -21,9 +21,9 @@ View your app in AI Studio: https://ai.studio/apps/drive/1KaxhzDJiogo98aNBhDO8de
    - `VITE_OPENAI_API_KEY` - Your OpenAI API key (Optional - for enhanced TTS voice)
      - Get your key from: https://platform.openai.com/api-keys
      - If not set, will use Gemini TTS (Kore voice) instead
-   - `VITE_GOOGLE_MAPS_API_KEY` - Your Google Maps API key (Optional - for address autocomplete)
-     - Get your key from: https://console.cloud.google.com/google/maps-apis
-     - Make sure to enable "Places API" for your project
+   - `VITE_MAPBOX_API_KEY` - Your Mapbox API key (Required for address verification and autocomplete)
+     - Get your key from: https://account.mapbox.com/access-tokens/
+     - Create a free account and get your public access token
 3. Run the app:
    `npm run dev`
 
