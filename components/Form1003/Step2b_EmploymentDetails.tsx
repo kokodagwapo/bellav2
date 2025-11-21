@@ -4,6 +4,7 @@ import type { FormData, EmploymentInfo } from '../../types';
 import StepHeader from '../StepHeader';
 import StepNavigation from '../StepNavigation';
 import { Lightbulb } from '../icons';
+import { MapPin } from 'lucide-react';
 
 interface Step2bProps {
     data: FormData;
@@ -207,67 +208,76 @@ const Step2bEmploymentDetails: React.FC<Step2bProps> = ({ data, onDataChange, on
 
                 {/* Employer Address */}
                 <div className="sm:col-span-2">
-                    <label className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">
+                    <label className="block text-xs sm:text-sm font-semibold text-foreground mb-2 sm:mb-3 flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-primary" />
                         Employer Address
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="sm:col-span-2">
-                            <input
-                                type="text"
-                                value={data.currentEmployment?.employerAddress?.street || ''}
-                                onChange={(e) => handleAddressChange('street', e.target.value)}
-                                placeholder="Street address"
-                                className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto]"
-                            />
+                            <div className="relative rounded-xl sm:rounded-lg overflow-hidden ring-1 ring-border/50 shadow-md hover:shadow-lg transition-all duration-300">
+                                <input
+                                    type="text"
+                                    value={data.currentEmployment?.employerAddress?.street || ''}
+                                    onChange={(e) => handleAddressChange('street', e.target.value)}
+                                    placeholder="Start typing your address..."
+                                    className="block w-full px-4 py-3.5 sm:px-4 sm:py-3 bg-gradient-to-br from-white to-gray-50/50 border-0 text-base sm:text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-0 transition-all duration-200 touch-manipulation min-h-[48px] sm:min-h-[44px]"
+                                />
+                            </div>
                         </div>
                         <div>
-                            <input
-                                type="text"
-                                value={data.currentEmployment?.employerAddress?.city || ''}
-                                onChange={(e) => handleAddressChange('city', e.target.value)}
-                                placeholder="City"
-                                className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto]"
-                            />
+                            <div className="relative rounded-xl sm:rounded-lg overflow-hidden ring-1 ring-border/50 shadow-md hover:shadow-lg transition-all duration-300">
+                                <input
+                                    type="text"
+                                    value={data.currentEmployment?.employerAddress?.city || ''}
+                                    onChange={(e) => handleAddressChange('city', e.target.value)}
+                                    placeholder="City"
+                                    className="block w-full px-4 py-3.5 sm:px-4 sm:py-3 bg-gradient-to-br from-white to-gray-50/50 border-0 text-base sm:text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-0 transition-all duration-200 touch-manipulation min-h-[48px] sm:min-h-[44px]"
+                                />
+                            </div>
                         </div>
                         <div>
-                            <input
-                                type="text"
-                                value={data.currentEmployment?.employerAddress?.state || ''}
-                                onChange={(e) => handleAddressChange('state', e.target.value)}
-                                placeholder="State"
-                                maxLength={2}
-                                className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto]"
-                            />
+                            <div className="relative rounded-xl sm:rounded-lg overflow-hidden ring-1 ring-border/50 shadow-md hover:shadow-lg transition-all duration-300">
+                                <input
+                                    type="text"
+                                    value={data.currentEmployment?.employerAddress?.state || ''}
+                                    onChange={(e) => handleAddressChange('state', e.target.value.toUpperCase().slice(0, 2))}
+                                    placeholder="State"
+                                    maxLength={2}
+                                    className="block w-full px-4 py-3.5 sm:px-4 sm:py-3 bg-gradient-to-br from-white to-gray-50/50 border-0 text-base sm:text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-0 transition-all duration-200 touch-manipulation min-h-[48px] sm:min-h-[44px] uppercase"
+                                />
+                            </div>
                         </div>
                         <div>
-                            <input
-                                type="text"
-                                inputMode="numeric"
-                                pattern="[0-9]*"
-                                value={data.currentEmployment?.employerAddress?.zip || ''}
-                                onChange={async (e) => {
-                                    // Allow only digits, limit to 5 characters
-                                    const zip = e.target.value.replace(/\D/g, '').slice(0, 5);
-                                    handleAddressChange('zip', zip);
-                                    // Auto-fill city/state from ZIP when 5 digits entered and verify with Mapbox
-                                    if (zip.length === 5) {
-                                        try {
-                                            const { getCityStateFromZip } = await import('../../services/addressVerificationService');
-                                            const cityState = await getCityStateFromZip(zip);
-                                            if (cityState) {
-                                                handleAddressChange('city', cityState.city);
-                                                handleAddressChange('state', cityState.state);
+                            <div className="relative rounded-xl sm:rounded-lg overflow-hidden ring-1 ring-border/50 shadow-md hover:shadow-lg transition-all duration-300">
+                                <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    value={data.currentEmployment?.employerAddress?.zip || ''}
+                                    onChange={async (e) => {
+                                        // Allow only digits, limit to 5 characters
+                                        const zip = e.target.value.replace(/\D/g, '').slice(0, 5);
+                                        handleAddressChange('zip', zip);
+                                        // Auto-fill city/state from ZIP when 5 digits entered and verify with Mapbox
+                                        if (zip.length === 5) {
+                                            try {
+                                                const { getCityStateFromZip } = await import('../../services/addressVerificationService');
+                                                const cityState = await getCityStateFromZip(zip);
+                                                if (cityState) {
+                                                    handleAddressChange('city', cityState.city);
+                                                    handleAddressChange('state', cityState.state);
+                                                }
+                                            } catch (error) {
+                                                console.error('Error verifying ZIP code with Mapbox:', error);
                                             }
-                                        } catch (error) {
-                                            console.error('Error verifying ZIP code with Mapbox:', error);
                                         }
-                                    }
-                                }}
-                                placeholder="ZIP Code"
-                                maxLength={5}
-                                minLength={5}
-                                className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto]"
-                            />
+                                    }}
+                                    placeholder="ZIP Code"
+                                    maxLength={5}
+                                    minLength={5}
+                                    className="block w-full px-4 py-3.5 sm:px-4 sm:py-3 bg-gradient-to-br from-white to-gray-50/50 border-0 text-base sm:text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-0 transition-all duration-200 touch-manipulation min-h-[48px] sm:min-h-[44px]"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

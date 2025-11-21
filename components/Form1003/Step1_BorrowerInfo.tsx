@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import type { FormData } from '../../types';
 import StepHeader from '../StepHeader';
 import StepNavigation from '../StepNavigation';
@@ -197,24 +198,52 @@ const AddressInput: React.FC<{
 
     return (
         <div className={fullWidth ? 'col-span-1 sm:col-span-2' : ''}>
-            <label htmlFor={id} className="block text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">
+            <label htmlFor={id} className="block text-xs sm:text-sm font-semibold text-foreground mb-2 sm:mb-3 flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" />
                 {label}
             </label>
-            <div className="relative">
-                {mapboxLoaded ? (
-                    <AddressAutofill
-                        accessToken={import.meta.env.VITE_MAPBOX_API_KEY || ''}
-                        onRetrieve={handleRetrieve}
-                        options={{
-                            country: 'US',
-                            language: 'en'
-                        }}
-                    >
+            <div className="relative group">
+                {/* Enhanced input container with gradient border effect */}
+                <div className={`relative rounded-xl sm:rounded-lg overflow-hidden transition-all duration-300 ${
+                    isVerified 
+                        ? 'ring-2 ring-green-400/50 shadow-lg shadow-green-100/50' 
+                        : 'ring-1 ring-border/50 shadow-md hover:shadow-lg'
+                } ${value && value.trim().length > 0 ? 'ring-primary/30' : ''}`}>
+                    {mapboxLoaded ? (
+                        <AddressAutofill
+                            accessToken={import.meta.env.VITE_MAPBOX_API_KEY || ''}
+                            onRetrieve={handleRetrieve}
+                            options={{
+                                country: 'US',
+                                language: 'en'
+                            }}
+                        >
+                            <input
+                                ref={addressInputRef}
+                                type="text"
+                                id={id}
+                                name={id}
+                                value={value || ''}
+                                onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    onChange(id, newValue);
+                                    // Reset verification when manually editing (only if it was verified)
+                                    if (isVerifiedRef.current) {
+                                        isVerifiedRef.current = false;
+                                        setIsVerified(false);
+                                        setAddressPreview(null); // Clear stored address when manually editing
+                                    }
+                                }}
+                                placeholder={placeholder || "Start typing your address..."}
+                                className="block w-full px-4 py-3.5 sm:px-4 sm:py-3 bg-gradient-to-br from-white to-gray-50/50 border-0 text-base sm:text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-0 transition-all duration-200 touch-manipulation min-h-[48px] sm:min-h-[44px] pr-14"
+                                autoComplete="address-line1"
+                            />
+                        </AddressAutofill>
+                    ) : (
                         <input
                             ref={addressInputRef}
                             type="text"
                             id={id}
-                            name={id}
                             value={value || ''}
                             onChange={(e) => {
                                 const newValue = e.target.value;
@@ -226,37 +255,16 @@ const AddressInput: React.FC<{
                                     setAddressPreview(null); // Clear stored address when manually editing
                                 }
                             }}
-                            placeholder={placeholder || "Street address, City, State ZIP"}
-                            className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto] pr-12"
+                            placeholder={placeholder || "Start typing your address..."}
+                            className="block w-full px-4 py-3.5 sm:px-4 sm:py-3 bg-gradient-to-br from-white to-gray-50/50 border-0 text-base sm:text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-0 transition-all duration-200 touch-manipulation min-h-[48px] sm:min-h-[44px] pr-14"
                             autoComplete="address-line1"
                         />
-                    </AddressAutofill>
-                ) : (
-                    <input
-                        ref={addressInputRef}
-                        type="text"
-                        id={id}
-                        value={value || ''}
-                        onChange={(e) => {
-                            const newValue = e.target.value;
-                            onChange(id, newValue);
-                            // Reset verification when manually editing (only if it was verified)
-                            if (isVerifiedRef.current) {
-                                isVerifiedRef.current = false;
-                                setIsVerified(false);
-                                setAddressPreview(null); // Clear stored address when manually editing
-                            }
-                        }}
-                        placeholder={placeholder || "Street address, City, State ZIP"}
-                        className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto] pr-12"
-                        autoComplete="address-line1"
-                    />
-                )}
-                {/* Modern icon button to view/confirm address */}
-                {value && value.trim().length > 5 && (
-                    <button
-                        type="button"
-                        onClick={async (e) => {
+                    )}
+                    {/* Beautiful icon button with enhanced styling */}
+                    {value && value.trim().length > 5 && (
+                        <button
+                            type="button"
+                            onClick={async (e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             
@@ -380,29 +388,38 @@ const AddressInput: React.FC<{
                                 }
                             }
                         }}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2.5 rounded-xl bg-gradient-to-br from-primary/10 via-primary/15 to-primary/20 hover:from-primary/20 hover:via-primary/25 hover:to-primary/30 text-primary shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm border border-primary/20"
                         aria-label="View and confirm address"
                         title="View and confirm address on map"
                     >
-                        <Eye className="h-5 w-5" />
+                        <Eye className="h-5 w-5 drop-shadow-sm" />
                     </button>
-                )}
-                {isVerified && !addressPreview && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                    </div>
+                    )}
+                    {/* Verified checkmark badge */}
+                    {isVerified && !addressPreview && (
+                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/20 backdrop-blur-sm border border-green-400/30">
+                            <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                    )}
+                </div>
+                {/* Enhanced verification message */}
+                {isVerified && value && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-2 flex items-center gap-2 text-xs sm:text-sm text-green-600 font-medium"
+                    >
+                        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-green-100">
+                            <svg className="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <span>Address verified and ready</span>
+                    </motion.div>
                 )}
             </div>
-            {isVerified && value && (
-                <p className="mt-1.5 text-xs sm:text-sm text-primary flex items-center gap-1">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Address verified
-                </p>
-            )}
             
             {/* Address Preview Modal */}
             <AddressPreviewModal
