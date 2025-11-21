@@ -76,9 +76,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-foreground mb-4 sm:mb-5 tracking-tight">
             Business Process Solutions
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light" style={{ color: '#6b7280' }}>
-            Streamline your mortgage process with our comprehensive suite of tools designed to simplify every step from pre-qualification to final approval
-          </p>
+          <div className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light" style={{ color: '#6b7280' }}>
+            <p className="mb-3 sm:mb-4">
+              Bella — Clarity for Borrowers, Efficiency for Lenders
+            </p>
+            <p>
+              Bella helps you understand the process, gather the right documents, and submit an accurate application — giving lenders a complete, guideline-ready file from the start.
+            </p>
+          </div>
         </motion.div>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 md:gap-12 max-w-6xl mx-auto">
