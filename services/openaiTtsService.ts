@@ -21,9 +21,10 @@ export const generateBellaSpeechOpenAI = async (text: string): Promise<string | 
     }
 
     try {
-        // Using latest TTS model with Nova voice - most human-like, agentic female voice
-        // Nova is specifically designed for natural, conversational, emotionally intelligent speech
-        console.log("🎤 Using latest OpenAI TTS (GPT-5.1 compatible) with 'nova' voice - agentic human-like female voice");
+        // Using latest TTS model with Nova voice - BEST human-like, agentic female voice
+        // Nova is the most natural, conversational, emotionally intelligent female voice available
+        // GPT-4o compatible, designed for human-like conversations
+        console.log("🎤 Using OpenAI TTS (GPT-4o compatible) with 'nova' voice - BEST human-like female voice");
         const response = await fetch('https://api.openai.com/v1/audio/speech', {
             method: 'POST',
             headers: {
@@ -31,10 +32,10 @@ export const generateBellaSpeechOpenAI = async (text: string): Promise<string | 
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'tts-1-hd', // Latest HD model - highest quality, most natural, GPT-5.1 compatible
-                voice: 'nova', // Best conversational female voice - most human-like, Gen Z friendly, emotionally intelligent
+                model: 'tts-1-hd', // Latest HD model - highest quality, most natural, GPT-4o compatible
+                voice: 'nova', // BEST female voice - most human-like, emotionally intelligent, natural conversational tone
                 input: text,
-                speed: 1.0, // Natural conversational pace for Gen Z energy and vibe
+                speed: 1.0, // Natural conversational pace - perfect for human-like speech
             }),
         });
 

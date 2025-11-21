@@ -872,10 +872,10 @@ const DemoController: React.FC<DemoControllerProps> = ({
           }
         }
 
-        // Use Gemini voice only for demo to prevent overlap with other voice assistants
-        // This ensures clean audio without OpenAI and Gemini voices talking over each other
-        console.log("🎤 Generating speech with Gemini voice only (demo mode - prevents voice overlap)...");
-        const audioData = await generateBellaSpeech(step.text, true); // true = use Gemini only (prevents overlap)
+        // Use best available voice for demo: OpenAI Nova (GPT-4o) preferred, Gemini Kore fallback
+        // Both are excellent female human-like voices - OpenAI Nova is most natural
+        console.log("🎤 Generating speech with best available voice (OpenAI Nova preferred, Gemini Kore fallback)...");
+        const audioData = await generateBellaSpeech(step.text, false); // false = use best available (OpenAI Nova first)
         
         if (audioData && audioContextRef.current) {
           // Properly stop and fade out previous audio to prevent noise
