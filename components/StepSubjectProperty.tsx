@@ -156,46 +156,50 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                 inputMode="numeric"
                 pattern="[0-9]*"
                 value={address.zip || ''}
-                onChange={async (e) => {
+                onChange={(e) => {
                   // Allow only digits, limit to 5 characters
                   const zip = e.target.value.replace(/\D/g, '').slice(0, 5);
+                  
+                  // Update ZIP code immediately (synchronous)
                   handleAddressChange('zip', zip);
                   
-                  // Auto-fill city and state from ZIP code with Mapbox when 5 digits are entered
+                  // Clear city/state if ZIP is incomplete
+                  if (zip.length < 5) {
+                    setZipVerified(false);
+                    setZipError('');
+                    handleAddressChange('city', '');
+                    handleAddressChange('state', '');
+                  }
+                  
+                  // Auto-fill city and state from ZIP code with Mapbox when 5 digits are entered (async)
                   if (zip.length === 5) {
-                    try {
-                      const { getCityStateFromZip } = await import('../services/addressVerificationService');
-                      const cityState = await getCityStateFromZip(zip);
-                      if (cityState) {
-                        handleAddressChange('city', cityState.city);
-                        handleAddressChange('state', cityState.state);
-                        // ZIP code is verified
-                        setZipVerified(true);
-                        setZipError('');
-                      } else {
-                        // ZIP code not found in Mapbox
+                    (async () => {
+                      try {
+                        const { getCityStateFromZip } = await import('../services/addressVerificationService');
+                        const cityState = await getCityStateFromZip(zip);
+                        if (cityState) {
+                          handleAddressChange('city', cityState.city);
+                          handleAddressChange('state', cityState.state);
+                          // ZIP code is verified
+                          setZipVerified(true);
+                          setZipError('');
+                        } else {
+                          // ZIP code not found in Mapbox
+                          setZipVerified(false);
+                          setZipError('ZIP code not found. Please verify the ZIP code.');
+                          // Clear city/state if ZIP is invalid
+                          handleAddressChange('city', '');
+                          handleAddressChange('state', '');
+                        }
+                      } catch (error) {
+                        console.error('Error verifying ZIP code with Mapbox:', error);
                         setZipVerified(false);
-                        setZipError('ZIP code not found. Please verify the ZIP code.');
-                        // Clear city/state if ZIP is invalid
+                        setZipError('Unable to verify ZIP code. Please check your connection.');
+                        // Clear city/state on error
                         handleAddressChange('city', '');
                         handleAddressChange('state', '');
                       }
-                    } catch (error) {
-                      console.error('Error verifying ZIP code with Mapbox:', error);
-                      setZipVerified(false);
-                      setZipError('Unable to verify ZIP code. Please check your connection.');
-                      // Clear city/state on error
-                      handleAddressChange('city', '');
-                      handleAddressChange('state', '');
-                    }
-                  } else {
-                    setZipVerified(false);
-                    setZipError('');
-                    // Clear city/state if ZIP is incomplete
-                    if (zip.length < 5) {
-                      handleAddressChange('city', '');
-                      handleAddressChange('state', '');
-                    }
+                    })();
                   }
                 }}
                 onBlur={async (e) => {
@@ -222,12 +226,16 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                 }`}
                 maxLength={5}
                 autoComplete="postal-code"
+                disabled={false}
+                readOnly={false}
                 style={{ 
                   pointerEvents: 'auto',
                   userSelect: 'text',
                   WebkitUserSelect: 'text',
                   MozUserSelect: 'text',
-                  touchAction: 'manipulation'
+                  touchAction: 'manipulation',
+                  WebkitAppearance: 'none',
+                  appearance: 'none'
                 }}
               />
               {zipVerified && address.zip?.length === 5 && (
