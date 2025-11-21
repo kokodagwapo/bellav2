@@ -733,56 +733,40 @@ const BellaVoiceAssistant: React.FC = () => {
             }
         }
 
-        // Request microphone permission with better error handling
+        // Request microphone permission - simple and direct approach
         try {
-            console.log("🎤 Requesting microphone access for agentic mode...");
+            console.log("🎤 Requesting microphone access...");
             setMicPermissionGranted(null); // Show loading state
+            setStatusMessage("Requesting Access...");
+            setMicError(null);
             
-            // Check if we already have permission
-            if (navigator.permissions) {
-                try {
-                    const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-                    if (permissionStatus.state === 'granted') {
-                        console.log("✅ Microphone permission already granted");
-                    } else if (permissionStatus.state === 'denied') {
-                        console.warn("⚠️ Microphone permission previously denied");
-                        setMicPermissionGranted(false);
-                        setMicError("Microphone access was previously denied. Please enable it in your browser settings (look for 🔒 or 🎤 icon in the address bar) and refresh the page.");
-                        setStatusMessage("Permission Denied");
-                        return;
-                    }
-                } catch (permError) {
-                    // Permission API not supported, continue with getUserMedia
-                    console.log("ℹ️ Permission API not available, proceeding with getUserMedia");
-                }
-            }
-            
+            // Directly request microphone access - let browser show the prompt
+            // Don't check permissions first, just request directly
             let stream: MediaStream;
             try {
-                // Try with optimal audio constraints first
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true,
-                        sampleRate: 44100
-                    } 
-                });
-                console.log("✅ Microphone permission granted with optimal settings");
-            } catch (constraintError: any) {
-                console.log("⚠️ Constrained request failed, trying basic request:", constraintError);
+                // Try with basic audio first (most compatible)
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log("✅ Microphone permission granted");
+            } catch (basicError: any) {
+                // If basic fails, try with constraints
                 try {
-                    // Fallback to basic audio request
-                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    console.log("✅ Basic microphone permission granted");
-                } catch (simpleError: any) {
-                    throw simpleError;
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        } 
+                    });
+                    console.log("✅ Microphone permission granted with constraints");
+                } catch (constraintError: any) {
+                    throw basicError; // Throw the original error
                 }
             }
             
             setMicPermissionGranted(true);
             micStreamRef.current = stream;
             setMicError(null);
+            setStatusMessage("Ready");
             console.log("✅ Microphone permission granted for agentic mode");
             
             // Monitor stream for disconnection
@@ -796,18 +780,17 @@ const BellaVoiceAssistant: React.FC = () => {
         } catch (e: any) {
             console.error("❌ Microphone permission error:", e);
             setMicPermissionGranted(false);
+            setStatusMessage("Permission Denied");
+            
             if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-                setMicError("Microphone access denied. Please click the 🔒 or 🎤 icon in your browser's address bar and select 'Allow' or 'Always allow', then click retry.");
+                setMicError("Please allow microphone access. Look for the permission popup or click the 🔒 icon in your browser's address bar and select 'Allow'.");
             } else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
-                setMicError("No microphone found. Please connect a microphone device and try again.");
+                setMicError("No microphone found. Please connect a microphone and try again.");
             } else if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
-                setMicError("Microphone is being used by another application. Please close other apps using the microphone and try again.");
-            } else if (e.name === 'OverconstrainedError' || e.name === 'ConstraintNotSatisfiedError') {
-                setMicError("Your microphone doesn't support the required settings. Please try a different microphone.");
+                setMicError("Microphone is being used by another app. Please close other apps and try again.");
             } else {
-                setMicError(`Could not access microphone: ${e.message || 'Unknown error'}. Please check your browser settings and microphone connection.`);
+                setMicError("Could not access microphone. Please check your browser settings.");
             }
-            setStatusMessage("Permission Needed");
             return;
         }
 
@@ -942,12 +925,15 @@ const BellaVoiceAssistant: React.FC = () => {
                     )}
                     
                     {/* Status Message */}
-                    <p className="text-sm text-gray-600 leading-relaxed font-medium">
-                        {mode === 'idle' && "Ready to guide you through Prep4Loan!"}
-                        {(mode === 'call' || mode === 'agentic') && isBellaSpeaking && "Speaking..."}
-                        {(mode === 'call' || mode === 'agentic') && !isBellaSpeaking && micPermissionGranted && conversationHistory.length === 0 && "Listening..."}
-                        {(mode === 'call' || mode === 'agentic') && !isBellaSpeaking && micPermissionGranted === false && "Mic Permission Needed"}
-                    </p>
+                    {!micError && (
+                        <p className="text-sm text-gray-600 leading-relaxed font-medium">
+                            {mode === 'idle' && "Ready to guide you through Prep4Loan!"}
+                            {(mode === 'call' || mode === 'agentic') && isBellaSpeaking && "Speaking..."}
+                            {(mode === 'call' || mode === 'agentic') && !isBellaSpeaking && micPermissionGranted && conversationHistory.length === 0 && "Listening..."}
+                            {(mode === 'call' || mode === 'agentic') && !isBellaSpeaking && micPermissionGranted === false && "Click button to allow mic"}
+                            {(mode === 'call' || mode === 'agentic') && micPermissionGranted === null && "Requesting access..."}
+                        </p>
+                    )}
                     {micError && (
                         <motion.div 
                             initial={{ opacity: 0, y: -10 }}
@@ -955,38 +941,36 @@ const BellaVoiceAssistant: React.FC = () => {
                             className="text-xs text-red-600 font-medium mt-2 space-y-3 w-full bg-red-50 border border-red-200 rounded-lg p-3"
                         >
                             <p className="font-semibold flex items-center gap-2">
-                                <span className="text-base">⚠️</span>
+                                <span className="text-base">🎤</span>
                                 {micError}
                             </p>
                             {(micError.includes('permission') || micError.includes('denied') || micError.includes('Allow')) && (
                                 <div className="space-y-3">
                                     <div className="text-[11px] text-gray-700 space-y-2 bg-white rounded p-2 border border-gray-200">
-                                        <p className="font-semibold text-gray-800">📋 Step-by-step fix:</p>
-                                        <ol className="list-decimal list-inside space-y-1.5 ml-1 text-gray-700">
-                                            <li>Look for a <strong>microphone icon 🔒 or 🎤</strong> in your browser's address bar (top left)</li>
-                                            <li>Click the icon to open permission settings</li>
-                                            <li>Select <strong>"Allow"</strong> or <strong>"Always allow"</strong> for microphone access</li>
-                                            <li>If you don't see the icon, check browser settings → Privacy → Site permissions → Microphone</li>
-                                            <li>Then click the <strong>"🔄 Retry"</strong> button below</li>
-                                        </ol>
+                                        <p className="font-semibold text-gray-800 mb-2">Quick Fix:</p>
+                                        <div className="space-y-1.5 text-gray-700">
+                                            <p>1. Look for the <strong>🔒 lock icon</strong> in your browser's address bar</p>
+                                            <p>2. Click it and select <strong>"Allow"</strong> for microphone</p>
+                                            <p>3. Click the button below to try again</p>
+                                        </div>
                                     </div>
                                     <button
                                         onClick={startAgenticMode}
+                                        type="button"
                                         className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-4 rounded-lg transition-all active:scale-95 shadow-md flex items-center justify-center gap-2"
                                     >
-                                        <span>🔄</span>
-                                        <span>Retry Microphone Access</span>
+                                        <span>🎤</span>
+                                        <span>Allow Microphone Access</span>
                                     </button>
                                 </div>
                             )}
                             {micError.includes('No microphone') && (
                                 <div className="text-[11px] text-gray-700 bg-white rounded p-2 border border-gray-200">
-                                    <p className="font-semibold mb-1">💡 Troubleshooting:</p>
+                                    <p className="font-semibold mb-1">💡 Check:</p>
                                     <ul className="list-disc list-inside space-y-0.5 ml-1">
-                                        <li>Check if your microphone is connected</li>
-                                        <li>Try unplugging and reconnecting your microphone</li>
-                                        <li>Check system settings to ensure microphone is enabled</li>
-                                        <li>Try refreshing the page after connecting</li>
+                                        <li>Is your microphone connected?</li>
+                                        <li>Is it enabled in system settings?</li>
+                                        <li>Try refreshing the page</li>
                                     </ul>
                                 </div>
                             )}
@@ -1021,8 +1005,9 @@ const BellaVoiceAssistant: React.FC = () => {
                             {micPermissionGranted === false ? (
                                 <button
                                     onClick={startAgenticMode}
+                                    type="button"
                                     className="p-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-all shadow-lg hover:shadow-xl animate-pulse"
-                                    title="Click to retry microphone access"
+                                    title="Click to allow microphone access"
                                 >
                                     <Mic size={20} />
                                 </button>
