@@ -90,7 +90,7 @@ const DemoController: React.FC = () => {
     if (!isMuted) {
       setIsLoadingAudio(true);
       try {
-        const audioData = await generateBellaSpeech(step.text);
+        const audioData = await generateBellaSpeech(step.text, true); // Force Gemini voice for demo
         if (audioData && audioContextRef.current) {
           if (currentSourceRef.current) {
             currentSourceRef.current.stop();

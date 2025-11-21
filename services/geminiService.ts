@@ -124,41 +124,46 @@ export const analyzeTextForData = async (text: string): Promise<Partial<FormData
     }
 };
 
-// New function for TTS - tries OpenAI first (more natural), falls back to Gemini
-export const generateBellaSpeech = async (text: string): Promise<string | null> => {
-    // Try OpenAI first if available
-    const openAiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    const hasValidOpenAiKey = openAiKey && 
-                               openAiKey !== 'your_openai_api_key_here' && 
-                               openAiKey.trim().length > 0 &&
-                               openAiKey.startsWith('sk-');
-    
-    if (hasValidOpenAiKey) {
-        try {
-            console.log("🎯 Attempting OpenAI TTS (GPT-5.1 compatible, Nova voice - agentic human-like female)...");
-            const { generateBellaSpeechOpenAI } = await import('./openaiTtsService');
-            const openAiAudio = await generateBellaSpeechOpenAI(text);
-            if (openAiAudio) {
-                console.log("✅ OpenAI TTS successful! Using latest GPT-5.1 compatible model with Nova agentic voice.");
-                return openAiAudio;
-            } else {
-                console.log("⚠️ OpenAI TTS returned null, falling back to Gemini TTS");
+// New function for TTS - uses Gemini voice (Kore) for demo, can use OpenAI for live mode
+export const generateBellaSpeech = async (text: string, useGeminiOnly: boolean = false): Promise<string | null> => {
+    // If useGeminiOnly is true (for demo), skip OpenAI and go straight to Gemini
+    if (!useGeminiOnly) {
+        // Try OpenAI first if available (for live mode)
+        const openAiKey = import.meta.env.VITE_OPENAI_API_KEY;
+        const hasValidOpenAiKey = openAiKey && 
+                                   openAiKey !== 'your_openai_api_key_here' && 
+                                   openAiKey.trim().length > 0 &&
+                                   openAiKey.startsWith('sk-');
+        
+        if (hasValidOpenAiKey) {
+            try {
+                console.log("🎯 Attempting OpenAI TTS (GPT-5.1 compatible, Nova voice - agentic human-like female)...");
+                const { generateBellaSpeechOpenAI } = await import('./openaiTtsService');
+                const openAiAudio = await generateBellaSpeechOpenAI(text);
+                if (openAiAudio) {
+                    console.log("✅ OpenAI TTS successful! Using latest GPT-5.1 compatible model with Nova agentic voice.");
+                    return openAiAudio;
+                } else {
+                    console.log("⚠️ OpenAI TTS returned null, falling back to Gemini TTS");
+                }
+            } catch (error: any) {
+                console.error("❌ OpenAI TTS error:", error?.message || error);
+                console.log("   Falling back to Gemini TTS");
             }
-        } catch (error: any) {
-            console.error("❌ OpenAI TTS error:", error?.message || error);
-            console.log("   Falling back to Gemini TTS");
+        } else {
+            if (!openAiKey) {
+                console.log("ℹ️ OpenAI API key not set in .env file, using Gemini TTS");
+            } else if (openAiKey === 'your_openai_api_key_here') {
+                console.log("ℹ️ OpenAI API key placeholder detected, using Gemini TTS");
+            } else if (!openAiKey.startsWith('sk-')) {
+                console.warn("⚠️ OpenAI API key format invalid (should start with 'sk-'), using Gemini TTS");
+                console.warn("   Get a valid key from: https://platform.openai.com/api-keys");
+            } else {
+                console.log("ℹ️ OpenAI API key appears invalid, using Gemini TTS");
+            }
         }
     } else {
-        if (!openAiKey) {
-            console.log("ℹ️ OpenAI API key not set in .env file, using Gemini TTS");
-        } else if (openAiKey === 'your_openai_api_key_here') {
-            console.log("ℹ️ OpenAI API key placeholder detected, using Gemini TTS");
-        } else if (!openAiKey.startsWith('sk-')) {
-            console.warn("⚠️ OpenAI API key format invalid (should start with 'sk-'), using Gemini TTS");
-            console.warn("   Get a valid key from: https://platform.openai.com/api-keys");
-        } else {
-            console.log("ℹ️ OpenAI API key appears invalid, using Gemini TTS");
-        }
+        console.log("🎯 Using Gemini TTS only (demo mode)");
     }
 
     // Fallback to Gemini TTS

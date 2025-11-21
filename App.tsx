@@ -9,6 +9,7 @@ import DocumentList from './components/DocumentList';
 import LandingPage from './components/LandingPage';
 import Footer from './components/Footer';
 import BellaVoiceAssistant from './components/BellaVoiceAssistant';
+import DemoController from './components/DemoController';
 import { FormData, LoanPurpose } from './types';
 import { generateLoanSummary } from './services/geminiService';
 import { motion, AnimatePresence } from "framer-motion";
