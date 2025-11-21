@@ -16,50 +16,578 @@ interface DemoScriptStep {
   waitForElement?: string;
 }
 
-const demoScript: DemoScriptStep[] = [
-  {
-    time: 0,
-    action: "Landing Page & Scroll",
-    text: "Hi! Welcome to the 'not-boring' way to get a mortgage. This is Prep4Loan. Think of it as the warm-up lap before the marathon... except we make the marathon feel like a walk in the park.",
-    navigateTo: 'home',
-    scrollTarget: "top"
-  },
-  {
-    time: 8,
-    action: "Navigate to Prep4Loan",
-    text: "We start here. No scary forms yet. Just you, me, and some big friendly buttons. It's like a dating app, but for your dream home.",
-    navigateTo: 'prep'
-  },
-  {
-    time: 16,
-    action: "Step-by-Step Flow - Welcome Screen",
-    text: "See how easy this is? I'm just asking the basics. We keep it light because, let's be honest, nobody wakes up excited to fill out paperwork. Click 'Get Started' when you're ready."
-  },
-  {
-    time: 24,
-    action: "Progress Bar & Checklist",
-    text: "Check out the left side. That's Bella—that's me!—keeping you organized. I'm like your personal assistant, but I don't drink all your coffee. I build your checklist in real-time so you know exactly what's happening.",
-    scrollTarget: "sidebar"
-  },
-  {
-    time: 32,
-    action: "Click 'Document List'",
-    text: "And for the documents? I've got super-vision. You upload your W2s, pay stubs, whatever—and I use OCR to read them instantly. I verify them faster than you can say 'low interest rate'.",
-    navigateTo: 'documents'
-  },
-  {
-    time: 40,
-    action: "Click 'Home Journey' (URLA 1003)",
-    text: "Now, for the magic trick. We switch to the Home Journey. This is the serious, official 1003 form that lenders need.",
-    navigateTo: 'form1003'
-  },
-  {
-    time: 48,
-    action: "Scrolling Form - Pre-filled Data",
-    text: "But guess what? You don't have to type it all again! I already moved your info over. Lenders love it because it's perfect; you love it because you're done. Easy, right?",
-    scrollTarget: "form-content"
+// Script variations for each demo step (11 variations per step)
+const demoScriptVariations: { [key: number]: DemoScriptStep[] } = {
+  // Step 0: Landing Page
+  0: [
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hi! Welcome to the 'not-boring' way to get a mortgage. This is Prep4Loan. Think of it as the warm-up lap before the marathon... except we make the marathon feel like a walk in the park.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hey there! Welcome to Prep4Loan—where getting a mortgage doesn't have to feel like pulling teeth. We're here to make this whole process actually enjoyable. No cap!",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Welcome! You've found the easiest way to get pre-qualified for a mortgage. I'm Bella, and I'm about to show you how we turn this typically stressful process into something smooth and simple.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hi! So you're thinking about buying a home? Smart move! Prep4Loan is here to guide you through every step. Think of me as your friendly mortgage coach who actually makes sense.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Welcome to Prep4Loan! I'm Bella, and I'm here to prove that getting a mortgage doesn't have to be complicated. We've taken all the confusing parts and made them... well, not confusing!",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hey bestie! Welcome to the future of mortgage applications. No more endless paperwork, no more confusion. Just you, me, and a straightforward path to your dream home. Let's do this!",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Welcome! You're about to experience the most user-friendly mortgage process out there. Prep4Loan takes all the guesswork out of getting pre-qualified. Ready to see how easy this can be?",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hi there! I'm Bella, and I'm here to show you that mortgage applications don't have to be a nightmare. We've built something special here—something that actually makes sense and saves you time.",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Welcome to Prep4Loan! If you've ever thought 'there has to be a better way' when dealing with mortgage stuff, you're in the right place. This is that better way. Let me show you!",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Hey! Welcome to Prep4Loan. We're here to change how you think about mortgage applications. No jargon, no confusion—just clear steps and helpful guidance. Sound good? Let's go!",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    },
+    {
+      time: 0,
+      action: "Landing Page & Scroll",
+      text: "Welcome! I'm Bella, and I'm about to walk you through the easiest mortgage pre-qualification process you've ever seen. We've taken everything that's annoying about this and fixed it. You're gonna love it!",
+      navigateTo: 'home',
+      scrollTarget: "top"
+    }
+  ],
+  // Step 1: Navigate to Prep4Loan
+  1: [
+    {
+      time: 8,
+      action: "Navigate to Prep4Loan",
+      text: "We start here. No scary forms yet. Just you, me, and some big friendly buttons. It's like a dating app, but for your dream home.",
+      navigateTo: 'prep'
+    },
+    {
+      time: 8,
+      action: "Navigate to Prep4Loan",
+      text: "Alright, let's dive in! Click that 'Start Pre-Evaluation' button and we'll begin. Don't worry—I'll be with you every step of the way. This is going to be painless, I promise!",
+      navigateTo: 'prep'
+    },
+    {
+      time: 8,
+      action: "Navigate to Prep4Loan",
+      text: "Ready to get started? Just hit that big button right there. We're going to ask you some simple questions—nothing overwhelming, I swear. Think of it as a friendly conversation about your goals.",
+      navigateTo: 'prep'
+    },
+    {
+      time: 8,
+      action: "Navigate to Prep4Loan",
+      text: "Here we go! Time to start your pre-evaluation. Click the button and let's see what you're working with. I'll make sure this is quick, easy, and actually helpful.",
+      navigateTo: 'prep'
+    },
+    {
+      time: 8,
+      action: "Navigate to Prep4Loan",
+      text: "Let's begin! That button right there is your ticket to a smoother mortgage process. Click it and we'll start gathering the basics. No pressure, just progress!",
+      navigateTo: 'prep'
+    },
+    {
+      time: 8,
+      action: "Navigate to Prep4Loan",
+      text: "Okay, here's where the magic happens. Click 'Start Pre-Evaluation' and we'll walk through this together. I'll explain everything as we go, so you're never left wondering what's happening.",
+      navigateTo: 'prep'
+    },
+    {
+      time: 8,
+      action: "Navigate to Prep4Loan",
+      text: "Time to take the first step! That button is your starting point. Click it and we'll begin the pre-evaluation process. I've got your back through all of this!",
+      navigateTo: 'prep'
+    },
+    {
+      time: 8,
+      action: "Navigate to Prep4Loan",
+      text: "Alright, let's do this! Click that button and we'll get your pre-evaluation rolling. I'll guide you through each question, so you'll know exactly what we need and why.",
+      navigateTo: 'prep'
+    },
+    {
+      time: 8,
+      action: "Navigate to Prep4Loan",
+      text: "Here we go! Click 'Start Pre-Evaluation' and let's begin. I promise this won't be like those other mortgage sites that make you feel lost. We're keeping this simple and clear.",
+      navigateTo: 'prep'
+    },
+    {
+      time: 8,
+      action: "Navigate to Prep4Loan",
+      text: "Ready? Let's start your journey! Click that button and we'll begin the pre-evaluation. I'll be right here, making sure everything makes sense and you're comfortable with each step.",
+      navigateTo: 'prep'
+    },
+    {
+      time: 8,
+      action: "Navigate to Prep4Loan",
+      text: "Perfect! Click 'Start Pre-Evaluation' and we're off. This is going to be way easier than you think. I'll walk you through everything, so just relax and follow along!",
+      navigateTo: 'prep'
+    }
+  ],
+  // Step 2: Welcome Screen
+  2: [
+    {
+      time: 16,
+      action: "Step-by-Step Flow - Welcome Screen",
+      text: "See how easy this is? I'm just asking the basics. We keep it light because, let's be honest, nobody wakes up excited to fill out paperwork. Click 'Get Started' when you're ready."
+    },
+    {
+      time: 16,
+      action: "Step-by-Step Flow - Welcome Screen",
+      text: "Welcome to the Prep4Loan flow! I'm going to ask you some straightforward questions. Nothing complicated—just the essentials we need to help you get pre-qualified. Ready? Click 'Get Started'!"
+    },
+    {
+      time: 16,
+      action: "Step-by-Step Flow - Welcome Screen",
+      text: "Alright, here's the deal: I'm going to guide you through a few simple questions. We'll take it step by step, and I'll explain everything along the way. When you're ready, hit 'Get Started'!"
+    },
+    {
+      time: 16,
+      action: "Step-by-Step Flow - Welcome Screen",
+      text: "This is where we start gathering the basics. Don't worry—I'm not going to overwhelm you with a million questions. Just the important stuff, one step at a time. Click 'Get Started' to begin!"
+    },
+    {
+      time: 16,
+      action: "Step-by-Step Flow - Welcome Screen",
+      text: "Hey! So we're going to go through this together. I'll ask you some questions, you'll answer them, and before you know it, you'll be pre-qualified. Simple as that! Ready? Click 'Get Started'!"
+    },
+    {
+      time: 16,
+      action: "Step-by-Step Flow - Welcome Screen",
+      text: "Welcome! I'm here to make this process as smooth as possible. We'll go through each question together, and I'll make sure you understand everything. When you're ready, click 'Get Started'!"
+    },
+    {
+      time: 16,
+      action: "Step-by-Step Flow - Welcome Screen",
+      text: "Perfect! Let's get this started. I'm going to ask you some questions about your situation, and we'll work through them together. Nothing stressful—just clear, simple questions. Click 'Get Started' when ready!"
+    },
+    {
+      time: 16,
+      action: "Step-by-Step Flow - Welcome Screen",
+      text: "Alright, here we go! I'll walk you through each step of the pre-evaluation. We'll keep it simple and straightforward. No tricks, no confusion—just helpful guidance. Click 'Get Started' to begin!"
+    },
+    {
+      time: 16,
+      action: "Step-by-Step Flow - Welcome Screen",
+      text: "Great! Now we're getting into the good stuff. I'll ask you some questions, and you'll answer them at your own pace. Take your time—there's no rush. Click 'Get Started' when you're ready!"
+    },
+    {
+      time: 16,
+      action: "Step-by-Step Flow - Welcome Screen",
+      text: "Welcome to the flow! I'm going to help you through this step by step. Each question is important, but I'll make sure you understand why we're asking. Ready? Click 'Get Started'!"
+    },
+    {
+      time: 16,
+      action: "Step-by-Step Flow - Welcome Screen",
+      text: "Perfect! Let's dive in. I'll guide you through each question, explaining what we need and why. This is going to be way easier than you think. Click 'Get Started' to begin the journey!"
+    }
+  ],
+  // Step 3: Progress Bar & Checklist
+  3: [
+    {
+      time: 24,
+      action: "Progress Bar & Checklist",
+      text: "Check out the left side. That's Bella—that's me!—keeping you organized. I'm like your personal assistant, but I don't drink all your coffee. I build your checklist in real-time so you know exactly what's happening.",
+      scrollTarget: "sidebar"
+    },
+    {
+      time: 24,
+      action: "Progress Bar & Checklist",
+      text: "See that checklist on the left? That's me tracking your progress in real-time. As you fill things out, I update it automatically. It's like having a personal assistant who never forgets anything!",
+      scrollTarget: "sidebar"
+    },
+    {
+      time: 24,
+      action: "Progress Bar & Checklist",
+      text: "Look over there on the left—that's your progress tracker! I'm keeping tabs on everything you've completed and what's still needed. It updates as you go, so you always know where you stand.",
+      scrollTarget: "sidebar"
+    },
+    {
+      time: 24,
+      action: "Progress Bar & Checklist",
+      text: "Notice the checklist on the left? That's me working behind the scenes to keep you organized. Every time you complete something, I check it off. It's like having a built-in progress tracker!",
+      scrollTarget: "sidebar"
+    },
+    {
+      time: 24,
+      action: "Progress Bar & Checklist",
+      text: "Check out your progress tracker on the left! I'm updating it in real-time as you move through the form. You'll always know what's done and what's next. Pretty cool, right?",
+      scrollTarget: "sidebar"
+    },
+    {
+      time: 24,
+      action: "Progress Bar & Checklist",
+      text: "See that sidebar? That's your personal checklist that I'm managing for you. As you answer questions, I automatically update it. No manual tracking needed—I've got you covered!",
+      scrollTarget: "sidebar"
+    },
+    {
+      time: 24,
+      action: "Progress Bar & Checklist",
+      text: "Look at the left side—that's your progress dashboard! I'm tracking everything you complete and showing you what's still needed. It updates instantly, so you're never left wondering what's next.",
+      scrollTarget: "sidebar"
+    },
+    {
+      time: 24,
+      action: "Progress Bar & Checklist",
+      text: "Check out the checklist on the left! That's me keeping you organized throughout this process. Every step you complete gets checked off automatically. It's like having a co-pilot for your mortgage journey!",
+      scrollTarget: "sidebar"
+    },
+    {
+      time: 24,
+      action: "Progress Bar & Checklist",
+      text: "See that progress tracker? I'm building it in real-time as you go through the form. You'll always know exactly what you've done and what's coming up next. No surprises, just clear progress!",
+      scrollTarget: "sidebar"
+    },
+    {
+      time: 24,
+      action: "Progress Bar & Checklist",
+      text: "Notice the sidebar checklist? That's me working behind the scenes to keep everything organized. I update it automatically as you complete each section. You're never flying blind with me around!",
+      scrollTarget: "sidebar"
+    },
+    {
+      time: 24,
+      action: "Progress Bar & Checklist",
+      text: "Look over there—that's your real-time progress tracker! I'm updating it as you move through the form, so you always know what's done and what's still needed. It's like having a built-in organizer!",
+      scrollTarget: "sidebar"
+    }
+  ],
+  // Step 4: Document List
+  4: [
+    {
+      time: 32,
+      action: "Click 'Document List'",
+      text: "And for the documents? I've got super-vision. You upload your W2s, pay stubs, whatever—and I use OCR to read them instantly. I verify them faster than you can say 'low interest rate'.",
+      navigateTo: 'documents'
+    },
+    {
+      time: 32,
+      action: "Click 'Document List'",
+      text: "Now let's talk documents! When you upload your files, I use advanced OCR technology to read and verify them automatically. W2s, pay stubs, bank statements—I can handle them all in seconds!",
+      navigateTo: 'documents'
+    },
+    {
+      time: 32,
+      action: "Click 'Document List'",
+      text: "Here's where the magic happens with documents. Upload your files and I'll read them using OCR—that's optical character recognition. I extract all the important info automatically. No manual typing needed!",
+      navigateTo: 'documents'
+    },
+    {
+      time: 32,
+      action: "Click 'Document List'",
+      text: "Documents? I've got you covered! Upload your W2s, pay stubs, or bank statements, and I'll read them instantly using OCR technology. I pull out all the key information automatically. It's like having a super-powered assistant!",
+      navigateTo: 'documents'
+    },
+    {
+      time: 32,
+      action: "Click 'Document List'",
+      text: "Let's check out the document section! When you upload files, I use OCR to read them automatically. I can extract information from W2s, pay stubs, and more—all in real-time. Pretty impressive, right?",
+      navigateTo: 'documents'
+    },
+    {
+      time: 32,
+      action: "Click 'Document List'",
+      text: "Documents are my specialty! Upload your files and I'll use OCR technology to read and verify them instantly. I can handle W2s, pay stubs, bank statements—you name it. All automated, all accurate!",
+      navigateTo: 'documents'
+    },
+    {
+      time: 32,
+      action: "Click 'Document List'",
+      text: "Time to see the document management system! I use OCR—optical character recognition—to read your uploaded files automatically. W2s, pay stubs, whatever you've got—I'll extract the info in seconds!",
+      navigateTo: 'documents'
+    },
+    {
+      time: 32,
+      action: "Click 'Document List'",
+      text: "Check out the document section! When you upload files, I read them using advanced OCR technology. I can pull information from W2s, pay stubs, bank statements—all automatically. No manual data entry required!",
+      navigateTo: 'documents'
+    },
+    {
+      time: 32,
+      action: "Click 'Document List'",
+      text: "Here's where document magic happens! Upload your files and I'll use OCR to read them instantly. I extract all the important details from W2s, pay stubs, and more. It's fast, accurate, and totally automated!",
+      navigateTo: 'documents'
+    },
+    {
+      time: 32,
+      action: "Click 'Document List'",
+      text: "Let's look at documents! I use OCR technology to read your uploaded files automatically. W2s, pay stubs, bank statements—I can handle them all and extract the key information in real-time. Super efficient!",
+      navigateTo: 'documents'
+    },
+    {
+      time: 32,
+      action: "Click 'Document List'",
+      text: "Documents? I've got superpowers here! Upload your files and I'll use OCR to read them instantly. I can extract information from W2s, pay stubs, and bank statements automatically. It's like having a document-reading robot!",
+      navigateTo: 'documents'
+    }
+  ],
+  // Step 5: Home Journey (URLA 1003)
+  5: [
+    {
+      time: 40,
+      action: "Click 'Home Journey' (URLA 1003)",
+      text: "Now, for the magic trick. We switch to the Home Journey. This is the serious, official 1003 form that lenders need.",
+      navigateTo: 'form1003'
+    },
+    {
+      time: 40,
+      action: "Click 'Home Journey' (URLA 1003)",
+      text: "Alright, here's where it gets official! The Home Journey is the URLA 1003 form—the standard form that all lenders use. But don't worry, I'll make this easy for you!",
+      navigateTo: 'form1003'
+    },
+    {
+      time: 40,
+      action: "Click 'Home Journey' (URLA 1003)",
+      text: "Time for the Home Journey! This is the official URLA 1003 form that lenders require. It might look serious, but I've got good news—most of it is already filled out from what you told me earlier!",
+      navigateTo: 'form1003'
+    },
+    {
+      time: 40,
+      action: "Click 'Home Journey' (URLA 1003)",
+      text: "Now we're moving to the Home Journey section—the official URLA 1003 form. This is what lenders need, but here's the cool part: I've already pre-filled most of it with your information!",
+      navigateTo: 'form1003'
+    },
+    {
+      time: 40,
+      action: "Click 'Home Journey' (URLA 1003)",
+      text: "Let's check out the Home Journey! This is the URLA 1003 form—the standard mortgage application form. The best part? I've already transferred all your info from Prep4Loan, so you won't have to start over!",
+      navigateTo: 'form1003'
+    },
+    {
+      time: 40,
+      action: "Click 'Home Journey' (URLA 1003)",
+      text: "Here we go—the Home Journey! This is the official URLA 1003 form that lenders use. But here's what makes it special: I've already filled in most of it using the information you provided earlier!",
+      navigateTo: 'form1003'
+    },
+    {
+      time: 40,
+      action: "Click 'Home Journey' (URLA 1003)",
+      text: "Time to see the Home Journey! This is the URLA 1003 form—the official mortgage application. The good news? I've already pre-populated it with everything you told me in Prep4Loan. No duplicate work!",
+      navigateTo: 'form1003'
+    },
+    {
+      time: 40,
+      action: "Click 'Home Journey' (URLA 1003)",
+      text: "Alright, let's move to the Home Journey section. This is the URLA 1003 form that lenders need. But here's the magic: I've already transferred all your information, so you're mostly done already!",
+      navigateTo: 'form1003'
+    },
+    {
+      time: 40,
+      action: "Click 'Home Journey' (URLA 1003)",
+      text: "Now for the Home Journey! This is the official URLA 1003 form—the standard application lenders use. The best part? I've already filled in most of it with your Prep4Loan data. You're ahead of the game!",
+      navigateTo: 'form1003'
+    },
+    {
+      time: 40,
+      action: "Click 'Home Journey' (URLA 1003)",
+      text: "Let's check out the Home Journey section! This is the URLA 1003 form that all lenders require. Here's what's awesome: I've already pre-filled it with everything from your Prep4Loan application!",
+      navigateTo: 'form1003'
+    },
+    {
+      time: 40,
+      action: "Click 'Home Journey' (URLA 1003)",
+      text: "Time for the Home Journey! This is the official URLA 1003 form. But here's the cool thing—I've already moved all your information over from Prep4Loan, so you won't have to type everything again!",
+      navigateTo: 'form1003'
+    }
+  ],
+  // Step 6: Scrolling Form - Pre-filled Data
+  6: [
+    {
+      time: 48,
+      action: "Scrolling Form - Pre-filled Data",
+      text: "But guess what? You don't have to type it all again! I already moved your info over. Lenders love it because it's perfect; you love it because you're done. Easy, right?",
+      scrollTarget: "form-content"
+    },
+    {
+      time: 48,
+      action: "Scrolling Form - Pre-filled Data",
+      text: "See all that information already filled in? That's me doing the heavy lifting! I took everything from Prep4Loan and put it right here. Lenders get accurate data, and you save tons of time. Win-win!",
+      scrollTarget: "form-content"
+    },
+    {
+      time: 48,
+      action: "Scrolling Form - Pre-filled Data",
+      text: "Look at that—most of the form is already done! I transferred all your information from Prep4Loan automatically. Lenders appreciate the accuracy, and you appreciate not having to retype everything. Perfect!",
+      scrollTarget: "form-content"
+    },
+    {
+      time: 48,
+      action: "Scrolling Form - Pre-filled Data",
+      text: "Check it out—your information is already there! I moved everything over from Prep4Loan, so you don't have to start from scratch. Lenders get clean, accurate data, and you get to skip the repetitive typing. Nice!",
+      scrollTarget: "form-content"
+    },
+    {
+      time: 48,
+      action: "Scrolling Form - Pre-filled Data",
+      text: "See how much is already filled in? That's the magic of Prep4Loan! I transferred all your information to this form automatically. Lenders love the accuracy, and you love not having to do it twice. Easy peasy!",
+      scrollTarget: "form-content"
+    },
+    {
+      time: 48,
+      action: "Scrolling Form - Pre-filled Data",
+      text: "Notice all that pre-filled information? That's me working behind the scenes! I took everything from Prep4Loan and put it in the right places here. No duplicate work, no errors—just smooth sailing!",
+      scrollTarget: "form-content"
+    },
+    {
+      time: 48,
+      action: "Scrolling Form - Pre-filled Data",
+      text: "Look at that—the form is mostly complete! I automatically transferred all your Prep4Loan data here. Lenders get exactly what they need, and you get to skip the tedious retyping. That's efficiency!",
+      scrollTarget: "form-content"
+    },
+    {
+      time: 48,
+      action: "Scrolling Form - Pre-filled Data",
+      text: "See all that information already there? That's the power of Prep4Loan! I moved everything over automatically, so you don't have to type it all again. Lenders get accurate data, you save time. Everyone wins!",
+      scrollTarget: "form-content"
+    },
+    {
+      time: 48,
+      action: "Scrolling Form - Pre-filled Data",
+      text: "Check it out—most of the form is done! I transferred all your information from Prep4Loan, so you're not starting over. Lenders appreciate the precision, and you appreciate the time saved. Perfect setup!",
+      scrollTarget: "form-content"
+    },
+    {
+      time: 48,
+      action: "Scrolling Form - Pre-filled Data",
+      text: "Look at that pre-filled form! I took everything from Prep4Loan and put it right where it needs to be. No retyping, no mistakes—just clean, accurate data that lenders love. That's how it should be!",
+      scrollTarget: "form-content"
+    },
+    {
+      time: 48,
+      action: "Scrolling Form - Pre-filled Data",
+      text: "See how much is already filled in? That's me doing the work for you! I transferred all your Prep4Loan information here automatically. Lenders get what they need, and you get to skip the repetition. Easy!",
+      scrollTarget: "form-content"
+    }
+  ]
+};
+
+// Script rotation system - tracks used scripts with timestamps
+const SCRIPT_ROTATION_KEY = 'bella_demo_script_rotation';
+const ROTATION_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes
+
+interface ScriptUsage {
+  stepIndex: number;
+  scriptIndex: number;
+  timestamp: number;
+}
+
+const getScriptRotation = (): ScriptUsage[] => {
+  try {
+    const stored = localStorage.getItem(SCRIPT_ROTATION_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.warn('Failed to load script rotation data:', e);
   }
-];
+  return [];
+};
+
+const saveScriptRotation = (usage: ScriptUsage[]) => {
+  try {
+    localStorage.setItem(SCRIPT_ROTATION_KEY, JSON.stringify(usage));
+  } catch (e) {
+    console.warn('Failed to save script rotation data:', e);
+  }
+};
+
+const getAvailableScripts = (stepIndex: number): number[] => {
+  const now = Date.now();
+  const rotation = getScriptRotation();
+  
+  // Filter out scripts used within the last 30 minutes
+  const recentlyUsed = new Set(
+    rotation
+      .filter(u => u.stepIndex === stepIndex && (now - u.timestamp) < ROTATION_COOLDOWN_MS)
+      .map(u => u.scriptIndex)
+  );
+  
+  const allScripts = demoScriptVariations[stepIndex] || [];
+  const available = allScripts
+    .map((_, index) => index)
+    .filter(index => !recentlyUsed.has(index));
+  
+  // If all scripts were recently used, reset and use all of them
+  if (available.length === 0) {
+    console.log(`All scripts for step ${stepIndex} were recently used. Resetting rotation.`);
+    return allScripts.map((_, index) => index);
+  }
+  
+  return available;
+};
+
+const selectScript = (stepIndex: number): DemoScriptStep => {
+  const available = getAvailableScripts(stepIndex);
+  const scripts = demoScriptVariations[stepIndex] || [];
+  
+  // Randomly select from available scripts
+  const randomIndex = available[Math.floor(Math.random() * available.length)];
+  const selectedScript = scripts[randomIndex];
+  
+  // Record usage
+  const rotation = getScriptRotation();
+  rotation.push({
+    stepIndex,
+    scriptIndex: randomIndex,
+    timestamp: Date.now()
+  });
+  
+  // Clean up old entries (older than 30 minutes)
+  const now = Date.now();
+  const cleaned = rotation.filter(u => (now - u.timestamp) < ROTATION_COOLDOWN_MS);
+  saveScriptRotation(cleaned);
+  
+  console.log(`🎲 Selected script ${randomIndex + 1}/${scripts.length} for step ${stepIndex} (${available.length} available)`);
+  
+  return selectedScript;
+};
+
+// Get the current demo script with rotation
+const getDemoScript = (): DemoScriptStep[] => {
+  return [0, 1, 2, 3, 4, 5, 6].map(stepIndex => selectScript(stepIndex));
+};
 
 interface DemoControllerProps {
   onNavigateTo?: (view: 'home' | 'prep' | 'form1003' | 'documents') => void;
@@ -82,6 +610,14 @@ const DemoController: React.FC<DemoControllerProps> = ({
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const demoTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const stepTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [demoScript, setDemoScript] = useState<DemoScriptStep[]>([]);
+  
+  // Initialize demo script with rotation on mount
+  useEffect(() => {
+    const script = getDemoScript();
+    setDemoScript(script);
+    console.log('🎬 Demo script initialized with rotation:', script.map(s => s.action));
+  }, []);
 
   useEffect(() => {
     // Initialize Audio Context - use default sample rate for better compatibility
@@ -105,6 +641,8 @@ const DemoController: React.FC<DemoControllerProps> = ({
   }, []);
 
   useEffect(() => {
+    if (demoScript.length === 0) return; // Wait for script to be initialized
+    
     if (isPlaying && currentStep < demoScript.length) {
       playStep(currentStep);
     } else if (currentStep >= demoScript.length) {
@@ -113,7 +651,7 @@ const DemoController: React.FC<DemoControllerProps> = ({
         onEndDemo();
       }
     }
-  }, [isPlaying, currentStep]);
+  }, [isPlaying, currentStep, demoScript]);
 
   // Wait for element to appear with retries
   const waitForElement = async (selector: string, maxRetries = 10, delay = 200): Promise<HTMLElement | null> => {
@@ -440,10 +978,15 @@ const DemoController: React.FC<DemoControllerProps> = ({
     setIsPlaying(false);
     if (currentSourceRef.current) {
       currentSourceRef.current.stop();
+      currentSourceRef.current.disconnect();
     }
     if (stepTimeoutRef.current) {
       clearTimeout(stepTimeoutRef.current);
     }
+    // Regenerate script with rotation for fresh variety
+    const newScript = getDemoScript();
+    setDemoScript(newScript);
+    console.log('🔄 Demo script regenerated with rotation');
   };
 
   return (
