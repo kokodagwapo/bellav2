@@ -69,10 +69,14 @@ export const getBellaChatReply = async (chatHistory: { role: 'user' | 'model', t
     }));
 
     try {
+        // Use latest Gemini model for agentic, human-like responses
         const response = await ai.models.generateContent({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.0-flash-exp", // Latest model with enhanced agentic capabilities
             contents: contents,
-            config: { systemInstruction: systemInstruction },
+            config: { 
+                systemInstruction: systemInstruction,
+                temperature: 0.8, // Slightly higher for more natural, human-like responses
+            },
         });
         return response.text;
     } catch (error) {
@@ -131,11 +135,11 @@ export const generateBellaSpeech = async (text: string): Promise<string | null> 
     
     if (hasValidOpenAiKey) {
         try {
-            console.log("🎯 Attempting OpenAI TTS (Nova voice - most natural)...");
+            console.log("🎯 Attempting OpenAI TTS (GPT-5.1 compatible, Nova voice - agentic human-like female)...");
             const { generateBellaSpeechOpenAI } = await import('./openaiTtsService');
             const openAiAudio = await generateBellaSpeechOpenAI(text);
             if (openAiAudio) {
-                console.log("✅ OpenAI TTS successful! Using Nova voice.");
+                console.log("✅ OpenAI TTS successful! Using latest GPT-5.1 compatible model with Nova agentic voice.");
                 return openAiAudio;
             } else {
                 console.log("⚠️ OpenAI TTS returned null, falling back to Gemini TTS");

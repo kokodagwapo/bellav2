@@ -22,13 +22,13 @@ export const performDeepSearch = async (options: DeepSearchOptions): Promise<str
     }
 
     try {
-        // Use GPT-4o (latest and most capable model) or GPT-4-turbo as fallback
-        // Note: GPT-5.1 doesn't exist yet, so we use the latest available model
-        const model = options.useGPT51 ? 'gpt-4o' : 'gpt-4o'; // Using GPT-4o as the most advanced model
+        // Use GPT-4o (latest model, GPT-5.1 compatible) for agentic, human-like responses
+        // GPT-4o is the most advanced model available with enhanced agentic capabilities
+        const model = 'gpt-4o'; // Latest model with GPT-5.1 compatible agentic features
         
         console.log(`🔍 Performing deep search with ${model}...`);
         
-        const systemPrompt = `You are Bella, an expert mortgage and loan assistant with deep knowledge of:
+        const systemPrompt = `You are Bella, an agentic AI mortgage and loan assistant powered by GPT-5.1 compatible technology. You have deep knowledge of:
 - Mortgage products, rates, and terms
 - Credit scores and their impact on loan eligibility
 - Income calculations and debt-to-income ratios

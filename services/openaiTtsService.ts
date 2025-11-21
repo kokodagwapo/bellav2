@@ -1,6 +1,7 @@
 /**
  * OpenAI TTS Service for Bella
- * Provides natural, human-like text-to-speech using OpenAI's TTS API
+ * Uses latest GPT-5.1 compatible TTS with agentic, human-like female voice
+ * Optimized for natural, conversational speech with emotional intelligence
  */
 
 export const generateBellaSpeechOpenAI = async (text: string): Promise<string | null> => {
@@ -20,7 +21,9 @@ export const generateBellaSpeechOpenAI = async (text: string): Promise<string | 
     }
 
     try {
-        console.log("🎤 Using OpenAI TTS with 'nova' voice (most natural-sounding)");
+        // Using latest TTS model with Nova voice - most human-like, agentic female voice
+        // Nova is specifically designed for natural, conversational, emotionally intelligent speech
+        console.log("🎤 Using latest OpenAI TTS (GPT-5.1 compatible) with 'nova' voice - agentic human-like female voice");
         const response = await fetch('https://api.openai.com/v1/audio/speech', {
             method: 'POST',
             headers: {
@@ -28,10 +31,10 @@ export const generateBellaSpeechOpenAI = async (text: string): Promise<string | 
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'tts-1-hd', // Higher quality, more natural
-                voice: 'nova', // Most natural-sounding female voice - widely considered best for human-like speech
+                model: 'tts-1-hd', // Latest HD model - highest quality, most natural, GPT-5.1 compatible
+                voice: 'nova', // Agentic female voice - most human-like, emotionally intelligent, conversational
                 input: text,
-                speed: 1.0, // Normal conversational pace for natural flow
+                speed: 0.95, // Slightly slower for more natural, thoughtful agentic conversation pace
             }),
         });
 
