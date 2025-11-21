@@ -50,13 +50,35 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
   const handleRetrieve = (res: any) => {
     const feature = res.features[0];
     if (feature) {
-      const context = feature.properties.context || {};
-      const city = context.place?.name || feature.properties.name || '';
-      const state = context.region?.short_code?.replace('US-', '') || '';
+      // Best practice: Extract from context array (Mapbox standard format)
+      const context = feature.context || [];
+      
+      let city = '';
+      let state = '';
+      
+      // Iterate through context to find place (city) and region (state)
+      context.forEach((item: any) => {
+        if (item.id?.startsWith('place')) {
+          city = item.text || '';
+        }
+        if (item.id?.startsWith('region')) {
+          state = item.short_code?.replace('US-', '') || item.text || '';
+        }
+      });
+      
+      // Fallback: try properties if context doesn't have the data
+      if (!city) {
+        city = feature.properties?.name || '';
+      }
       
       if (city && state) {
         const formattedLocation = `${city}, ${state}`;
         onChange('location', formattedLocation);
+        setIsValid(true);
+        setErrorMessage('');
+      } else if (city) {
+        // If we have city but no state, still accept it
+        onChange('location', city);
         setIsValid(true);
         setErrorMessage('');
       }

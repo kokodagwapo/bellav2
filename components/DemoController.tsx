@@ -153,14 +153,14 @@ const demoScriptVariations: { [key: number]: DemoScriptStep[] } = {
       navigateTo: 'home',
       scrollTarget: "top"
     },
-    {
-      time: 0,
-      action: "Landing Page & Scroll",
+  {
+    time: 0,
+    action: "Landing Page & Scroll",
       text: "Hi there! I'm Bella, and I want you to know how genuinely excited I am to help you with this. Buying a home is such a meaningful milestone—it's about creating a space for your life, your dreams, your future together. I know this process can feel overwhelming, but I'm here to make sure you feel supported, understood, and confident. Let's take this journey together, one step at a time, with care and excitement.",
       navigateTo: 'home',
-      scrollTarget: "top"
-    },
-    {
+    scrollTarget: "top"
+  },
+  {
       time: 0,
       action: "Landing Page & Scroll",
       text: "Hey! I'm Bella, and I'm genuinely thrilled you're here. You know, I've helped so many couples through this journey, and every time, I'm reminded of how special this moment is. Whether you're buying your first home together, planning for a growing family, or just ready for that next chapter—this is a big deal, and I want to make sure it feels amazing. I'm here with genuine care and excitement. Let's make this something you'll remember fondly!",
@@ -173,7 +173,7 @@ const demoScriptVariations: { [key: number]: DemoScriptStep[] } = {
     {
       time: 8,
       action: "Navigate to Prep4Loan",
-      text: "We start here. No scary forms yet. Just you, me, and some big friendly buttons. It's like a dating app, but for your dream home.",
+    text: "We start here. No scary forms yet. Just you, me, and some big friendly buttons. It's like a dating app, but for your dream home.",
       navigateTo: 'prep'
     },
     {
@@ -353,7 +353,7 @@ const demoScriptVariations: { [key: number]: DemoScriptStep[] } = {
     },
     {
       time: 24,
-      action: "Progress Bar & Checklist",
+    action: "Progress Bar & Checklist",
       text: "Notice the sidebar checklist? That's me working behind the scenes to keep everything organized. I update it automatically as you complete each section. You're never flying blind with me around!",
       scrollTarget: "sidebar"
     },
@@ -368,8 +368,8 @@ const demoScriptVariations: { [key: number]: DemoScriptStep[] } = {
   4: [
     {
       time: 32,
-      action: "Click 'Document List'",
-      text: "And for the documents? I've got super-vision. You upload your W2s, pay stubs, whatever—and I use OCR to read them instantly. I verify them faster than you can say 'low interest rate'.",
+    action: "Click 'Document List'",
+    text: "And for the documents? I've got super-vision. You upload your W2s, pay stubs, whatever—and I use OCR to read them instantly. I verify them faster than you can say 'low interest rate'.",
       navigateTo: 'documents'
     },
     {
@@ -437,8 +437,8 @@ const demoScriptVariations: { [key: number]: DemoScriptStep[] } = {
   5: [
     {
       time: 40,
-      action: "Click 'Home Journey' (URLA 1003)",
-      text: "Now, for the magic trick. We switch to the Home Journey. This is the serious, official 1003 form that lenders need.",
+    action: "Click 'Home Journey' (URLA 1003)",
+    text: "Now, for the magic trick. We switch to the Home Journey. This is the serious, official 1003 form that lenders need.",
       navigateTo: 'form1003'
     },
     {
@@ -507,8 +507,8 @@ const demoScriptVariations: { [key: number]: DemoScriptStep[] } = {
     {
       time: 48,
       action: "Scrolling Form - Pre-filled Data",
-      text: "But guess what? You don't have to type it all again! I already moved your info over. Lenders love it because it's perfect; you love it because you're done. Easy, right?",
-      scrollTarget: "form-content"
+    text: "But guess what? You don't have to type it all again! I already moved your info over. Lenders love it because it's perfect; you love it because you're done. Easy, right?",
+    scrollTarget: "form-content"
     },
     {
       time: 48,
@@ -872,10 +872,10 @@ const DemoController: React.FC<DemoControllerProps> = ({
           }
         }
 
-        // Use best agentic voice: OpenAI Nova (best) with Gemini Kore as fallback
-        // Don't force Gemini only - let it use the best available voice
-        console.log("🎤 Generating speech with best available agentic voice (OpenAI Nova preferred, Gemini Kore fallback)...");
-        const audioData = await generateBellaSpeech(step.text, false); // false = use best available (OpenAI first)
+        // Use Gemini voice only for demo to prevent overlap with other voice assistants
+        // This ensures clean audio without OpenAI and Gemini voices talking over each other
+        console.log("🎤 Generating speech with Gemini voice only (demo mode - prevents voice overlap)...");
+        const audioData = await generateBellaSpeech(step.text, true); // true = use Gemini only (prevents overlap)
         
         if (audioData && audioContextRef.current) {
           // Properly stop and fade out previous audio to prevent noise
@@ -905,7 +905,7 @@ const DemoController: React.FC<DemoControllerProps> = ({
             } catch (e) {
               // If fade fails, just stop directly
               try {
-                currentSourceRef.current.stop();
+            currentSourceRef.current.stop();
                 currentSourceRef.current.disconnect();
               } catch (stopError) {
                 // Ignore if already stopped
@@ -973,17 +973,17 @@ const DemoController: React.FC<DemoControllerProps> = ({
               console.log(`⏱️ Step ${index + 1} completed. Audio: ${audioDuration.toFixed(0)}ms, Pausing ${pauseTime.toFixed(0)}ms before next step`);
               
               stepTimeoutRef.current = setTimeout(() => {
-                if (isPlaying) {
+             if (isPlaying) {
                   playStep(index + 1);
                 }
               }, pauseTime);
-            }
+             }
           };
           
           console.log(`🎵 Starting audio playback for step ${index + 1} (duration: ${audioBuffer.duration.toFixed(2)}s)`);
           try {
             source.start(0);
-            currentSourceRef.current = source;
+          currentSourceRef.current = source;
             setIsLoadingAudio(false);
           } catch (playError: any) {
             console.error("❌ Audio playback error:", playError);
@@ -1069,7 +1069,7 @@ const DemoController: React.FC<DemoControllerProps> = ({
         } catch (e) {
           // Fallback: just stop directly
           try {
-            currentSourceRef.current.stop();
+        currentSourceRef.current.stop();
             currentSourceRef.current.disconnect();
           } catch (stopError) {
             // Ignore if already stopped
@@ -1137,7 +1137,7 @@ const DemoController: React.FC<DemoControllerProps> = ({
         playStep(currentStep + 1);
       }
     } else {
-      playStep(currentStep + 1);
+    playStep(currentStep + 1);
     }
   };
 

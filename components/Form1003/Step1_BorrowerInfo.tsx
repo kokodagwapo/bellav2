@@ -62,11 +62,16 @@ const AddressInput: React.FC<{
         }
     }, []);
 
-    // Handle Mapbox address retrieval
+    // Handle Mapbox address retrieval - improved to extract all address components
     const handleRetrieve = (res: any) => {
         const feature = res.features[0];
         if (feature) {
-            const formattedAddress = feature.properties.full_address || feature.properties.place_name || '';
+            const properties = feature.properties || {};
+            const context = feature.context || [];
+            
+            // Extract full formatted address (best practice: use full_address or place_name)
+            const formattedAddress = properties.full_address || properties.place_name || properties.address_line || '';
+            
             if (formattedAddress) {
                 onChange(id, formattedAddress);
                 isVerifiedRef.current = true;

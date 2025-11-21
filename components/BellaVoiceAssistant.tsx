@@ -28,6 +28,7 @@ const BellaVoiceAssistant: React.FC<BellaVoiceAssistantProps> = ({ onStartDemo }
     const [micPermissionGranted, setMicPermissionGranted] = useState<boolean | null>(null);
     const [micError, setMicError] = useState<string | null>(null);
     const [isMinimized, setIsMinimized] = useState(false);
+    const [voicePreference, setVoicePreference] = useState<'auto' | 'gemini' | 'openai'>('auto'); // Voice preference: 'auto' tries OpenAI first, 'gemini' uses only Gemini, 'openai' uses only OpenAI
 
     // Audio Refs
     const audioContextRef = useRef<AudioContext | null>(null);
@@ -335,9 +336,20 @@ const BellaVoiceAssistant: React.FC<BellaVoiceAssistantProps> = ({ onStartDemo }
         }
 
         try {
-            // generateBellaSpeech tries OpenAI first, then falls back to Gemini
+            // Determine if we should use Gemini only based on voice preference
+            // If voicePreference is 'gemini', use Gemini only to prevent overlap
+            const useGeminiOnly = voicePreference === 'gemini';
+            
+            if (useGeminiOnly) {
+                console.log("🔊 Using Gemini voice only (voice preference: Gemini)");
+            } else if (voicePreference === 'openai') {
+                console.log("🔊 Using OpenAI voice only (voice preference: OpenAI)");
+            } else {
+                console.log("🔊 Using auto voice selection (OpenAI first, Gemini fallback)");
+            }
+            
             console.log("🔊 Requesting TTS for text:", text.substring(0, 50) + "...");
-            const audioData = await generateBellaSpeech(text);
+            const audioData = await generateBellaSpeech(text, useGeminiOnly);
 
             if (!audioData) {
                 console.error("❌ No audio data returned from TTS service");
@@ -727,6 +739,10 @@ const BellaVoiceAssistant: React.FC<BellaVoiceAssistantProps> = ({ onStartDemo }
         setStatusMessage("Starting live guide...");
         setMicError(null);
         setConversationHistory([]);
+        
+        // When starting agentic mode, use auto voice selection (OpenAI first, Gemini fallback)
+        // This allows best quality voice when available, but falls back gracefully
+        setVoicePreference('auto');
 
         // Resume Audio Context on user interaction
         if (audioContextRef.current?.state === 'suspended') {
