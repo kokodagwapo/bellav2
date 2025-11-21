@@ -82,11 +82,11 @@ const BellaVoiceAssistant: React.FC = () => {
                         try { 
                             recognition.start(); 
                             console.log("🔄 Restarting speech recognition");
-                        } catch (e) { 
+                        } catch (e: any) { 
                             console.warn("Could not restart recognition:", e);
                             // If restart fails, it might be because recognition is already running
                             // or permissions were revoked
-                            if (e.toString().includes('not-allowed') || e.toString().includes('permission')) {
+                            if (e?.toString()?.includes('not-allowed') || e?.toString()?.includes('permission')) {
                                 setMicError("Microphone access denied. Please check your browser settings.");
                                 setMicPermissionGranted(false);
                             }
@@ -185,7 +185,7 @@ const BellaVoiceAssistant: React.FC = () => {
                     }
 
                     // Update conversation history
-                    const updatedHistory = [...conversationHistory, { role: 'user', text: transcript }];
+                    const updatedHistory: { role: 'user' | 'model', text: string }[] = [...conversationHistory, { role: 'user' as const, text: transcript }];
                     setConversationHistory(updatedHistory);
 
                     // Get contextual response from Bella with user context
@@ -205,17 +205,17 @@ const BellaVoiceAssistant: React.FC = () => {
                         : '';
                     
                     // Build conversation with context
-                    const conversationWithContext = contextPrompt 
+                    const conversationWithContext: { role: 'user' | 'model', text: string }[] = contextPrompt 
                         ? [
                             ...updatedHistory.slice(0, -1), // All but the last user message
-                            { role: 'user', text: `${transcript} ${contextPrompt}` }
+                            { role: 'user' as const, text: `${transcript} ${contextPrompt}` }
                           ]
                         : updatedHistory;
                     
                     const reply = await getBellaChatReply(conversationWithContext);
                     
                     // Update conversation history with Bella's response
-                    setConversationHistory([...updatedHistory, { role: 'model', text: reply }]);
+                    setConversationHistory([...updatedHistory, { role: 'model' as const, text: reply }]);
                     
                     // Play response
                     await playAudio(reply, () => {
@@ -452,7 +452,7 @@ const BellaVoiceAssistant: React.FC = () => {
             source.onended = async () => {
                 // Fade out before disconnecting to prevent noise
                 try {
-                    if (currentSourceGainRef.current) {
+                    if (currentSourceGainRef.current && audioContextRef.current) {
                         const fadeOutTime = 0.1;
                         const currentTime = audioContextRef.current.currentTime;
                         currentSourceGainRef.current.gain.cancelScheduledValues(currentTime);
@@ -712,45 +712,87 @@ const BellaVoiceAssistant: React.FC = () => {
 
         // Resume Audio Context on user interaction
         if (audioContextRef.current?.state === 'suspended') {
-            await audioContextRef.current.resume();
+            try {
+                await audioContextRef.current.resume();
+                console.log("✅ Audio context resumed");
+            } catch (e) {
+                console.warn("⚠️ Could not resume audio context:", e);
+            }
         }
 
-        // Request microphone permission
+        // Request microphone permission with better error handling
         try {
             console.log("🎤 Requesting microphone access for agentic mode...");
+            setMicPermissionGranted(null); // Show loading state
+            
+            // Check if we already have permission
+            if (navigator.permissions) {
+                try {
+                    const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+                    if (permissionStatus.state === 'granted') {
+                        console.log("✅ Microphone permission already granted");
+                    } else if (permissionStatus.state === 'denied') {
+                        console.warn("⚠️ Microphone permission previously denied");
+                        setMicPermissionGranted(false);
+                        setMicError("Microphone access was previously denied. Please enable it in your browser settings (look for 🔒 or 🎤 icon in the address bar) and refresh the page.");
+                        setStatusMessage("Permission Denied");
+                        return;
+                    }
+                } catch (permError) {
+                    // Permission API not supported, continue with getUserMedia
+                    console.log("ℹ️ Permission API not available, proceeding with getUserMedia");
+                }
+            }
+            
             let stream: MediaStream;
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                console.log("✅ Basic microphone permission granted");
-            } catch (simpleError: any) {
-                console.log("⚠️ Simple request failed, trying with constraints:", simpleError);
+                // Try with optimal audio constraints first
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true,
+                        sampleRate: 44100
+                    } 
+                });
+                console.log("✅ Microphone permission granted with optimal settings");
+            } catch (constraintError: any) {
+                console.log("⚠️ Constrained request failed, trying basic request:", constraintError);
                 try {
-                    stream = await navigator.mediaDevices.getUserMedia({ 
-                        audio: {
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            autoGainControl: true,
-                            sampleRate: 44100
-                        } 
-                    });
-                    console.log("✅ Microphone permission granted with constraints");
-                } catch (constraintError: any) {
+                    // Fallback to basic audio request
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    console.log("✅ Basic microphone permission granted");
+                } catch (simpleError: any) {
                     throw simpleError;
                 }
             }
             
             setMicPermissionGranted(true);
             micStreamRef.current = stream;
+            setMicError(null);
             console.log("✅ Microphone permission granted for agentic mode");
+            
+            // Monitor stream for disconnection
+            stream.getTracks().forEach(track => {
+                track.onended = () => {
+                    console.warn("⚠️ Microphone track ended unexpectedly");
+                    setMicPermissionGranted(false);
+                    setMicError("Microphone disconnected. Please check your microphone and try again.");
+                };
+            });
         } catch (e: any) {
-            console.error("❌ Microphone permission denied:", e);
+            console.error("❌ Microphone permission error:", e);
             setMicPermissionGranted(false);
             if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-                setMicError("Microphone access denied. Please allow microphone access in your browser settings and try again.");
-            } else if (e.name === 'NotFoundError') {
-                setMicError("No microphone found. Please connect a microphone and try again.");
+                setMicError("Microphone access denied. Please click the 🔒 or 🎤 icon in your browser's address bar and select 'Allow' or 'Always allow', then click retry.");
+            } else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
+                setMicError("No microphone found. Please connect a microphone device and try again.");
+            } else if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
+                setMicError("Microphone is being used by another application. Please close other apps using the microphone and try again.");
+            } else if (e.name === 'OverconstrainedError' || e.name === 'ConstraintNotSatisfiedError') {
+                setMicError("Your microphone doesn't support the required settings. Please try a different microphone.");
             } else {
-                setMicError(`Could not access microphone: ${e.message}. Please check your browser settings.`);
+                setMicError(`Could not access microphone: ${e.message || 'Unknown error'}. Please check your browser settings and microphone connection.`);
             }
             setStatusMessage("Permission Needed");
             return;
@@ -786,9 +828,9 @@ const BellaVoiceAssistant: React.FC = () => {
             return;
         }
 
-        // Welcome message for agentic mode
+        // Welcome message for agentic mode - conversational and question-asking
         if (micPermissionGranted) {
-            const welcomeMessage = "Hey! I'm Bella, your live mortgage guide. I'm here to help you through Prep4Loan—no scripts, just real conversation. Ask me anything, tell me what you're looking at, or just chat about your mortgage goals. I'll guide you naturally through everything. What would you like to explore?";
+            const welcomeMessage = "Hey there! I'm Bella, your friendly mortgage guide. I'm here to help you through Prep4Loan with real conversation—no scripts, just genuine help. What brings you here today? Are you looking to buy a home, refinance, or just exploring your options?";
             await playAudio(welcomeMessage);
             setConversationHistory([{ role: 'model', text: welcomeMessage }]);
         }
@@ -858,27 +900,48 @@ const BellaVoiceAssistant: React.FC = () => {
                         {(mode === 'call' || mode === 'agentic') && !isBellaSpeaking && micPermissionGranted === false && "Mic Permission Needed"}
                     </p>
                     {micError && (
-                        <div className="text-xs text-red-500 font-medium mt-1 space-y-2 w-full">
-                            <p>⚠️ {micError}</p>
-                            {micError.includes('permission') || micError.includes('denied') ? (
-                                <div className="space-y-2">
-                                    <div className="text-[10px] text-gray-600 space-y-1">
-                                        <p className="font-semibold">How to fix:</p>
-                                        <ol className="list-decimal list-inside space-y-0.5 ml-1">
-                                            <li>Look for a microphone icon 🔒 or 🎤 in your browser's address bar</li>
-                                            <li>Click it and select "Allow" or "Always allow"</li>
-                                            <li>Then click the retry button below</li>
+                        <motion.div 
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-xs text-red-600 font-medium mt-2 space-y-3 w-full bg-red-50 border border-red-200 rounded-lg p-3"
+                        >
+                            <p className="font-semibold flex items-center gap-2">
+                                <span className="text-base">⚠️</span>
+                                {micError}
+                            </p>
+                            {(micError.includes('permission') || micError.includes('denied') || micError.includes('Allow')) && (
+                                <div className="space-y-3">
+                                    <div className="text-[11px] text-gray-700 space-y-2 bg-white rounded p-2 border border-gray-200">
+                                        <p className="font-semibold text-gray-800">📋 Step-by-step fix:</p>
+                                        <ol className="list-decimal list-inside space-y-1.5 ml-1 text-gray-700">
+                                            <li>Look for a <strong>microphone icon 🔒 or 🎤</strong> in your browser's address bar (top left)</li>
+                                            <li>Click the icon to open permission settings</li>
+                                            <li>Select <strong>"Allow"</strong> or <strong>"Always allow"</strong> for microphone access</li>
+                                            <li>If you don't see the icon, check browser settings → Privacy → Site permissions → Microphone</li>
+                                            <li>Then click the <strong>"🔄 Retry"</strong> button below</li>
                                         </ol>
                                     </div>
                                     <button
                                         onClick={startAgenticMode}
-                                        className="w-full bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold py-2 px-4 rounded-lg transition-all active:scale-95 shadow-md"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-4 rounded-lg transition-all active:scale-95 shadow-md flex items-center justify-center gap-2"
                                     >
-                                        🔄 Retry Microphone Access
+                                        <span>🔄</span>
+                                        <span>Retry Microphone Access</span>
                                     </button>
                                 </div>
-                            ) : null}
-                        </div>
+                            )}
+                            {micError.includes('No microphone') && (
+                                <div className="text-[11px] text-gray-700 bg-white rounded p-2 border border-gray-200">
+                                    <p className="font-semibold mb-1">💡 Troubleshooting:</p>
+                                    <ul className="list-disc list-inside space-y-0.5 ml-1">
+                                        <li>Check if your microphone is connected</li>
+                                        <li>Try unplugging and reconnecting your microphone</li>
+                                        <li>Check system settings to ensure microphone is enabled</li>
+                                        <li>Try refreshing the page after connecting</li>
+                                    </ul>
+                                </div>
+                            )}
+                        </motion.div>
                     )}
                     {(mode === 'call' || mode === 'agentic') && micPermissionGranted === null && !micError && (
                         <p className="text-xs text-blue-600 font-medium mt-1">
