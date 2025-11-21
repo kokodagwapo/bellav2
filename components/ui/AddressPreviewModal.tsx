@@ -116,26 +116,28 @@ const AddressPreviewModal: React.FC<AddressPreviewModalProps> = ({
     };
   }, [isOpen, address]);
 
-  if (!address) return null;
-
   const openInGoogleMaps = () => {
-    const query = encodeURIComponent(address.fullAddress || `${address.street}, ${address.city}, ${address.state} ${address.zip}`);
+    if (!address) return;
+    const query = encodeURIComponent(address.fullAddress || `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zip || ''}`);
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
   };
 
   const openInMapbox = () => {
+    if (!address) return;
     if (address.coordinates) {
       const { longitude, latitude } = address.coordinates;
       window.open(`https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+ff0000(${longitude},${latitude})/${longitude},${latitude},14,0/800x600?access_token=${import.meta.env.VITE_MAPBOX_API_KEY}`, '_blank');
     } else {
-      const query = encodeURIComponent(address.fullAddress || `${address.street}, ${address.city}, ${address.state} ${address.zip}`);
+      const query = encodeURIComponent(address.fullAddress || `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zip || ''}`);
       window.open(`https://www.mapbox.com/search/?query=${query}`, '_blank');
     }
   };
 
+  if (!isOpen || !address) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
+    <AnimatePresence mode="wait">
+      {isOpen && address && (
         <>
           {/* Backdrop */}
           <motion.div
@@ -143,7 +145,8 @@ const AddressPreviewModal: React.FC<AddressPreviewModalProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4"
+            style={{ position: 'fixed' }}
           >
             {/* Modal */}
             <motion.div
@@ -151,7 +154,8 @@ const AddressPreviewModal: React.FC<AddressPreviewModalProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+              className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col z-[10000]"
+              style={{ position: 'relative', zIndex: 10000 }}
             >
               {/* Header */}
               <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl z-10">
