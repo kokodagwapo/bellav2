@@ -223,6 +223,7 @@ const AddressInput: React.FC<{
                                 if (isVerifiedRef.current) {
                                     isVerifiedRef.current = false;
                                     setIsVerified(false);
+                                    setAddressPreview(null); // Clear stored address when manually editing
                                 }
                             }}
                             placeholder={placeholder || "Street address, City, State ZIP"}
