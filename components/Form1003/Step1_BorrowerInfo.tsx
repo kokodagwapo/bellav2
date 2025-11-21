@@ -5,6 +5,7 @@ import StepNavigation from '../StepNavigation';
 import { Lightbulb } from '../icons';
 import { AddressAutofill } from '@mapbox/search-js-react';
 import AddressPreviewModal, { AddressDetails } from '../ui/AddressPreviewModal';
+import { MapPin, Eye } from 'lucide-react';
 
 
 interface Step1Props {
@@ -152,9 +153,8 @@ const AddressInput: React.FC<{
                     onChange(id, verifiedFullAddress);
                 }
                 
-                // Show preview modal
+                // Store address details for modal (don't show automatically)
                 setAddressPreview(addressDetails);
-                setShowAddressModal(true);
                 
                 isVerifiedRef.current = true;
                 setIsVerified(true);
@@ -163,7 +163,7 @@ const AddressInput: React.FC<{
                 }
             } catch (error) {
                 console.error('Error verifying address:', error);
-                // Address is already set above, just show modal with unverified address
+                // Address is already set above, store for modal (don't show automatically)
                 const addressDetails: AddressDetails = {
                     street,
                     city,
@@ -177,7 +177,6 @@ const AddressInput: React.FC<{
                     verified: false
                 };
                 setAddressPreview(addressDetails);
-                setShowAddressModal(true);
                 
                 isVerifiedRef.current = true;
                 setIsVerified(true);
@@ -227,7 +226,7 @@ const AddressInput: React.FC<{
                                 }
                             }}
                             placeholder={placeholder || "Street address, City, State ZIP"}
-                            className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto] pr-10"
+                            className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto] pr-12"
                             autoComplete="address-line1"
                         />
                     </AddressAutofill>
@@ -244,14 +243,27 @@ const AddressInput: React.FC<{
                             if (isVerifiedRef.current) {
                                 isVerifiedRef.current = false;
                                 setIsVerified(false);
+                                setAddressPreview(null); // Clear stored address when manually editing
                             }
                         }}
                         placeholder={placeholder || "Street address, City, State ZIP"}
-                        className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto] pr-10"
+                        className="mt-1 block w-full px-4 py-3 sm:px-3 sm:py-2.5 bg-background border border-border rounded-xl sm:rounded-lg shadow-sm text-base sm:text-sm text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all touch-manipulation min-h-[44px] sm:min-h-[auto] pr-12"
                         autoComplete="address-line1"
                     />
                 )}
-                {isVerified && (
+                {/* Modern icon button to view/confirm address */}
+                {addressPreview && value && value.trim().length > 0 && (
+                    <button
+                        type="button"
+                        onClick={() => setShowAddressModal(true)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        aria-label="View and confirm address"
+                        title="View and confirm address"
+                    >
+                        <Eye className="h-5 w-5" />
+                    </button>
+                )}
+                {isVerified && !addressPreview && (
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                         <svg className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
