@@ -963,16 +963,28 @@ const DemoController: React.FC<DemoControllerProps> = ({
             throw new Error(`Failed to decode audio: ${decodeError.message}`);
           }
           
+          // Ensure audio context is running
+          if (audioContextRef.current.state === 'suspended') {
+            await audioContextRef.current.resume();
+            console.log("✅ Audio context resumed before playback");
+          }
+          
           // Create gain node for smooth fade in (longer fade to prevent sharp sounds)
           const gainNode = audioContextRef.current.createGain();
           const startTime = audioContextRef.current.currentTime;
           gainNode.gain.setValueAtTime(0, startTime);
           gainNode.gain.linearRampToValueAtTime(1, startTime + 0.15); // 150ms smooth fade in
+          
+          // Connect gain node directly to destination (not through another gain node)
           gainNode.connect(audioContextRef.current.destination);
           
           const source = audioContextRef.current.createBufferSource();
           source.buffer = audioBuffer;
           source.connect(gainNode);
+          
+          // Verify audio context state before starting
+          console.log(`🎵 Audio context state: ${audioContextRef.current.state}, sample rate: ${audioContextRef.current.sampleRate}Hz`);
+          console.log(`🎵 Audio buffer: ${audioBuffer.duration.toFixed(2)}s, ${audioBuffer.numberOfChannels} channels, ${audioBuffer.sampleRate}Hz`);
           
           source.onended = () => {
             console.log(`✅ Audio playback completed for step ${index + 1}`);
@@ -1011,12 +1023,36 @@ const DemoController: React.FC<DemoControllerProps> = ({
           };
           
           console.log(`🎵 Starting audio playback for step ${index + 1} (duration: ${audioBuffer.duration.toFixed(2)}s)`);
+          console.log(`🎵 Audio context state before start: ${audioContextRef.current.state}`);
+          
           try {
+            // Ensure audio context is running before starting
+            if (audioContextRef.current.state === 'suspended') {
+              await audioContextRef.current.resume();
+              console.log("✅ Audio context resumed right before start");
+            }
+            
             source.start(0);
-          currentSourceRef.current = source;
+            currentSourceRef.current = source;
             setIsLoadingAudio(false);
+            
+            console.log(`✅ Audio playback started successfully. Context state: ${audioContextRef.current.state}`);
+            
+            // Verify audio is actually playing after a short delay
+            setTimeout(() => {
+              if (audioContextRef.current) {
+                console.log(`🎵 Audio context state after start: ${audioContextRef.current.state}`);
+              }
+            }, 100);
           } catch (playError: any) {
             console.error("❌ Audio playback error:", playError);
+            console.error("❌ Error details:", {
+              message: playError.message,
+              name: playError.name,
+              stack: playError.stack,
+              audioContextState: audioContextRef.current?.state,
+              sourcePlaybackRate: source.playbackRate
+            });
             setIsLoadingAudio(false);
             // Clean up on error
             try {
@@ -1120,13 +1156,35 @@ const DemoController: React.FC<DemoControllerProps> = ({
       }
     } else {
       // Resume audio context on user interaction (required for autoplay policies)
-      if (audioContextRef.current?.state === 'suspended') {
-        try {
-          await audioContextRef.current.resume();
-          console.log("✅ Audio context resumed on play button click");
-        } catch (e) {
-          console.warn("⚠️ Could not resume audio context:", e);
+      if (audioContextRef.current) {
+        if (audioContextRef.current.state === 'suspended') {
+          try {
+            await audioContextRef.current.resume();
+            console.log("✅ Audio context resumed on play button click");
+            console.log(`🎵 Audio context state after resume: ${audioContextRef.current.state}`);
+          } catch (e) {
+            console.error("❌ Could not resume audio context:", e);
+            alert("Please allow audio playback in your browser settings to hear Bella speak.");
+            return; // Don't start playing if we can't resume audio
+          }
         }
+        
+        // Verify audio context is running
+        if (audioContextRef.current.state !== 'running') {
+          console.warn(`⚠️ Audio context is not running. State: ${audioContextRef.current.state}`);
+          try {
+            await audioContextRef.current.resume();
+            console.log("✅ Audio context resumed (second attempt)");
+          } catch (e) {
+            console.error("❌ Failed to resume audio context:", e);
+            alert("Audio playback is blocked. Please check your browser settings and allow audio.");
+            return;
+          }
+        }
+      } else {
+        console.error("❌ Audio context is null - cannot play audio");
+        alert("Audio system not initialized. Please refresh the page.");
+        return;
       }
       
       setIsPlaying(true);
