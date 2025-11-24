@@ -13,8 +13,8 @@ const Form1003Welcome: React.FC<Form1003WelcomeProps> = ({ onNext }) => {
   };
 
   return (
-    <div className="text-center flex flex-col justify-center items-center" style={{minHeight: '400px'}}>
-      <div className="px-2">
+    <div className="text-center flex flex-col justify-center items-center relative w-full" style={{minHeight: '400px', pointerEvents: 'auto', visibility: 'visible', opacity: 1, zIndex: 10, position: 'relative'}}>
+      <div className="px-2 w-full">
         <motion.div 
           animate={{ opacity: 1, display: 'flex' }}
           className="flex flex-col items-center gap-2 mb-4 sm:mb-6"
