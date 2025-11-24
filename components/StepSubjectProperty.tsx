@@ -131,7 +131,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
 
   const canProceed = hasProperty !== null && (
     hasProperty 
-      ? ((address.fullAddress || (address.street && address.city && address.state && address.zip)) && value > 0 && addressConfirmed)
+      ? ((address.fullAddress || (address.street && address.city && address.state && address.zip)) && value > 0 && addressVerified)
       : (budgetRange && targetZip && targetZipVerified)
   );
 
@@ -392,21 +392,17 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                     autoComplete="address-line1"
                   />
                 </AddressAutofill>
-                {/* Verification message */}
-                {verificationMessage && addressVerified && (
+                {/* Address confirmed message - persistent when verified */}
+                {addressVerified && (
                   <motion.div
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800 flex items-start gap-2"
+                    className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800 flex items-center gap-2"
                   >
-                    <svg className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                    <div className="flex-1">
-                      <p className="font-semibold text-green-900 mb-1">Address Verified ✓</p>
-                      <p className="text-green-700">{verificationMessage}</p>
-            </div>
+                    <p className="font-semibold text-green-900">Address confirmed</p>
                   </motion.div>
                 )}
                 {/* Modern icon button to view/confirm address - Hidden for now */}
