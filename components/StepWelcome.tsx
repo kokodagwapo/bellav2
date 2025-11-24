@@ -98,8 +98,8 @@ const StepWelcome: React.FC<StepWelcomeProps> = ({ onNext }) => {
             Business Process Solutions
           </motion.span>
         </motion.div>
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 sm:mb-3">Discover Mortgage Possibilities</h1>
-        <p className="text-muted-foreground text-base sm:text-lg mb-6 sm:mb-8 px-2">Just answer a few questions and you'll get real mortgage rates in minutes. It's that easy.</p>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-foreground mb-4 sm:mb-5 tracking-tight">Discover Mortgage Possibilities</h1>
+        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light mb-6 sm:mb-8 px-2" style={{ color: '#6b7280' }}>Just answer a few questions and you'll get real mortgage rates in minutes. It's that easy.</p>
       </div>
       <div className="px-4 sm:px-0 mt-4 sm:mt-6 w-full flex justify-center relative" style={{zIndex: 100, visibility: 'visible', opacity: 1, pointerEvents: 'auto', position: 'relative'}}>
         <button
