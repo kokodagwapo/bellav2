@@ -215,6 +215,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigateToPrep, onNavigateT
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
         className="text-center px-4 sm:px-6 mb-16 sm:mb-20"
+        style={{ display: 'none' }}
       >
         <div className="relative bg-gradient-to-br from-white to-gray-50/50 rounded-3xl p-10 sm:p-14 md:p-18 lg:p-24 shadow-xl border border-gray-200/80 overflow-hidden">
           <div className="relative z-10">
