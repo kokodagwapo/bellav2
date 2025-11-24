@@ -4,7 +4,7 @@ import StepHeader from './StepHeader';
 import { SelectionButton } from './StepHeader';
 import StepNavigation from './StepNavigation';
 import { Clock, Lightbulb, UploadCloud } from './icons';
-import { extractDataFromDocument } from '../services/geminiService';
+import { extractDataFromDocument } from '../services/ocrService';
 import type { FormData } from '../types';
 
 interface StepTimeInJobProps {

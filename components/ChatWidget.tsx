@@ -9,9 +9,9 @@ import { getRequirements } from "../data/requirements";
 import { 
     getBellaChatReply, 
     analyzeTextForData,
-    generateBellaSpeech,
-    extractDataFromDocument 
+    generateBellaSpeech
 } from '../services/geminiService';
+import { extractDataFromDocument } from '../services/ocrService';
 import { GoogleGenAI, Modality, LiveServerMessage, Blob } from "@google/genai";
 import VoiceAgentView from './VoiceAgentView';
 

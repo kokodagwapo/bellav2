@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import StepHeader from './StepHeader';
 import StepNavigation from './StepNavigation';
 import { UploadCloud, FileCheck2, Loader, AlertCircle, FileText } from './icons';
-import { extractDataFromDocument } from '../services/geminiService';
+import { extractDataFromDocument } from '../services/ocrService';
 import type { FormData } from '../types';
 
 interface StepPrepDocsProps {
