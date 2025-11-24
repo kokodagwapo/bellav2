@@ -1232,87 +1232,94 @@ const DemoController: React.FC<DemoControllerProps> = ({
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 50 }}
-      className="fixed bottom-6 left-6 z-50 bg-white/95 backdrop-blur-md border border-primary/20 shadow-2xl rounded-2xl p-4 w-80 max-h-[90vh] overflow-y-auto"
+      exit={{ opacity: 0, y: 20 }}
+      className="fixed bottom-6 left-6 z-50 bg-white/98 backdrop-blur-xl border border-gray-200/60 shadow-lg rounded-3xl p-5 w-[340px] max-h-[85vh] overflow-hidden flex flex-col"
     >
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-primary text-lg">Bella Live Demo</h3>
-        <div className="flex gap-2">
+      {/* Minimalist Header */}
+      <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+          <h3 className="font-light text-sm text-gray-800 tracking-tight">Bella Demo</h3>
+        </div>
+        <div className="flex items-center gap-1">
           <button 
             onClick={() => setIsMuted(!isMuted)} 
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1.5 hover:bg-gray-50 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
             aria-label={isMuted ? "Unmute" : "Mute"}
           >
-            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+            {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
           </button>
           <button 
             onClick={stopDemo}
-            className="p-2 hover:bg-red-50 text-red-500 hover:text-red-700 rounded-full transition-colors"
+            className="p-1.5 hover:bg-gray-50 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
             aria-label="Close demo"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
       </div>
       
-      <div className="mb-4 min-h-[60px]">
-        <p className="text-sm text-gray-700 italic leading-relaxed">
+      {/* Quote Text - Minimalist */}
+      <div className="mb-5 min-h-[80px] flex-1">
+        <p className="text-sm text-gray-600 leading-relaxed font-light">
           {isLoadingAudio ? (
-            <span className="text-primary">🎤 Bella is speaking...</span>
+            <span className="text-primary/70 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+              Bella is speaking...
+            </span>
           ) : (
-            `"${demoScript[currentStep]?.text || ''}"`
+            demoScript[currentStep]?.text || ''
           )}
         </p>
       </div>
 
-      <div className="flex items-center justify-center gap-3 mb-3">
-        <button 
-          onClick={togglePlay}
-          className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary/90 transition-all shadow-lg hover:scale-105 active:scale-95"
-          aria-label={isPlaying ? "Pause" : "Play"}
-        >
-          {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-1" />}
-        </button>
-        <button 
-          onClick={nextStep}
-          className="p-2 text-gray-500 hover:text-primary hover:bg-primary/10 rounded-full transition-all"
-          aria-label="Skip to next step"
-        >
-          <SkipForward size={24} />
-        </button>
-        <button
-          onClick={resetDemo}
-          className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all"
-        >
-          Reset
-        </button>
-      </div>
-      
-      <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center text-xs">
-        <span className="text-gray-500">
-          Step {currentStep + 1}/{demoScript.length}
-        </span>
-        <span className="text-gray-400 font-medium">
-          {demoScript[currentStep]?.action || 'Demo Complete'}
-        </span>
-      </div>
-      
-      <div className="mt-3 pt-2 border-t border-gray-200">
-        <div className="flex gap-1">
+      {/* Progress Indicator - Minimalist */}
+      <div className="mb-4">
+        <div className="flex gap-0.5 mb-2">
           {demoScript.map((_, idx) => (
             <div
               key={idx}
-              className={`flex-1 h-1 rounded-full transition-all ${
+              className={`flex-1 h-0.5 rounded-full transition-all duration-300 ${
                 idx === currentStep 
                   ? 'bg-primary' 
                   : idx < currentStep 
-                    ? 'bg-primary/50' 
+                    ? 'bg-primary/30' 
                     : 'bg-gray-200'
               }`}
             />
           ))}
+        </div>
+        <div className="flex items-center justify-between text-xs text-gray-400 font-light">
+          <span>Step {currentStep + 1}/{demoScript.length}</span>
+          <span className="truncate max-w-[180px]">{demoScript[currentStep]?.action || 'Complete'}</span>
+        </div>
+      </div>
+
+      {/* Controls - Minimalist */}
+      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+        <button
+          onClick={resetDemo}
+          className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-lg transition-all font-light"
+        >
+          Reset
+        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={nextStep}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all"
+            aria-label="Skip to next step"
+          >
+            <SkipForward size={18} />
+          </button>
+          <button 
+            onClick={togglePlay}
+            className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary/90 transition-all shadow-sm hover:shadow-md"
+            aria-label={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
+          </button>
         </div>
       </div>
     </motion.div>
