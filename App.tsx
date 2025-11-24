@@ -4,6 +4,8 @@ import { Landmark, FilePlus2, FileText, AiIcon, LayoutList, Home } from './compo
 import StepIndicator from './components/StepIndicator';
 import Form1003 from './components/Form1003';
 import RequirementsChecklist from './components/Checklist';
+import Prep4LoanChecklist from './components/Prep4LoanChecklist';
+import ProgressBar from './components/ProgressBar';
 import BellaChatWidget from './components/ChatWidget';
 import DocumentList from './components/DocumentList';
 import LandingPage from './components/LandingPage';
@@ -371,18 +373,26 @@ const App: React.FC = () => {
                   />
                 </div>
               )}
-              <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-12 xl:gap-16 items-start">
-                <div className="hidden lg:block lg:col-span-1 pt-6 lg:pt-12">
-                  <RequirementsChecklist loanPurpose={formData.loanPurpose} formData={formData} />
-                </div>
-                <div className="w-full lg:col-span-2">
-                  <div className="bg-white rounded-2xl sm:rounded-3xl border border-border/60 transition-all duration-300 overflow-hidden shadow-xl sm:shadow-2xl hover:shadow-2xl relative" style={{ zIndex: 10 }}>
-                    <div className="p-4 sm:p-6 md:p-8 lg:p-12 min-h-[400px] sm:min-h-[500px] md:min-h-[550px] flex flex-col justify-between bg-white relative" style={{ zIndex: 10, pointerEvents: 'auto' }}>
-                      <div key={step} className="animate-fade-in w-full flex-1 flex flex-col justify-center relative" style={{ zIndex: 10, pointerEvents: 'auto' }}>
-                        {renderPrepFlow()}
-                      </div>
-                    </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-8 xl:gap-12 items-start">
+                <div className="lg:col-span-2 bg-white rounded-2xl sm:rounded-3xl border border-border/60 transition-all duration-300 overflow-hidden shadow-xl sm:shadow-2xl hover:shadow-2xl p-4 sm:p-6 md:p-8 lg:p-12 min-h-[400px] sm:min-h-[500px] md:min-h-[550px] flex flex-col justify-between">
+                  <div key={step} className="animate-fade-in w-full flex-1 flex flex-col justify-center relative">
+                    {renderPrepFlow()}
                   </div>
+                </div>
+                <div className="hidden lg:block lg:col-span-1 space-y-4">
+                  <ProgressBar 
+                    currentStep={step + 1} 
+                    totalSteps={filteredFlow.length} 
+                    formData={formData}
+                    flowSteps={filteredFlow}
+                    onSectionClick={(sectionKey, stepIndex) => {
+                      // Navigate to the step if a valid index is provided
+                      if (stepIndex !== null && stepIndex !== undefined && stepIndex >= 0 && stepIndex < filteredFlow.length) {
+                        setStep(stepIndex);
+                      }
+                    }}
+                  />
+                  <Prep4LoanChecklist loanPurpose={formData.loanPurpose} formData={formData} />
                 </div>
               </div>
             </div>
