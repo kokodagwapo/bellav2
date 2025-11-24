@@ -375,6 +375,7 @@ const App: React.FC = () => {
               )}
               <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-8 xl:gap-12 items-stretch" style={{ marginTop: '0.5in' }}>
                 <div className="lg:col-span-2 bg-white rounded-2xl sm:rounded-3xl border border-border/60 transition-all duration-300 overflow-hidden shadow-xl sm:shadow-2xl hover:shadow-2xl p-4 sm:p-6 md:p-8 lg:p-12 min-h-[400px] sm:min-h-[500px] md:min-h-[550px] flex flex-col justify-between">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-foreground mb-4 sm:mb-6 md:mb-8 text-center lg:text-left">Prep4Loan</h1>
                   <div key={step} className="animate-fade-in w-full flex-1 flex flex-col justify-center relative">
                     {renderPrepFlow()}
                   </div>
