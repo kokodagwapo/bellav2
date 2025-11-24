@@ -532,7 +532,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                   <span className="text-gray-500 text-base sm:text-lg">$</span>
-                </div>
+            </div>
               <input
                 type="text"
                   inputMode="numeric"
