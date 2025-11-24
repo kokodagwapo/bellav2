@@ -107,7 +107,7 @@ const StepWelcome: React.FC<StepWelcomeProps> = ({ onNext }) => {
           onTouchEnd={handleTouch}
           onMouseDown={handleClick}
           type="button"
-          className="w-full sm:w-auto sm:min-w-[200px] bg-primary text-white font-bold py-4 sm:py-4 px-8 sm:px-10 rounded-xl sm:rounded-2xl hover:bg-primary/90 active:bg-primary/85 transition duration-300 focus:outline-none focus:ring-2 focus:ring-primary shadow-lg text-base sm:text-lg touch-manipulation min-h-[48px] sm:min-h-[52px] cursor-pointer"
+          className="w-full sm:w-auto sm:min-w-[200px] bg-primary text-white font-light py-4 sm:py-4 px-8 sm:px-10 rounded-xl sm:rounded-2xl hover:bg-primary/90 active:bg-primary/85 transition duration-300 focus:outline-none focus:ring-2 focus:ring-primary shadow-lg text-base sm:text-lg touch-manipulation min-h-[48px] sm:min-h-[52px] cursor-pointer"
           style={{ 
             pointerEvents: 'auto',
             WebkitTapHighlightColor: 'transparent',

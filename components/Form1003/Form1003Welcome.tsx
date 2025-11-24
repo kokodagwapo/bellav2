@@ -44,7 +44,7 @@ const Form1003Welcome: React.FC<Form1003WelcomeProps> = ({ onNext }) => {
       <div className="px-4 sm:px-0 mt-4 sm:mt-6 w-full flex justify-center">
         <button
           onClick={handleClick}
-          className="w-full sm:w-auto sm:min-w-[200px] bg-primary text-primary-foreground font-bold py-4 sm:py-4 px-8 sm:px-10 rounded-xl sm:rounded-2xl hover:bg-primary/90 transition duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-lg hover:shadow-xl text-base sm:text-lg touch-manipulation min-h-[56px] sm:min-h-[52px] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto sm:min-w-[200px] bg-primary text-primary-foreground font-light py-4 sm:py-4 px-8 sm:px-10 rounded-xl sm:rounded-2xl hover:bg-primary/90 transition duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-lg hover:shadow-xl text-base sm:text-lg touch-manipulation min-h-[56px] sm:min-h-[52px] disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!onNext}
         >
           Get Started

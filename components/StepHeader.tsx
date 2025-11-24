@@ -47,8 +47,8 @@ const SelectionButton: React.FC<SelectionButtonProps> = ({ label, icon, isSelect
                 </div>
               </div>
             )}
-            <span className={`font-medium text-base sm:text-lg md:text-xl flex-1 transition-colors ${
-              isSelected ? 'text-primary font-semibold' : 'text-gray-900'
+            <span className={`font-light text-base sm:text-lg md:text-xl flex-1 transition-colors ${
+              isSelected ? 'text-primary' : 'text-gray-900'
             }`}>
               {label}
             </span>

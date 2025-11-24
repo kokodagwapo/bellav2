@@ -127,7 +127,7 @@ const StepLoanPurpose: React.FC<StepLoanPurposeProps> = ({ data, onChange, onNex
             className="mt-6 text-center"
           >
             <div className="inline-block px-6 py-3 bg-primary/10 border-2 border-primary rounded-full">
-              <p className="text-primary font-semibold text-lg">{gamificationMessage}</p>
+              <p className="text-primary font-light text-lg">{gamificationMessage}</p>
             </div>
           </motion.div>
         )}
