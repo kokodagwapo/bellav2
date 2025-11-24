@@ -24,11 +24,11 @@ const RequirementItem: React.FC<{ requirement: Form1003Requirement; isCompleted:
             )}
         </div>
             <div className="flex-1 min-w-0">
-            <p className={`font-semibold text-sm transition-colors duration-300 ${isCompleted ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+            <p className={`font-light text-sm transition-colors duration-300 ${isCompleted ? 'line-through opacity-60' : 'text-foreground'}`} style={isCompleted ? { color: '#6b7280' } : {}}>
                 {requirement.label}
             </p>
                 {requirement.section && (
-            <p className="text-xs text-muted-foreground mt-0.5">{requirement.section}</p>
+            <p className="text-xs font-light mt-0.5" style={{ color: '#6b7280' }}>{requirement.section}</p>
                 )}
         </div>
     </div>
@@ -86,13 +86,13 @@ const Form1003Checklist: React.FC<Form1003ChecklistProps> = ({ formData }) => {
   return (
     <div className="space-y-4 p-6 bg-secondary/50 rounded-lg border border-border">
       <div>
-        <h3 className="text-lg font-bold font-heading text-foreground mb-1">Application Checklist</h3>
-        <p className="text-xs text-muted-foreground mb-3">
+        <h3 className="text-lg sm:text-xl md:text-2xl font-light tracking-tight text-foreground mb-1">Application Checklist</h3>
+        <p className="text-xs sm:text-sm font-light leading-relaxed mb-3" style={{ color: '#6b7280' }}>
           This list tracks key information required for a complete application.
         </p>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-semibold text-foreground">Progress</span>
-          <span className="text-xs font-semibold text-primary">{completedCount} / {totalCount}</span>
+          <span className="text-xs font-light text-foreground">Progress</span>
+          <span className="text-xs font-light text-primary">{completedCount} / {totalCount}</span>
         </div>
         <div className="w-full bg-muted/50 rounded-full h-2 overflow-hidden">
           <div 
@@ -100,7 +100,7 @@ const Form1003Checklist: React.FC<Form1003ChecklistProps> = ({ formData }) => {
             style={{ width: `${completionPercentage}%` }}
           />
         </div>
-        <p className="text-xs text-muted-foreground mt-1 text-right">{completionPercentage}% Complete</p>
+        <p className="text-xs font-light mt-1 text-right" style={{ color: '#6b7280' }}>{completionPercentage}% Complete</p>
       </div>
       
       <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
@@ -112,7 +112,7 @@ const Form1003Checklist: React.FC<Form1003ChecklistProps> = ({ formData }) => {
                 onClick={() => toggleSection(section)}
                 className="w-full flex items-center justify-between px-4 py-3 bg-secondary/50 hover:bg-secondary/70 transition-colors cursor-pointer"
               >
-                <h4 className="text-xs font-bold text-black uppercase tracking-wider">
+                <h4 className="text-xs font-light text-black uppercase tracking-wider">
               {section}
             </h4>
                 <motion.div
@@ -150,7 +150,7 @@ const Form1003Checklist: React.FC<Form1003ChecklistProps> = ({ formData }) => {
       </div>
       
       <div className="pt-4 border-t border-border">
-        <p className="text-xs text-muted-foreground leading-relaxed">
+        <p className="text-xs font-light leading-relaxed" style={{ color: '#6b7280' }}>
           This checklist aligns with Fannie Mae Form 1003 requirements. Additional documentation may be required based on your specific loan scenario.
         </p>
       </div>

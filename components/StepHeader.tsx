@@ -8,11 +8,11 @@ interface StepHeaderProps {
 
 const StepHeader: React.FC<StepHeaderProps> = ({ title, subtitle }) => (
   <div className="text-center mb-4 sm:mb-8 md:mb-10 px-2">
-    <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-foreground font-heading mb-1.5 sm:mb-3">
+    <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-light tracking-tight text-foreground mb-1.5 sm:mb-3">
       {title}
     </h2>
     {subtitle && (
-      <p className="text-sm sm:text-base md:text-lg text-gray-600 px-2 font-light">
+      <p className="text-sm sm:text-base md:text-lg px-2 font-light leading-relaxed" style={{ color: '#6b7280' }}>
         {subtitle}
       </p>
     )}

@@ -105,9 +105,9 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ labels, currentStepIndex,
                         animate={{ opacity: 1, width: 'auto' }}
                         exit={{ opacity: 0, width: 0 }}
                         transition={{ duration: 0.2 }}
-                        className={`text-xs sm:text-sm font-medium whitespace-nowrap ${
+                        className={`text-xs sm:text-sm font-light whitespace-nowrap ${
                           isActive 
-                            ? 'text-primary font-semibold' 
+                            ? 'text-primary' 
                             : isCompleted 
                             ? 'text-primary' 
                             : 'text-gray-500'

@@ -108,12 +108,12 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, form
       {/* Progress Header - Matching prep4loan style */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <h3 className="text-sm sm:text-base font-semibold text-foreground">Application Progress</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground">Pre-Evaluation Requirements</p>
+          <h3 className="text-sm sm:text-base md:text-lg font-light tracking-tight text-foreground">Application Progress</h3>
+          <p className="text-xs sm:text-sm font-light leading-relaxed" style={{ color: '#6b7280' }}>Pre-Evaluation Requirements</p>
         </div>
         <div className="text-right flex-shrink-0">
-          <div className="text-xl sm:text-2xl font-bold text-primary">{Math.round(progressPercentage)}%</div>
-          <div className="text-xs text-muted-foreground">{completedSections}/{totalSections}</div>
+          <div className="text-xl sm:text-2xl font-light text-primary">{Math.round(progressPercentage)}%</div>
+          <div className="text-xs font-light" style={{ color: '#6b7280' }}>{completedSections}/{totalSections}</div>
         </div>
       </div>
 
@@ -134,7 +134,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, form
             onClick={() => setIsSectionsExpanded(!isSectionsExpanded)}
             className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors mb-2"
           >
-            <span className="text-xs sm:text-sm font-medium text-foreground">
+            <span className="text-xs sm:text-sm font-light text-foreground">
               {isSectionsExpanded ? 'Hide' : 'Show'} Sections ({completedSections}/{totalSections})
             </span>
             <ChevronDown 
@@ -168,7 +168,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, form
                         ) : (
                           <Circle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         )}
-                        <span className={`text-xs font-medium flex-1 ${
+                        <span className={`text-xs font-light flex-1 ${
                           isCompleted 
                             ? 'text-foreground line-through opacity-60' 
                             : 'text-foreground'
@@ -193,7 +193,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, form
           className="mt-4 p-4 bg-primary/10 rounded-xl border border-primary/20 text-center"
         >
           <div className="text-2xl mb-2">🎉</div>
-          <p className="text-sm font-semibold text-foreground">All requirements complete!</p>
+          <p className="text-sm font-light text-foreground">All requirements complete!</p>
           </motion.div>
         )}
     </div>
