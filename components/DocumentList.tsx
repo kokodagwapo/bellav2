@@ -49,8 +49,8 @@ const DocumentList: React.FC<DocumentListProps> = ({ formData }) => {
   return (
     <div className="w-full max-w-6xl mx-auto animate-fade-in my-4 sm:my-6 md:my-8 px-3 sm:px-4 md:px-6">
       <div className="text-center mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground font-heading mb-2 px-2">Document List</h1>
-        <p className="text-muted-foreground text-sm sm:text-base md:text-lg px-2">Track your progress and see what's needed for your mortgage application</p>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-foreground mb-4 sm:mb-5 tracking-tight px-2">Document List</h1>
+        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light px-2" style={{ color: '#6b7280' }}>Track your progress and see what's needed for your mortgage application</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
