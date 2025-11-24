@@ -144,11 +144,11 @@ const Form1003: React.FC<Form1003Props> = ({ initialData }) => {
             )}
           </>
         )}
-        <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-8 xl:gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-8 xl:gap-12 items-stretch">
             <div className="lg:col-span-2 bg-white rounded-2xl sm:rounded-3xl border border-border/60 transition-all duration-300 overflow-hidden shadow-xl sm:shadow-2xl hover:shadow-2xl p-4 sm:p-6 md:p-8 lg:p-12 min-h-[400px] sm:min-h-[500px] md:min-h-[550px] flex flex-col justify-between">
                 {renderStep()}
             </div>
-            <div className="hidden lg:block lg:col-span-1 space-y-4">
+            <div className="hidden lg:block lg:col-span-1 space-y-4 flex flex-col">
                 <ProgressBar 
                   currentStep={step + 1} 
                   totalSteps={totalSteps} 
