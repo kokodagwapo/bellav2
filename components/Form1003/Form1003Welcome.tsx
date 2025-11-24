@@ -39,7 +39,7 @@ const Form1003Welcome: React.FC<Form1003WelcomeProps> = ({ onNext }) => {
         </motion.div>
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-foreground mb-4 sm:mb-5 tracking-tight">Home Journey</h1>
         <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light mb-2 sm:mb-3 px-2" style={{ color: '#6b7280' }}>Uniform Residential Loan Application 1003</p>
-        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light mb-6 sm:mb-8 px-2" style={{ color: '#6b7280' }}>Bella will guide you through each section step by step, ensuring your application is complete and ready for lender review.</p>
+        <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-light mb-6 sm:mb-8 px-2" style={{ color: '#6b7280' }}>Bella will guide you through each section step by step, ensuring your application is complete and ready for lender review. With OCR-powered document extraction and real-time insights, Bella helps you complete the form accurately and efficiently.</p>
       </div>
       <div className="px-4 sm:px-0 mt-4 sm:mt-6 w-full flex justify-center">
         <button
