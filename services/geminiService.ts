@@ -71,17 +71,17 @@ export const getBellaChatReply = async (chatHistory: { role: 'user' | 'model', t
 
     // Try both APIs in parallel for best response
     const geminiPromise = (async () => {
-        try {
+    try {
             console.log("🎯 Using Gemini 2.0 Flash for chat response...");
-            const response = await ai.models.generateContent({
+        const response = await ai.models.generateContent({
                 model: "gemini-2.0-flash-exp", // Latest model with enhanced agentic capabilities
-                contents: contents,
+            contents: contents,
                 config: { 
                     systemInstruction: systemInstruction,
                 },
-            });
+        });
             console.log("✅ Gemini chat response successful!");
-            return response.text;
+        return response.text;
         } catch (error: any) {
             console.error("❌ Gemini chat error:", error?.message || error);
             return null;
@@ -168,37 +168,37 @@ export const generateBellaSpeech = async (text: string, useGeminiOnly: boolean =
     // If useGeminiOnly is true (for demo), skip OpenAI and go straight to Gemini
     if (!useGeminiOnly) {
         // Try OpenAI first if available (for live mode)
-        const openAiKey = import.meta.env.VITE_OPENAI_API_KEY;
-        const hasValidOpenAiKey = openAiKey && 
-                                   openAiKey !== 'your_openai_api_key_here' && 
-                                   openAiKey.trim().length > 0 &&
-                                   openAiKey.startsWith('sk-');
-        
-        if (hasValidOpenAiKey) {
-            try {
+    const openAiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const hasValidOpenAiKey = openAiKey && 
+                               openAiKey !== 'your_openai_api_key_here' && 
+                               openAiKey.trim().length > 0 &&
+                               openAiKey.startsWith('sk-');
+    
+    if (hasValidOpenAiKey) {
+        try {
                 console.log("🎤 Attempting OpenAI TTS (GPT-5.1 compatible) - Nova voice: Best female human-like voice...");
-                const { generateBellaSpeechOpenAI } = await import('./openaiTtsService');
-                const openAiAudio = await generateBellaSpeechOpenAI(text);
-                if (openAiAudio) {
+            const { generateBellaSpeechOpenAI } = await import('./openaiTtsService');
+            const openAiAudio = await generateBellaSpeechOpenAI(text);
+            if (openAiAudio) {
                     console.log("✅ OpenAI TTS successful! Using Nova voice - best female human-like voice (GPT-5.1 compatible).");
-                    return openAiAudio;
-                } else {
-                    console.log("⚠️ OpenAI TTS returned null, falling back to Gemini TTS (Kore voice)");
-                }
-            } catch (error: any) {
-                console.error("❌ OpenAI TTS error:", error?.message || error);
-                console.log("   Falling back to Gemini TTS (Kore voice - excellent female human-like voice)");
-            }
-        } else {
-            if (!openAiKey) {
-                console.log("ℹ️ OpenAI API key not set, using Gemini TTS (Kore voice)");
-            } else if (openAiKey === 'your_openai_api_key_here') {
-                console.log("ℹ️ OpenAI API key placeholder detected, using Gemini TTS (Kore voice)");
-            } else if (!openAiKey.startsWith('sk-')) {
-                console.warn("⚠️ OpenAI API key format invalid, using Gemini TTS (Kore voice)");
+                return openAiAudio;
             } else {
-                console.log("ℹ️ OpenAI API key appears invalid, using Gemini TTS (Kore voice)");
+                    console.log("⚠️ OpenAI TTS returned null, falling back to Gemini TTS (Kore voice)");
             }
+        } catch (error: any) {
+            console.error("❌ OpenAI TTS error:", error?.message || error);
+                console.log("   Falling back to Gemini TTS (Kore voice - excellent female human-like voice)");
+        }
+    } else {
+        if (!openAiKey) {
+                console.log("ℹ️ OpenAI API key not set, using Gemini TTS (Kore voice)");
+        } else if (openAiKey === 'your_openai_api_key_here') {
+                console.log("ℹ️ OpenAI API key placeholder detected, using Gemini TTS (Kore voice)");
+        } else if (!openAiKey.startsWith('sk-')) {
+                console.warn("⚠️ OpenAI API key format invalid, using Gemini TTS (Kore voice)");
+        } else {
+                console.log("ℹ️ OpenAI API key appears invalid, using Gemini TTS (Kore voice)");
+        }
         }
     } else {
         console.log("🎤 Using Gemini TTS (Kore voice) - Best female human-like voice from Gemini");

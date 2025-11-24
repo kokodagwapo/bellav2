@@ -747,7 +747,7 @@ const BellaVoiceAssistant: React.FC<BellaVoiceAssistantProps> = ({ onStartDemo }
         // Resume Audio Context on user interaction
         if (audioContextRef.current?.state === 'suspended') {
             try {
-                await audioContextRef.current.resume();
+            await audioContextRef.current.resume();
                 console.log("✅ Audio context resumed");
             } catch (e) {
                 console.warn("⚠️ Could not resume audio context:", e);
@@ -971,14 +971,14 @@ const BellaVoiceAssistant: React.FC<BellaVoiceAssistantProps> = ({ onStartDemo }
                     
                     {/* Status Message */}
                     {!micError && (
-                        <p className="text-sm text-gray-600 leading-relaxed font-medium">
-                            {mode === 'idle' && "Ready to guide you through Prep4Loan!"}
+                    <p className="text-sm text-gray-600 leading-relaxed font-medium">
+                        {mode === 'idle' && "Ready to guide you through Prep4Loan!"}
                             {mode === 'demo' && "Demo Mode - Check demo controller"}
-                            {(mode === 'call' || mode === 'agentic') && isBellaSpeaking && "Speaking..."}
+                        {(mode === 'call' || mode === 'agentic') && isBellaSpeaking && "Speaking..."}
                             {(mode === 'call' || mode === 'agentic') && !isBellaSpeaking && micPermissionGranted && conversationHistory.length === 0 && "Listening..."}
                             {(mode === 'call' || mode === 'agentic') && !isBellaSpeaking && micPermissionGranted === false && "Demo Mode - Bella can guide you"}
                             {(mode === 'call' || mode === 'agentic') && micPermissionGranted === null && "Requesting access..."}
-                        </p>
+                    </p>
                     )}
                     {micError && (
                         <motion.div 
@@ -1020,7 +1020,7 @@ const BellaVoiceAssistant: React.FC<BellaVoiceAssistantProps> = ({ onStartDemo }
                                         <li>Is it enabled in system settings?</li>
                                         <li>Try refreshing the page</li>
                                     </ul>
-                                </div>
+                        </div>
                             )}
                         </motion.div>
                     )}
@@ -1040,13 +1040,13 @@ const BellaVoiceAssistant: React.FC<BellaVoiceAssistantProps> = ({ onStartDemo }
                             <div className="flex flex-col gap-2">
                                 {/* Start Live Guide - Hidden for now, will bring back later */}
                                 {false && (
-                                    <button
-                                        onClick={startAgenticMode}
+                            <button
+                                onClick={startAgenticMode}
                                         type="button"
-                                        className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white py-3 px-6 rounded-xl shadow-md transition-all active:scale-95 w-full"
-                                    >
-                                        <Phone size={18} />
-                                        <span className="text-sm font-semibold">Start Live Guide</span>
+                                className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white py-3 px-6 rounded-xl shadow-md transition-all active:scale-95 w-full"
+                            >
+                                <Phone size={18} />
+                                <span className="text-sm font-semibold">Start Live Guide</span>
                                     </button>
                                 )}
                                 <button
@@ -1060,7 +1060,7 @@ const BellaVoiceAssistant: React.FC<BellaVoiceAssistantProps> = ({ onStartDemo }
                                 >
                                     <Sparkles size={18} />
                                     <span className="text-sm font-semibold">Start Demo Tour</span>
-                                </button>
+                            </button>
                             </div>
                         </div>
                     )}

@@ -358,11 +358,11 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                     language: 'en'
                   }}
                 >
-                  <input
-                    type="text"
+              <input
+                type="text"
                     name="fullAddress"
                     value={address.fullAddress || (address.street && address.city && address.state && address.zip ? `${address.street}${address.street && address.city ? ', ' : ''}${address.city}${address.city && address.state ? ', ' : ''}${address.state} ${address.zip}`.trim() : '') || ''}
-                    onChange={(e) => {
+                onChange={(e) => {
                       const newValue = e.target.value;
                       // Update full address, but keep components for backend
                       const newAddress = {
@@ -383,8 +383,8 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                       if (addressVerified) {
                         setAddressVerified(false);
                         setVerificationMessage(null);
-                      }
-                    }}
+                  }
+                }}
                     placeholder="Start typing your address (e.g., 123 Main St, City, State ZIP)"
                     className={`w-full px-4 py-3 pr-12 bg-white border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400 transition-colors ${
                       addressVerified ? 'border-green-500 bg-green-50/30' : 'border-gray-300'
@@ -406,7 +406,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                     <div className="flex-1">
                       <p className="font-semibold text-green-900 mb-1">Address Verified ✓</p>
                       <p className="text-green-700">{verificationMessage}</p>
-                    </div>
+            </div>
                   </motion.div>
                 )}
                 {/* Modern icon button to view/confirm address - Hidden for now */}
@@ -537,8 +537,8 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                   <span className="text-gray-500 text-base sm:text-lg">$</span>
                 </div>
-                <input
-                  type="text"
+              <input
+                type="text"
                   inputMode="numeric"
                   value={value > 0 ? value.toLocaleString('en-US') : ''}
                   onChange={(e) => {
@@ -551,8 +551,8 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                   className="w-full px-4 py-3 pl-8 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400"
                   style={{ fontSize: '16px' }}
                   aria-label="Home Value in US Dollars"
-                />
-              </div>
+              />
+            </div>
             </div>
           </motion.div>
         )}
