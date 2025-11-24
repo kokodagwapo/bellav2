@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2 } from './icons';
 
@@ -12,10 +12,11 @@ interface StepIndicatorProps {
 const StepIndicator: React.FC<StepIndicatorProps> = ({ labels, currentStepIndex, onStepClick, stepIndices }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const activeStepRef = useRef<HTMLDivElement>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
 
-  // Scroll to active step when it changes
+  // Scroll to active step when it changes (only if user isn't manually scrolling)
   useEffect(() => {
-    if (activeStepRef.current && containerRef.current) {
+    if (activeStepRef.current && containerRef.current && !isScrolling) {
       const container = containerRef.current;
       const activeStep = activeStepRef.current;
       const containerWidth = container.offsetWidth;
@@ -28,25 +29,57 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ labels, currentStepIndex,
         behavior: 'smooth'
       });
     }
-  }, [currentStepIndex]);
+  }, [currentStepIndex, isScrolling]);
+
+  // Track manual scrolling
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let scrollTimeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      setIsScrolling(true);
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        setIsScrolling(false);
+      }, 150);
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, []);
 
   return (
     <div className="w-full pb-2 sm:pb-3 px-2 sm:px-4">
       <div 
         ref={containerRef}
         className="flex items-center w-full overflow-x-auto scrollbar-hide gap-1 sm:gap-2 py-2"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        style={{ 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          scrollBehavior: 'smooth',
+          WebkitOverflowScrolling: 'touch',
+          overscrollBehaviorX: 'contain'
+        }}
       >
         <style>{`
           .scrollbar-hide::-webkit-scrollbar {
             display: none;
+          }
+          .scrollbar-hide {
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
           }
         `}</style>
         {labels.map((label, index) => {
           const isActive = index === currentStepIndex;
           const isCompleted = index < currentStepIndex;
           const isUpcoming = index > currentStepIndex;
-          const showLabel = isActive || isCompleted || index === currentStepIndex + 1;
+          // Show labels for all steps to make navigation easier when scrolling
+          const showLabel = true;
 
           return (
             <React.Fragment key={index}>
@@ -60,6 +93,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ labels, currentStepIndex,
                 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
                 className="flex items-center gap-1 sm:gap-2 flex-shrink-0"
+                style={{ minWidth: 'fit-content' }}
               >
                 <motion.button 
                   className="relative flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg cursor-pointer touch-manipulation group transition-all"
@@ -70,11 +104,17 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ labels, currentStepIndex,
                       onStepClick(stepIndices[index]);
                     }
                   }}
+                  onTouchStart={(e) => {
+                    // Prevent scrolling when tapping on a step button
+                    e.stopPropagation();
+                  }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   style={{ 
                     pointerEvents: 'auto',
-                    backgroundColor: isActive ? 'rgba(16, 185, 129, 0.1)' : isCompleted ? 'rgba(16, 185, 129, 0.05)' : 'transparent'
+                    backgroundColor: isActive ? 'rgba(16, 185, 129, 0.1)' : isCompleted ? 'rgba(16, 185, 129, 0.05)' : 'transparent',
+                    touchAction: 'manipulation',
+                    userSelect: 'none'
                   }}
                   aria-label={`Go to step: ${label || `Step ${index + 1}`}`}
                 >
