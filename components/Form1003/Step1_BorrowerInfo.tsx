@@ -233,9 +233,7 @@ const AddressInput: React.FC<{
                             onRetrieve={handleRetrieve}
                             options={{
                                 country: 'US',
-                                language: 'en',
-                                types: 'address',
-                                limit: 5
+                                language: 'en'
                             }}
                         >
                             <input

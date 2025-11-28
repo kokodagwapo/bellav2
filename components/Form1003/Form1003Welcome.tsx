@@ -7,9 +7,7 @@ interface Form1003WelcomeProps {
 
 const Form1003Welcome: React.FC<Form1003WelcomeProps> = ({ onNext }) => {
   const handleClick = () => {
-    if (onNext) {
-      onNext();
-    }
+    onNext();
   };
 
   return (
@@ -75,7 +73,7 @@ const Form1003Welcome: React.FC<Form1003WelcomeProps> = ({ onNext }) => {
             onClick={handleClick}
             whileHover={{ scale: 1.02, y: -1 }}
             whileTap={{ scale: 0.98 }}
-            disabled={!onNext}
+            disabled={false}
             type="button"
             className="group relative w-auto min-w-[160px] sm:min-w-[180px] bg-gradient-to-r from-primary via-primary to-green-600 text-white font-light py-2.5 sm:py-3 px-6 sm:px-8 rounded-xl sm:rounded-2xl hover:from-green-600 hover:via-primary hover:to-primary transition-all duration-500 focus:outline-none focus:ring-3 focus:ring-primary/30 shadow-lg hover:shadow-xl hover:shadow-primary/20 text-sm sm:text-base touch-manipulation min-h-[40px] sm:min-h-[44px] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             style={{ 
@@ -85,7 +83,7 @@ const Form1003Welcome: React.FC<Form1003WelcomeProps> = ({ onNext }) => {
               position: 'relative',
               zIndex: 1001,
               isolation: 'isolate',
-              cursor: onNext ? 'pointer' : 'not-allowed',
+              cursor: 'pointer',
               userSelect: 'none',
               WebkitUserSelect: 'none',
               fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif',

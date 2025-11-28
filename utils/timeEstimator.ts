@@ -1,7 +1,7 @@
 import type { FormData } from '../types';
 import { calculateProgress } from './progressCalculator';
 
-interface TimeEstimate {
+export interface TimeEstimate {
   minutesRemaining: number;
   percentageComplete: number;
   estimatedTotalMinutes: number;
