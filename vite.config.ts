@@ -16,7 +16,7 @@ const copy404Plugin = () => {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/bellaprep/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/bellav2/' : '/',
   plugins: [react(), copy404Plugin()],
   server: {
     port: 5175
