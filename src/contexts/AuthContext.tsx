@@ -55,6 +55,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
+    // Demo mode: Allow login with test credentials (always check first for demo)
+    const demoUsers: Record<string, { password: string; user: User }> = {
+      'admin@bellaprep.com': {
+        password: 'admin123',
+        user: {
+          id: 'demo-admin-1',
+          email: 'admin@bellaprep.com',
+          firstName: 'Super',
+          lastName: 'Admin',
+          role: 'SUPER_ADMIN',
+          mfaEnabled: false,
+        },
+      },
+      'admin@demo.com': {
+        password: 'Demo123!',
+        user: {
+          id: 'demo-admin-2',
+          email: 'admin@demo.com',
+          firstName: 'Lender',
+          lastName: 'Admin',
+          role: 'LENDER_ADMIN',
+          mfaEnabled: false,
+        },
+      },
+    };
+
+    const demoUser = demoUsers[email];
+    if (demoUser && demoUser.password === password) {
+      setUser(demoUser.user);
+      localStorage.setItem('user', JSON.stringify(demoUser.user));
+      localStorage.setItem('demo_mode', 'true');
+      return;
+    }
+
+    // Try real API login
     try {
       const response = await authApi.login({ email, password });
       const userData: User = {
@@ -67,46 +102,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.removeItem('demo_mode');
     } catch (error: any) {
-      // If API is not available, use demo mode with test credentials
+      // If API is not available, check if it's a network error
       const isNetworkError = error?.message?.includes('Failed to fetch') || 
                             error?.message?.includes('NetworkError') ||
-                            error?.message?.includes('fetch');
+                            error?.message?.includes('fetch') ||
+                            error?.message?.includes('Network request failed') ||
+                            error?.name === 'TypeError';
       
-      if (isNetworkError) {
-        // Demo mode: Allow login with test credentials
-        const demoUsers: Record<string, { password: string; user: User }> = {
-          'admin@bellaprep.com': {
-            password: 'admin123',
-            user: {
-              id: 'demo-admin-1',
-              email: 'admin@bellaprep.com',
-              firstName: 'Super',
-              lastName: 'Admin',
-              role: 'SUPER_ADMIN',
-              mfaEnabled: false,
-            },
-          },
-          'admin@demo.com': {
-            password: 'Demo123!',
-            user: {
-              id: 'demo-admin-2',
-              email: 'admin@demo.com',
-              firstName: 'Lender',
-              lastName: 'Admin',
-              role: 'LENDER_ADMIN',
-              mfaEnabled: false,
-            },
-          },
-        };
-
-        const demoUser = demoUsers[email];
-        if (demoUser && demoUser.password === password) {
-          setUser(demoUser.user);
-          localStorage.setItem('user', JSON.stringify(demoUser.user));
-          localStorage.setItem('demo_mode', 'true');
-          return;
-        }
+      if (isNetworkError && demoUser) {
+        // Already handled demo user above, but if we get here, credentials were wrong
+        throw new Error('Invalid email or password');
       }
       
       console.error('Login failed:', error);
