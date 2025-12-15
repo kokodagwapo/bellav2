@@ -57,6 +57,11 @@ export const getFilteredFlow = (flow: AppStep[], formData: FormData): AppStep[] 
 export const appFlow: AppStep[] = [
   { component: StepWelcome, path: 'all' },
   { component: StepLoanPurpose, path: 'all', indicatorLabel: 'Goal' },
+  { 
+    component: StepRefinanceDetails, 
+    path: LoanPurpose.REFINANCE,
+    indicatorLabel: 'Refinance'
+  },
   { component: StepPropertyType, path: 'all', indicatorLabel: 'Property' },
   { component: StepPropertyUse, path: 'all', indicatorLabel: 'Occupancy' },
   { 
@@ -64,12 +69,23 @@ export const appFlow: AppStep[] = [
     path: 'all',
     condition: (data) => data.propertyUse === PropertyUse.PRIMARY_RESIDENCE
   },
+  { component: StepFirstTimeBuyer, path: LoanPurpose.PURCHASE },
+  { component: StepMilitary, path: 'all' },
+  { component: StepLocation, path: 'all', indicatorLabel: 'Location' },
   { component: StepSubjectProperty, path: 'all', indicatorLabel: 'Property' },
+  { 
+    component: StepBorrowAmount, 
+    path: LoanPurpose.PURCHASE,
+    indicatorLabel: 'Loan Amount'
+  },
+  { component: StepCreditScore, path: 'all', indicatorLabel: 'Credit' },
+  { component: StepName, path: 'all', indicatorLabel: 'Personal' },
   { component: StepCurrentHousingStatus, path: 'all', indicatorLabel: 'Housing' },
   { component: StepEmploymentStatus, path: 'all', indicatorLabel: 'Employment' },
   { component: StepTimeInJob, path: 'all', indicatorLabel: 'Employment' },
   { component: StepDebtsLiabilities, path: 'all', indicatorLabel: 'Debts' },
   { component: StepAssetsFunds, path: 'all', indicatorLabel: 'Assets' },
+  { component: StepPricing, path: 'all' },
   { component: StepAddCoBorrower, path: 'all', indicatorLabel: 'Co-Borrower' },
   { 
     component: StepCoBorrowerDetails, 
@@ -86,5 +102,6 @@ export const appFlow: AppStep[] = [
   { component: StepAffordabilitySnapshot, path: 'all', indicatorLabel: 'Snapshot' },
   { component: StepReviewChecklist, path: 'all', indicatorLabel: 'Review' },
   { component: StepPrep4LoanSummary, path: 'all', indicatorLabel: 'Summary' },
+  { component: StepContact, path: 'all', indicatorLabel: 'Contact' },
   { component: StepConfirmation, path: 'all', indicatorLabel: 'Apply' },
 ];
