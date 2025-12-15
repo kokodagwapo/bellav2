@@ -10,10 +10,12 @@ interface StepLocationProps {
   onBack: () => void;
 }
 
+type LocationStatus = 'idle' | 'verifying' | 'verified' | 'invalid';
+
 const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onBack }) => {
   const locationInputRef = useRef<HTMLInputElement>(null);
-  const [isValid, setIsValid] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [status, setStatus] = useState<LocationStatus>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const [mapboxLoaded, setMapboxLoaded] = useState(false);
 
   // Initialize Mapbox
@@ -27,25 +29,84 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
     setMapboxLoaded(true);
   }, []);
 
-  // Validate location format
+  const raw = (data.location || '').trim();
+  const isZip = /^\d{5}$/.test(raw);
+  const cityStateMatch = raw.match(/^(.+?),\s*([A-Za-z]{2})$/);
+  const city = cityStateMatch?.[1]?.trim() ?? '';
+  const state = (cityStateMatch?.[2]?.trim() ?? '').toUpperCase();
+  const isCityState = !!cityStateMatch && city.length >= 2 && /^[A-Z]{2}$/.test(state);
+
+  // Verify location using a real lookup (no Mapbox key required):
+  // - ZIP:   https://api.zippopotam.us/us/{zip}
+  // - City:  https://api.zippopotam.us/us/{state}/{city}
   useEffect(() => {
-    if (data.location && data.location.trim().length > 2) {
-      // Check if it's in "City, State" format
-      const locationPattern = /^[^,]+,\s*[A-Z]{2}$/i;
-      if (locationPattern.test(data.location.trim())) {
-        setIsValid(true);
-        setErrorMessage('');
-      } else if (data.location.trim().length > 5) {
-        // Allow manual input if it's long enough
-        setIsValid(true);
-        setErrorMessage('');
-      } else {
-        setIsValid(false);
+    let cancelled = false;
+    let timeout: number | undefined;
+
+    const run = async () => {
+      setErrorMessage('');
+
+      // Don't show "valid" for partial input like "937"
+      if (!raw) {
+        setStatus('idle');
+        return;
       }
-    } else {
-      setIsValid(false);
-    }
-  }, [data.location]);
+
+      // Only attempt verification when the input is complete enough
+      if (!isZip && !isCityState) {
+        setStatus('idle');
+        return;
+      }
+
+      setStatus('verifying');
+      try {
+        const url = isZip
+          ? `https://api.zippopotam.us/us/${encodeURIComponent(raw)}`
+          : `https://api.zippopotam.us/us/${encodeURIComponent(state)}/${encodeURIComponent(city)}`;
+
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error('not-found');
+        }
+
+        const json = await res.json();
+
+        // Normalize to "City, ST" when possible
+        const place0 = Array.isArray(json.places) ? json.places[0] : undefined;
+        const normalizedCity: string | undefined =
+          place0?.['place name'] || place0?.place_name || place0?.placeName;
+        const normalizedState: string | undefined =
+          place0?.['state abbreviation'] || place0?.state_abbreviation || place0?.stateAbbreviation;
+
+        if (!cancelled) {
+          if (normalizedCity && normalizedState) {
+            const normalized = `${normalizedCity}, ${String(normalizedState).toUpperCase()}`;
+            if (normalized !== raw) {
+              onChange('location', normalized);
+            }
+          }
+          setStatus('verified');
+          setErrorMessage('');
+        }
+      } catch {
+        if (!cancelled) {
+          setStatus('invalid');
+          setErrorMessage(
+            isZip
+              ? 'ZIP code not found. Please enter a valid 5-digit US ZIP.'
+              : 'City/State not found. Please enter a valid US city and 2-letter state (e.g., Naples, FL).',
+          );
+        }
+      }
+    };
+
+    // debounce
+    timeout = window.setTimeout(run, 400);
+    return () => {
+      cancelled = true;
+      if (timeout) window.clearTimeout(timeout);
+    };
+  }, [raw, isZip, isCityState, city, state, onChange]);
 
   const handleRetrieve = (res: any) => {
     const feature = res.features[0];
@@ -74,25 +135,13 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
       if (city && state) {
         const formattedLocation = `${city}, ${state}`;
         onChange('location', formattedLocation);
-        setIsValid(true);
-        setErrorMessage('');
+        // Verification will run via effect
       } else if (city) {
         // If we have city but no state, still accept it
         onChange('location', city);
-        setIsValid(true);
-        setErrorMessage('');
       }
     }
   };
-
-  useEffect(() => {
-    // Validate existing location
-    if (data.location && data.location.trim().length > 2) {
-      setIsValid(true);
-    } else {
-      setIsValid(false);
-    }
-  }, [data.location]);
 
   return (
     <div className="px-2 sm:px-0">
@@ -143,16 +192,22 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
         {errorMessage && (
           <p className="mt-2 text-sm text-red-500">{errorMessage}</p>
         )}
-        {isValid && data.location && (
+        {status === 'verifying' && (
+          <p className="mt-2 text-sm text-muted-foreground flex items-center gap-2">
+            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
+            Verifying location…
+          </p>
+        )}
+        {status === 'verified' && raw && (
           <p className="mt-2 text-sm text-primary flex items-center gap-1">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            Valid location
+            Verified location
           </p>
         )}
       </div>
-      <StepNavigation onNext={onNext} onBack={onBack} isNextDisabled={!isValid} />
+      <StepNavigation onNext={onNext} onBack={onBack} isNextDisabled={status !== 'verified'} />
     </div>
   );
 };
