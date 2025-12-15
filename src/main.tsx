@@ -11,9 +11,12 @@ if (!rootElement) {
   throw new Error('Could not find root element to mount to');
 }
 
+// Get base path from Vite's import.meta.env.BASE_URL
+const basename = import.meta.env.BASE_URL;
+
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <App />
     </BrowserRouter>
   </React.StrictMode>,
