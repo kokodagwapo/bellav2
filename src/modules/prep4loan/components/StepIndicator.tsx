@@ -96,6 +96,7 @@ const StepIndicator: React.FC<StepIndicatorProps> = ({ labels, currentStepIndex,
                 style={{ minWidth: 'fit-content' }}
               >
                 <motion.button 
+                  type="button"
                   className="relative flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg cursor-pointer touch-manipulation group transition-all"
                   onClick={(e) => {
                     e.preventDefault();

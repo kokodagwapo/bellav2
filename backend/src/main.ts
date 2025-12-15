@@ -20,12 +20,38 @@ async function bootstrapServer(): Promise<Server> {
 
     const configService = app.get(ConfigService);
 
-    // Security
-    app.use(helmet());
-    app.enableCors({
-      origin: configService.get('FRONTEND_URL') || '*',
-      credentials: true,
-    });
+  // Security
+  app.use(helmet());
+  
+  // CORS configuration - allow frontend origins
+  const frontendUrl = configService.get('FRONTEND_URL');
+  const allowedOrigins = frontendUrl 
+    ? frontendUrl.split(',').map(url => url.trim())
+    : ['http://localhost:5175', 'http://localhost:5173', 'http://localhost:3000', '*'];
+  
+  app.enableCors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // In development, allow all localhost origins
+      if (process.env.NODE_ENV === 'development') {
+        if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+          return callback(null, true);
+        }
+      }
+      
+      // Check against allowed origins
+      if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  });
 
     // Global pipes
     app.useGlobalPipes(
@@ -39,11 +65,11 @@ async function bootstrapServer(): Promise<Server> {
       }),
     );
 
-    // API versioning
-    app.enableVersioning({
-      type: VersioningType.URI,
-      defaultVersion: '1',
-    });
+    // API versioning - disabled to use /api/tenants instead of /api/v1/tenants
+    // app.enableVersioning({
+    //   type: VersioningType.URI,
+    //   defaultVersion: '1',
+    // });
 
     // Swagger API documentation
     if (process.env.NODE_ENV !== 'production') {
@@ -83,9 +109,35 @@ export async function bootstrap() {
 
   // Security
   app.use(helmet());
+  
+  // CORS configuration - allow frontend origins
+  const frontendUrl = configService.get('FRONTEND_URL');
+  const allowedOrigins = frontendUrl 
+    ? frontendUrl.split(',').map(url => url.trim())
+    : ['http://localhost:5175', 'http://localhost:5173', 'http://localhost:3000', '*'];
+  
   app.enableCors({
-    origin: configService.get('FRONTEND_URL') || '*',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // In development, allow all localhost origins
+      if (process.env.NODE_ENV === 'development') {
+        if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+          return callback(null, true);
+        }
+      }
+      
+      // Check against allowed origins
+      if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   });
 
   // Global pipes
@@ -97,11 +149,11 @@ export async function bootstrap() {
     }),
   );
 
-  // API versioning
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-  });
+  // API versioning - disabled to use /api/tenants instead of /api/v1/tenants
+  // app.enableVersioning({
+  //   type: VersioningType.URI,
+  //   defaultVersion: '1',
+  // });
 
   // Swagger
   const config = new DocumentBuilder()

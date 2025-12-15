@@ -15,6 +15,7 @@ import { AuditModule } from './modules/audit/audit.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
 import { PlaidModule } from './modules/plaid/plaid.module';
+import { SettingsModule } from './modules/settings/settings.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -48,6 +49,7 @@ import { PrismaModule } from './prisma/prisma.module';
     NotificationsModule,
     CalendarModule,
     PlaidModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}

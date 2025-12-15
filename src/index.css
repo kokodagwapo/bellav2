@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Global styles migrated for module architecture */
 
 .custom-scrollbar::-webkit-scrollbar {

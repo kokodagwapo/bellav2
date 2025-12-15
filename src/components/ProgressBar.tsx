@@ -149,7 +149,12 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentStep, totalSteps, form
       {formData && !isForm1003 && (
         <div>
           <button
-            onClick={() => setIsSectionsExpanded(!isSectionsExpanded)}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsSectionsExpanded(!isSectionsExpanded);
+            }}
             className="w-full flex items-center justify-between p-1.5 rounded-lg hover:bg-muted/50 transition-colors mb-1.5"
           >
             <span className="text-[10px] sm:text-xs font-light text-gray-900">
