@@ -169,6 +169,21 @@ const App: React.FC = () => {
   // - onChange('someField', value)
   const handleFlexibleChange = (fieldOrData: any, value?: any) => {
     if (typeof fieldOrData === 'string') {
+      // If a step component falls back to commonProps (e.g. due to production minification),
+      // preserve the "select + auto-advance" behavior for these selection-card fields.
+      const autoAdvanceFields: Array<keyof FormData> = [
+        'goal',
+        'propertyType',
+        'propertyUse',
+        'isFirstTimeBuyer',
+        'isMilitary',
+      ];
+
+      if (autoAdvanceFields.includes(fieldOrData as keyof FormData)) {
+        handleSelectionAndNext(fieldOrData as keyof FormData, value);
+        return;
+      }
+
       handleDataChange({ [fieldOrData]: value } as Partial<FormData>);
       return;
     }
