@@ -1,4 +1,16 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+// Determine API base URL - use environment variable or default to localhost for development only
+const getApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
+  }
+  
+  // Only use localhost default in development
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  return isDevelopment ? 'http://localhost:3000/api' : '';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 class ApiClient {
   private baseURL: string;
@@ -24,6 +36,11 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {},
   ): Promise<T> {
+    // If no API URL is configured, reject the request gracefully
+    if (!this.baseURL) {
+      throw new Error('API URL not configured');
+    }
+
     const url = this.baseURL + endpoint;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',

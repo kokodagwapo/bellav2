@@ -29,25 +29,38 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
   const loadTenant = async () => {
     try {
+      // Check if API URL is localhost (development) or if we're in production without a valid API URL
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const isLocalhost = apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1');
+      const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+      
+      // Skip API calls if we're in production and API URL is localhost (not configured)
+      if (isProduction && (isLocalhost || !apiUrl)) {
+        console.warn('API URL not configured for production. Skipping tenant fetch.');
+        setIsLoading(false);
+        return;
+      }
+
       // Try to detect tenant from subdomain
       const hostname = window.location.hostname;
       const subdomain = hostname.split('.')[0];
       
       // If subdomain exists and isn't 'www' or 'localhost', fetch tenant
-      if (subdomain && subdomain !== 'www' && subdomain !== 'localhost') {
+      if (subdomain && subdomain !== 'www' && subdomain !== 'localhost' && !isLocalhost) {
         const tenantData = await apiClient.get<Tenant>(`/tenants/by-slug/${subdomain}`);
         setTenant(tenantData);
         localStorage.setItem('tenant_id', tenantData.id);
       } else {
         // Try to load from localStorage
         const tenantId = localStorage.getItem('tenant_id');
-        if (tenantId) {
+        if (tenantId && !isLocalhost) {
           const tenantData = await apiClient.get<Tenant>(`/tenants/${tenantId}`);
           setTenant(tenantData);
         }
       }
     } catch (error) {
-      console.error('Failed to load tenant:', error);
+      // Silently fail - don't block the app if tenant loading fails
+      console.debug('Failed to load tenant (non-blocking):', error);
     } finally {
       setIsLoading(false);
     }

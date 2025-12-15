@@ -29,7 +29,7 @@ const App: React.FC = () => {
       <AuthProvider>
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={<Navigate to="borrower" replace />} />
+          <Route path="/" element={<Navigate to="/borrower" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           

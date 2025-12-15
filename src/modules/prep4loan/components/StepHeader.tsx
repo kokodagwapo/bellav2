@@ -29,12 +29,18 @@ interface SelectionButtonProps {
 const SelectionButton: React.FC<SelectionButtonProps> = ({ label, icon, isSelected, onClick }) => {
     return (
         <button
-            onClick={onClick}
-            className={`w-full p-2 sm:p-3 border rounded-lg text-left transition-all duration-200 flex items-center gap-2 sm:gap-3 focus:outline-none focus:ring-2 focus:ring-primary/50 relative touch-manipulation min-h-[44px] sm:min-h-[48px] ${
+            type="button"
+            onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClick();
+            }}
+            className={`w-full p-2 sm:p-3 border rounded-lg text-left transition-all duration-200 flex items-center gap-2 sm:gap-3 focus:outline-none focus:ring-2 focus:ring-primary/50 relative touch-manipulation min-h-[44px] sm:min-h-[48px] cursor-pointer ${
                 isSelected
                 ? 'bg-primary/10 border-primary border-2 shadow-md shadow-primary/20'
                 : 'bg-white border-gray-300 hover:border-primary/50 hover:bg-gray-50 active:bg-gray-100'
             }`}
+            style={{ pointerEvents: 'auto' }}
         >
             {icon && (
               <div className={`p-1.5 sm:p-2 rounded-lg flex-shrink-0 transition-colors ${
