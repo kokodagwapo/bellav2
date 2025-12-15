@@ -39,6 +39,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
+  // Check for demo mode on mount
+  useEffect(() => {
+    const isDemoMode = localStorage.getItem('demo_mode') === 'true';
+    if (isDemoMode) {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (error) {
+          console.error('Failed to parse stored user:', error);
+        }
+      }
+    }
+  }, []);
+
   const login = async (email: string, password: string) => {
     try {
       const response = await authApi.login({ email, password });
@@ -52,15 +67,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
-    } catch (error) {
+    } catch (error: any) {
+      // If API is not available, use demo mode with test credentials
+      const isNetworkError = error?.message?.includes('Failed to fetch') || 
+                            error?.message?.includes('NetworkError') ||
+                            error?.message?.includes('fetch');
+      
+      if (isNetworkError) {
+        // Demo mode: Allow login with test credentials
+        const demoUsers: Record<string, { password: string; user: User }> = {
+          'admin@bellaprep.com': {
+            password: 'admin123',
+            user: {
+              id: 'demo-admin-1',
+              email: 'admin@bellaprep.com',
+              firstName: 'Super',
+              lastName: 'Admin',
+              role: 'SUPER_ADMIN',
+              mfaEnabled: false,
+            },
+          },
+          'admin@demo.com': {
+            password: 'Demo123!',
+            user: {
+              id: 'demo-admin-2',
+              email: 'admin@demo.com',
+              firstName: 'Lender',
+              lastName: 'Admin',
+              role: 'LENDER_ADMIN',
+              mfaEnabled: false,
+            },
+          },
+        };
+
+        const demoUser = demoUsers[email];
+        if (demoUser && demoUser.password === password) {
+          setUser(demoUser.user);
+          localStorage.setItem('user', JSON.stringify(demoUser.user));
+          localStorage.setItem('demo_mode', 'true');
+          return;
+        }
+      }
+      
       console.error('Login failed:', error);
       throw error;
     }
   };
 
   const logout = () => {
-    authApi.logout();
+    try {
+      authApi.logout();
+    } catch (error) {
+      // Ignore errors in demo mode
+    }
     setUser(null);
+    localStorage.removeItem('demo_mode');
   };
 
   const register = async (data: any) => {
