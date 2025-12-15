@@ -177,5 +177,7 @@ const StepPrep4LoanSummary: React.FC<StepPrep4LoanSummaryProps> = ({
   );
 };
 
+StepPrep4LoanSummary.displayName = 'StepPrep4LoanSummary';
+
 export default StepPrep4LoanSummary;
 

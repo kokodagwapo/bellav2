@@ -248,4 +248,6 @@ const StepPrepDocs: React.FC<StepPrepDocsProps> = ({ onDataChange, onNext, onBac
   );
 };
 
+StepPrepDocs.displayName = 'StepPrepDocs';
+
 export default StepPrepDocs;

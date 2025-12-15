@@ -180,5 +180,7 @@ const StepReviewChecklist: React.FC<StepReviewChecklistProps> = ({
   );
 };
 
+StepReviewChecklist.displayName = 'StepReviewChecklist';
+
 export default StepReviewChecklist;
 

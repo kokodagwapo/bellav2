@@ -30,4 +30,6 @@ const StepFirstTimeBuyer: React.FC<StepFirstTimeBuyerProps> = ({ data, onChange 
   );
 };
 
+StepFirstTimeBuyer.displayName = 'StepFirstTimeBuyer';
+
 export default StepFirstTimeBuyer;

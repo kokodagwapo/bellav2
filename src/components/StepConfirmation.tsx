@@ -47,7 +47,12 @@ const StepConfirmation: React.FC<StepConfirmationProps> = ({ isLoading, result, 
           </div>
           <div className="mt-8">
             <button
-              onClick={onProceed}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onProceed();
+              }}
               className="w-full sm:w-auto bg-primary text-primary-foreground font-bold py-3 px-10 rounded-lg hover:bg-primary/90 transition duration-300 transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring animate-pulse-strong"
             >
               APPLY NOW
@@ -58,5 +63,7 @@ const StepConfirmation: React.FC<StepConfirmationProps> = ({ isLoading, result, 
     </div>
   );
 };
+
+StepConfirmation.displayName = 'StepConfirmation';
 
 export default StepConfirmation;

@@ -234,8 +234,8 @@ const App: React.FC = () => {
       StepConfirmation: { isLoading: isLoading, result: submissionResult, onProceed: handleProceedToApplication },
     };
 
-    // Get component name, with fallback to commonProps if not found
-    const componentName = CurrentStepComponent.name || CurrentStepComponent.displayName || '';
+    // Get component name. Prefer displayName because function/class names can be minified in production builds.
+    const componentName = CurrentStepComponent.displayName || CurrentStepComponent.name || '';
     const props = stepProps[componentName] || commonProps;
 
     return <CurrentStepComponent {...props} />;
