@@ -164,6 +164,19 @@ const App: React.FC = () => {
     });
   };
 
+  // Accept both signatures:
+  // - onChange({ someField: value })
+  // - onChange('someField', value)
+  const handleFlexibleChange = (fieldOrData: any, value?: any) => {
+    if (typeof fieldOrData === 'string') {
+      handleDataChange({ [fieldOrData]: value } as Partial<FormData>);
+      return;
+    }
+    if (fieldOrData && typeof fieldOrData === 'object') {
+      handleDataChange(fieldOrData as Partial<FormData>);
+    }
+  };
+
   const handleSelectionAndNext = (field: keyof FormData, value: any) => {
     handleDataChange({ [field]: value });
     if (field !== 'loanPurpose') {
@@ -198,7 +211,7 @@ const App: React.FC = () => {
       data: formData,
       onNext: nextStep,
       onBack: prevStep,
-      onChange: handleDataChange,
+      onChange: handleFlexibleChange,
     };
 
     // Customize props based on component needs
