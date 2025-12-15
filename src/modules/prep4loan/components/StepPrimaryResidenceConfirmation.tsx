@@ -48,7 +48,12 @@ const StepPrimaryResidenceConfirmation: React.FC<StepPrimaryResidenceConfirmatio
               </p>
             </div>
             <button
-              onClick={() => setShowTooltip(!showTooltip)}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowTooltip(!showTooltip);
+              }}
               className="ml-2 text-yellow-600 hover:text-yellow-800"
             >
               <AlertCircle className="h-5 w-5" />
@@ -119,6 +124,8 @@ const StepPrimaryResidenceConfirmation: React.FC<StepPrimaryResidenceConfirmatio
     </div>
   );
 };
+
+StepPrimaryResidenceConfirmation.displayName = 'StepPrimaryResidenceConfirmation';
 
 export default StepPrimaryResidenceConfirmation;
 
