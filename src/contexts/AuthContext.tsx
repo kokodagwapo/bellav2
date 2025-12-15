@@ -89,35 +89,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Try real API login
-    try {
-      const response = await authApi.login({ email, password });
-      const userData: User = {
-        id: response.user.id,
-        email: response.user.email,
-        firstName: response.user.firstName,
-        lastName: response.user.lastName,
-        role: response.user.role,
-        mfaEnabled: false,
-      };
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.removeItem('demo_mode');
-    } catch (error: any) {
-      // If API is not available, check if it's a network error
-      const isNetworkError = error?.message?.includes('Failed to fetch') || 
-                            error?.message?.includes('NetworkError') ||
-                            error?.message?.includes('fetch') ||
-                            error?.message?.includes('Network request failed') ||
-                            error?.name === 'TypeError';
-      
-      if (isNetworkError && demoUser) {
-        // Already handled demo user above, but if we get here, credentials were wrong
-        throw new Error('Invalid email or password');
+    // If demo credentials don't match, check if we should try API or throw error
+    // Try real API login only if email is not a demo user
+    if (!demoUser) {
+      try {
+        const response = await authApi.login({ email, password });
+        const userData: User = {
+          id: response.user.id,
+          email: response.user.email,
+          firstName: response.user.firstName,
+          lastName: response.user.lastName,
+          role: response.user.role,
+          mfaEnabled: false,
+        };
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.removeItem('demo_mode');
+        return;
+      } catch (error: any) {
+        // If API is not available, check if it's a network error
+        const isNetworkError = error?.message?.includes('Failed to fetch') || 
+                              error?.message?.includes('NetworkError') ||
+                              error?.message?.includes('fetch') ||
+                              error?.message?.includes('Network request failed') ||
+                              error?.name === 'TypeError';
+        
+        if (isNetworkError) {
+          // API unavailable and not a demo user - show error
+          throw new Error('Invalid email or password');
+        }
+        
+        console.error('Login failed:', error);
+        throw error;
       }
-      
-      console.error('Login failed:', error);
-      throw error;
+    } else {
+      // Demo user email but wrong password
+      throw new Error('Invalid email or password');
     }
   };
 

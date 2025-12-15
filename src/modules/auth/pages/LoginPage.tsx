@@ -14,7 +14,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = (location.state as any)?.from?.pathname || '/dashboard';
+  const from = (location.state as any)?.from?.pathname || '/workspace/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
