@@ -36,4 +36,6 @@ const StepPropertyType: React.FC<StepPropertyTypeProps> = ({ data, onChange }) =
   );
 };
 
+StepPropertyType.displayName = 'StepPropertyType';
+
 export default StepPropertyType;
