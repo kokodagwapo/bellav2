@@ -31,6 +31,8 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
   onNext, 
   onBack 
 }) => {
+  const mapboxKey = import.meta.env.VITE_MAPBOX_API_KEY || '';
+  const hasMapboxKey = !!mapboxKey;
   const [hasProperty, setHasProperty] = useState<boolean | null>(
     data.subjectProperty?.hasProperty ?? null
   );
@@ -46,6 +48,8 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
   const [showConfirmationBanner, setShowConfirmationBanner] = useState(false);
   const [addressVerified, setAddressVerified] = useState(false);
   const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
+  const [addressError, setAddressError] = useState<string | null>(null);
+  const [isVerifyingAddress, setIsVerifyingAddress] = useState(false);
 
   const handleHasProperty = (value: boolean) => {
     setHasProperty(value);
@@ -128,6 +132,121 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
       }, 5000);
     }
   };
+
+  // Fallback subject-property address verification when Mapbox isn't configured.
+  // We can't fully validate a street address without a geocoder, but we can verify:
+  // - a real ZIP exists
+  // - the ZIP's city/state match what the user typed
+  // - the input includes a 2-letter state and a 5-digit ZIP
+  useEffect(() => {
+    if (hasMapboxKey) return; // Mapbox path handles verification
+    if (hasProperty !== true) return;
+
+    const full = (address.fullAddress || '').trim();
+    setAddressError(null);
+
+    if (!full) {
+      setIsVerifyingAddress(false);
+      setAddressVerified(false);
+      setVerificationMessage(null);
+      return;
+    }
+
+    // Only try when the user has typed enough to include a ZIP at the end
+    const zipMatch = full.match(/(\d{5})(?:-\d{4})?\s*$/);
+    if (!zipMatch) {
+      setIsVerifyingAddress(false);
+      setAddressVerified(false);
+      setVerificationMessage(null);
+      return;
+    }
+
+    const zip = zipMatch[1];
+    const withoutZip = full.replace(/(\d{5})(?:-\d{4})?\s*$/, '').trim();
+    const stateMatch = withoutZip.match(/\b([A-Za-z]{2})\b\s*$/);
+    if (!stateMatch) {
+      setIsVerifyingAddress(false);
+      setAddressVerified(false);
+      setAddressError('Please include the 2-letter state before the ZIP (e.g., "…, NV 89138").');
+      return;
+    }
+
+    const state = stateMatch[1].toUpperCase();
+    const withoutZipState = withoutZip.replace(/\b([A-Za-z]{2})\b\s*$/, '').trim();
+
+    // Require a leading house number and some street text
+    if (!/^\d+\s+\S+/.test(withoutZipState)) {
+      setIsVerifyingAddress(false);
+      setAddressVerified(false);
+      setAddressError('Please include a street number and street name (e.g., "12057 Cielo Amber Ln, …").');
+      return;
+    }
+
+    let cancelled = false;
+    setIsVerifyingAddress(true);
+
+    (async () => {
+      try {
+        const res = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(zip)}`);
+        if (!res.ok) throw new Error('zip-not-found');
+        const json = await res.json();
+        const place0 = Array.isArray(json.places) ? json.places[0] : undefined;
+        const zipCity: string | undefined = place0?.['place name'];
+        const zipState: string | undefined = place0?.['state abbreviation'];
+
+        if (cancelled) return;
+
+        if (!zipCity || !zipState) throw new Error('zip-parse');
+        if (zipState.toUpperCase() !== state) {
+          setAddressVerified(false);
+          setVerificationMessage(null);
+          setAddressError(`ZIP ${zip} does not match state ${state}. It belongs to ${zipCity}, ${zipState}.`);
+          return;
+        }
+
+        // Basic city match: the typed string should contain the ZIP's city name
+        const typedLower = withoutZipState.toLowerCase();
+        const cityLower = zipCity.toLowerCase();
+        if (!typedLower.includes(cityLower)) {
+          setAddressVerified(false);
+          setVerificationMessage(null);
+          setAddressError(`ZIP ${zip} belongs to ${zipCity}, ${zipState}. Please include the correct city/state.`);
+          return;
+        }
+
+        // Store structured fields for downstream usage
+        if (address.zip !== zip || (address.state || '').toUpperCase() !== state || (address.city || '').toLowerCase() !== cityLower) {
+          const updatedAddress = {
+            ...address,
+            zip,
+            state,
+            city: zipCity,
+          };
+          setAddress(updatedAddress);
+          onChange('subjectProperty', {
+            ...data.subjectProperty,
+            address: updatedAddress,
+          });
+        }
+
+        setAddressVerified(true);
+        setAddressError(null);
+        setVerificationMessage(`Address verified (ZIP ${zip} → ${zipCity}, ${zipState}).`);
+      } catch {
+        if (cancelled) return;
+        setAddressVerified(false);
+        setVerificationMessage(null);
+        setAddressError('Address could not be verified. Please check the city/state and ZIP.');
+      } finally {
+        if (!cancelled) setIsVerifyingAddress(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMapboxKey, hasProperty, address.fullAddress]);
 
   const canProceed = hasProperty !== null && (
     hasProperty 
@@ -218,7 +337,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
               </label>
               <div className="relative mb-6">
                 <AddressAutofill
-                  accessToken={import.meta.env.VITE_MAPBOX_API_KEY || ''}
+                  accessToken={mapboxKey}
                   onRetrieve={async (res: any) => {
                     const feature = res.features[0];
                     if (feature) {
@@ -274,6 +393,12 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                       
                       // Verify address with Mapbox
                       try {
+                        if (!hasMapboxKey) {
+                          // Fallback verification is handled by the effect
+                          setAddressPreview(null);
+                          setAddressConfirmed(false);
+                          return;
+                        }
                         const { verifyAddress } = await import('../services/addressVerificationService');
                         const verification = await verifyAddress({
                           street,
@@ -392,6 +517,15 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                     autoComplete="address-line1"
                   />
                 </AddressAutofill>
+                {isVerifyingAddress && (
+                  <p className="mt-2 text-sm text-muted-foreground flex items-center gap-2">
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
+                    Verifying address…
+                  </p>
+                )}
+                {addressError && (
+                  <p className="mt-2 text-sm text-red-600">{addressError}</p>
+                )}
                 {/* Address confirmed message - persistent when verified */}
                 {addressVerified && (
                   <motion.div
@@ -402,7 +536,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                     <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                    <p className="font-semibold text-green-900">Address confirmed</p>
+                    <p className="font-semibold text-green-900">{verificationMessage || 'Address confirmed'}</p>
                   </motion.div>
                 )}
                 {/* Modern icon button to view/confirm address - Hidden for now */}
@@ -640,7 +774,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
         )}
       </div>
 
-      <StepNavigation onNext={canProceed ? onNext : undefined} onBack={onBack} />
+      <StepNavigation onNext={onNext} onBack={onBack} isNextDisabled={!canProceed} />
       
       {/* Address Preview Modal */}
       <AddressSatelliteView
