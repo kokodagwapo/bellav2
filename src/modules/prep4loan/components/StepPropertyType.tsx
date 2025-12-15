@@ -4,6 +4,8 @@ import StepHeader from './StepHeader';
 import { SelectionButton } from './StepHeader';
 import { Building, Building2, Landmark } from './icons';
 
+// Property type selection component for Prep4Loan form
+
 
 interface StepPropertyTypeProps {
   data: { propertyType: PropertyType | '' };
