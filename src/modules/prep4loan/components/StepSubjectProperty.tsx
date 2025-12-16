@@ -802,4 +802,6 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
   );
 };
 
+StepSubjectProperty.displayName = 'StepSubjectProperty';
+
 export default StepSubjectProperty;

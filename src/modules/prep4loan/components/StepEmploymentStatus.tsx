@@ -74,5 +74,7 @@ const StepEmploymentStatus: React.FC<StepEmploymentStatusProps> = ({
   );
 };
 
+StepEmploymentStatus.displayName = 'StepEmploymentStatus';
+
 export default StepEmploymentStatus;
 

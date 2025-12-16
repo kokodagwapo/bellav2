@@ -71,4 +71,6 @@ const StepContact: React.FC<StepContactProps> = ({ data, onChange, onNext, onBac
   );
 };
 
+StepContact.displayName = 'StepContact';
+
 export default StepContact;

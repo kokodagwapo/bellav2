@@ -273,5 +273,7 @@ const StepTimeInJob: React.FC<StepTimeInJobProps> = ({
   );
 };
 
+StepTimeInJob.displayName = 'StepTimeInJob';
+
 export default StepTimeInJob;
 

@@ -73,4 +73,6 @@ const StepRefinanceDetails: React.FC<StepRefinanceDetailsProps> = ({ data, onCha
   );
 };
 
+StepRefinanceDetails.displayName = 'StepRefinanceDetails';
+
 export default StepRefinanceDetails;

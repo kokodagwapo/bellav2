@@ -223,5 +223,7 @@ const StepAffordabilitySnapshot: React.FC<StepAffordabilitySnapshotProps> = ({
   );
 };
 
+StepAffordabilitySnapshot.displayName = 'StepAffordabilitySnapshot';
+
 export default StepAffordabilitySnapshot;
 

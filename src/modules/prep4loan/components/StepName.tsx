@@ -51,4 +51,6 @@ const StepName: React.FC<StepNameProps> = ({ data, onChange, onNext, onBack }) =
   );
 };
 
+StepName.displayName = 'StepName';
+
 export default StepName;

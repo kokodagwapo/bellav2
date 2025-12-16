@@ -52,4 +52,6 @@ const StepCreditScore: React.FC<StepCreditScoreProps> = ({ data, onChange, onNex
   );
 };
 
+StepCreditScore.displayName = 'StepCreditScore';
+
 export default StepCreditScore;

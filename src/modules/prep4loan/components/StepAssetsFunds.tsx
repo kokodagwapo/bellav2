@@ -145,5 +145,7 @@ const StepAssetsFunds: React.FC<StepAssetsFundsProps> = ({
   );
 };
 
+StepAssetsFunds.displayName = 'StepAssetsFunds';
+
 export default StepAssetsFunds;
 

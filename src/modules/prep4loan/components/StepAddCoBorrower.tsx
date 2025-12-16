@@ -56,5 +56,7 @@ const StepAddCoBorrower: React.FC<StepAddCoBorrowerProps> = ({
   );
 };
 
+StepAddCoBorrower.displayName = 'StepAddCoBorrower';
+
 export default StepAddCoBorrower;
 

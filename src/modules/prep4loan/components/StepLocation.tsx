@@ -212,4 +212,6 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
   );
 };
 
+StepLocation.displayName = 'StepLocation';
+
 export default StepLocation;

@@ -207,5 +207,7 @@ const StepDMVAddressVerification: React.FC<StepDMVAddressVerificationProps> = ({
   );
 };
 
+StepDMVAddressVerification.displayName = 'StepDMVAddressVerification';
+
 export default StepDMVAddressVerification;
 

@@ -34,4 +34,6 @@ const StepPropertyUse: React.FC<StepPropertyUseProps> = ({ data, onChange }) => 
   );
 };
 
+StepPropertyUse.displayName = 'StepPropertyUse';
+
 export default StepPropertyUse;

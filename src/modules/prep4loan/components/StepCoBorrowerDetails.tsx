@@ -224,5 +224,7 @@ const StepCoBorrowerDetails: React.FC<StepCoBorrowerDetailsProps> = ({
   );
 };
 
+StepCoBorrowerDetails.displayName = 'StepCoBorrowerDetails';
+
 export default StepCoBorrowerDetails;
 

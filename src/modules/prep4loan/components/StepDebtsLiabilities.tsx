@@ -147,5 +147,7 @@ const StepDebtsLiabilities: React.FC<StepDebtsLiabilitiesProps> = ({
   );
 };
 
+StepDebtsLiabilities.displayName = 'StepDebtsLiabilities';
+
 export default StepDebtsLiabilities;
 

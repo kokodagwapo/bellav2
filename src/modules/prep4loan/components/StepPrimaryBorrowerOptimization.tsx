@@ -124,5 +124,7 @@ const StepPrimaryBorrowerOptimization: React.FC<StepPrimaryBorrowerOptimizationP
   );
 };
 
+StepPrimaryBorrowerOptimization.displayName = 'StepPrimaryBorrowerOptimization';
+
 export default StepPrimaryBorrowerOptimization;
 

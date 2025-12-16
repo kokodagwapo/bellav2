@@ -63,4 +63,6 @@ const StepBorrowAmount: React.FC<StepLoanAmountProps> = ({ data, onChange, onNex
   );
 };
 
+StepBorrowAmount.displayName = 'StepBorrowAmount';
+
 export default StepBorrowAmount;

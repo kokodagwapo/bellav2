@@ -100,4 +100,6 @@ const StepLoanPurpose: React.FC<StepLoanPurposeProps> = ({ data, onChange, onNex
   );
 };
 
+StepLoanPurpose.displayName = 'StepLoanPurpose';
+
 export default StepLoanPurpose;

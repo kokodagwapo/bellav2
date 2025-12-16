@@ -59,4 +59,6 @@ const StepConfirmation: React.FC<StepConfirmationProps> = ({ isLoading, result, 
   );
 };
 
+StepConfirmation.displayName = 'StepConfirmation';
+
 export default StepConfirmation;

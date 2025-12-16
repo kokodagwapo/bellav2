@@ -74,4 +74,6 @@ const StepPricing: React.FC<StepPricingProps> = ({ data, onChange, onNext, onBac
   );
 };
 
+StepPricing.displayName = 'StepPricing';
+
 export default StepPricing;

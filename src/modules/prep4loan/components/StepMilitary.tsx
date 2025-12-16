@@ -30,4 +30,6 @@ const StepMilitary: React.FC<StepMilitaryProps> = ({ data, onChange }) => {
   );
 };
 
+StepMilitary.displayName = 'StepMilitary';
+
 export default StepMilitary;

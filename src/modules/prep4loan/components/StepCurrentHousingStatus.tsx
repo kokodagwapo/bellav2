@@ -254,5 +254,7 @@ const StepCurrentHousingStatus: React.FC<StepCurrentHousingStatusProps> = ({
   );
 };
 
+StepCurrentHousingStatus.displayName = 'StepCurrentHousingStatus';
+
 export default StepCurrentHousingStatus;
 

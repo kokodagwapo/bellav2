@@ -184,4 +184,6 @@ const StepWelcome: React.FC<StepWelcomeProps> = ({ onNext }) => {
   );
 };
 
+StepWelcome.displayName = 'StepWelcome';
+
 export default StepWelcome;
