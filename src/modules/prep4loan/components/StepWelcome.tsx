@@ -11,7 +11,6 @@ const StepWelcome: React.FC<StepWelcomeProps> = ({ onNext }) => {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Get Started clicked', { onNext, type: typeof onNext });
     if (onNext && typeof onNext === 'function') {
       try {
         onNext();
@@ -19,14 +18,13 @@ const StepWelcome: React.FC<StepWelcomeProps> = ({ onNext }) => {
         console.error('Error in onNext:', error);
       }
     } else {
-      console.warn('onNext is not a function:', onNext);
+      console.warn('StepWelcome: onNext is not a function', typeof onNext);
     }
   };
 
   const handleTouch = (e: React.TouchEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Get Started touched', { onNext, type: typeof onNext });
     if (onNext && typeof onNext === 'function') {
       try {
         onNext();
@@ -34,7 +32,7 @@ const StepWelcome: React.FC<StepWelcomeProps> = ({ onNext }) => {
         console.error('Error in onNext:', error);
       }
     } else {
-      console.warn('onNext is not a function:', onNext);
+      console.warn('StepWelcome: onNext is not a function', typeof onNext);
     }
   };
 

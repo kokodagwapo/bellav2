@@ -266,6 +266,11 @@ const App: React.FC = () => {
     const componentName = CurrentStepComponent.displayName || CurrentStepComponent.name || '';
     const props = stepProps[componentName] || commonProps;
 
+    // For StepWelcome, ensure onNext is always a function
+    if (componentName === 'StepWelcome' && (!props.onNext || typeof props.onNext !== 'function')) {
+      props.onNext = nextStep;
+    }
+
     return <CurrentStepComponent {...props} />;
   };
 
