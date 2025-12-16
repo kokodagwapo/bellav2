@@ -268,7 +268,7 @@ const StepTimeInJob: React.FC<StepTimeInJobProps> = ({
         </div>
       </div>
 
-      <StepNavigation onNext={canProceed ? onNext : undefined} onBack={onBack} />
+      <StepNavigation onNext={onNext} onBack={onBack} isNextDisabled={!canProceed} />
     </div>
   );
 };

@@ -249,7 +249,7 @@ const StepCurrentHousingStatus: React.FC<StepCurrentHousingStatusProps> = ({
         )}
       </div>
 
-      <StepNavigation onNext={canProceed ? onNext : undefined} onBack={onBack} />
+      <StepNavigation onNext={onNext} onBack={onBack} isNextDisabled={!canProceed} />
     </div>
   );
 };

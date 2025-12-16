@@ -202,7 +202,7 @@ const StepDMVAddressVerification: React.FC<StepDMVAddressVerificationProps> = ({
         )}
       </div>
 
-      <StepNavigation onNext={canProceed ? onNext : undefined} onBack={onBack} />
+      <StepNavigation onNext={onNext} onBack={onBack} isNextDisabled={!canProceed} />
     </div>
   );
 };
