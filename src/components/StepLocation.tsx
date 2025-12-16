@@ -45,64 +45,34 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
   const isCityState = !!cityStateMatch && city.length >= 2 && /^[A-Z]{2}$/.test(state);
 
   // Fetch city suggestions as user types (when no Mapbox)
+  // Note: Simplified suggestions - Zippopotam API doesn't support city search well
+  // For better suggestions, consider using a dedicated city search API
   useEffect(() => {
-    if (mapboxLoaded) return; // Mapbox handles autosuggest
+    if (mapboxLoaded) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return; // Mapbox handles autosuggest
+    }
     
-    const query = raw.trim().toLowerCase();
+    const query = raw.trim();
     if (query.length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
     }
 
-    // Check if it looks like a city name (not a complete city+state)
-    const hasStateCode = /[A-Za-z]{2}$/.test(query);
-    if (hasStateCode && query.length > 3) {
-      // User is typing city + state, don't show suggestions
+    // Don't show suggestions if user has already entered city + state format
+    if (isCityState || isZip) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
     }
 
-    let cancelled = false;
-    const timeout = setTimeout(async () => {
-      try {
-        // Use a free city search API - Geonames or similar
-        // For now, we'll use a simple approach: try to fetch suggestions
-        // This is a placeholder - you might want to use a proper city API
-        const response = await fetch(
-          `https://api.zippopotam.us/us/${query.slice(-2).toUpperCase()}`
-        );
-        if (!cancelled && response.ok) {
-          const json = await response.json();
-          const places = Array.isArray(json.places) ? json.places : [];
-          const cityNames = places
-            .map((p: any) => p['place name'] || p.place_name)
-            .filter((name: string) => 
-              name && name.toLowerCase().startsWith(query.split(/\s+/)[0].toLowerCase())
-            )
-            .slice(0, 5)
-            .map((name: string) => `${name}, ${json['country abbreviation'] || 'US'}`);
-          
-          if (!cancelled) {
-            setSuggestions(cityNames);
-            setShowSuggestions(cityNames.length > 0);
-          }
-        }
-      } catch (error) {
-        // Silently fail - suggestions are optional
-        if (!cancelled) {
-          setSuggestions([]);
-          setShowSuggestions(false);
-        }
-      }
-    }, 300);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-    };
-  }, [raw, mapboxLoaded]);
+    // For now, disable suggestions to avoid API errors
+    // The input will still work with manual entry
+    setSuggestions([]);
+    setShowSuggestions(false);
+  }, [raw, mapboxLoaded, isCityState, isZip]);
 
   // Close suggestions when clicking outside
   useEffect(() => {
