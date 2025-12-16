@@ -51,7 +51,7 @@ const StepAddCoBorrower: React.FC<StepAddCoBorrowerProps> = ({
         />
       </div>
 
-      <StepNavigation onNext={hasCoBorrower !== null ? onNext : undefined} onBack={onBack} />
+      <StepNavigation onNext={onNext} onBack={onBack} isNextDisabled={hasCoBorrower === null} />
     </div>
   );
 };

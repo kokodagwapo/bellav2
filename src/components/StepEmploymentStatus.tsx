@@ -69,7 +69,7 @@ const StepEmploymentStatus: React.FC<StepEmploymentStatusProps> = ({
         ))}
       </div>
 
-      <StepNavigation onNext={status ? onNext : undefined} onBack={onBack} />
+      <StepNavigation onNext={onNext} onBack={onBack} isNextDisabled={!status} />
     </div>
   );
 };
