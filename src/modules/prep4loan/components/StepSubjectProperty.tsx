@@ -511,27 +511,30 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                     name="fullAddress"
                     value={address.fullAddress || (address.street && address.city && address.state && address.zip ? `${address.street}${address.street && address.city ? ', ' : ''}${address.city}${address.city && address.state ? ', ' : ''}${address.state} ${address.zip}`.trim() : '') || ''}
                 onChange={(e) => {
-                      const newValue = e.target.value;
-                      // Update full address, but keep components for backend
-                      const newAddress = {
-                        ...address,
-                        fullAddress: newValue
-                      };
-                      setAddress(newAddress);
-                      onChange('subjectProperty', {
-                        ...data.subjectProperty,
-                        address: newAddress
-                      });
-                      // Clear confirmation and verification when manually editing
-                      if (addressConfirmed) {
-                        setAddressConfirmed(false);
-                        setShowConfirmationBanner(false);
-                        setAddressPreview(null);
+                      const newValue = e.target.value || '';
+                      // Only update if value actually changed to prevent clearing
+                      if (newValue !== (address.fullAddress || '')) {
+                        // Update full address, but keep components for backend
+                        const newAddress = {
+                          ...address,
+                          fullAddress: newValue
+                        };
+                        setAddress(newAddress);
+                        onChange('subjectProperty', {
+                          ...data.subjectProperty,
+                          address: newAddress
+                        });
+                        // Clear confirmation and verification when manually editing
+                        if (addressConfirmed) {
+                          setAddressConfirmed(false);
+                          setShowConfirmationBanner(false);
+                          setAddressPreview(null);
+                        }
+                        if (addressVerified) {
+                          setAddressVerified(false);
+                          setVerificationMessage(null);
+                        }
                       }
-                      if (addressVerified) {
-                        setAddressVerified(false);
-                        setVerificationMessage(null);
-                  }
                 }}
                     placeholder="Start typing your address (e.g., 123 Main St, City, State ZIP)"
                     className={`w-full px-4 py-3 pr-12 bg-white border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-black placeholder:text-gray-400 transition-colors ${
