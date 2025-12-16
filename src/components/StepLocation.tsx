@@ -17,6 +17,9 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
   const [status, setStatus] = useState<LocationStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [mapboxLoaded, setMapboxLoaded] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   // Initialize Mapbox
   useEffect(() => {
@@ -31,10 +34,92 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
 
   const raw = (data.location || '').trim();
   const isZip = /^\d{5}$/.test(raw);
-  const cityStateMatch = raw.match(/^(.+?),\s*([A-Za-z]{2})$/);
+  
+  // Accept both "City, ST" and "City ST" formats
+  const cityStateMatchWithComma = raw.match(/^(.+?),\s*([A-Za-z]{2})$/);
+  const cityStateMatchWithoutComma = raw.match(/^(.+?)\s+([A-Za-z]{2})$/);
+  const cityStateMatch = cityStateMatchWithComma || cityStateMatchWithoutComma;
+  
   const city = cityStateMatch?.[1]?.trim() ?? '';
   const state = (cityStateMatch?.[2]?.trim() ?? '').toUpperCase();
   const isCityState = !!cityStateMatch && city.length >= 2 && /^[A-Z]{2}$/.test(state);
+
+  // Fetch city suggestions as user types (when no Mapbox)
+  useEffect(() => {
+    if (mapboxLoaded) return; // Mapbox handles autosuggest
+    
+    const query = raw.trim().toLowerCase();
+    if (query.length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Check if it looks like a city name (not a complete city+state)
+    const hasStateCode = /[A-Za-z]{2}$/.test(query);
+    if (hasStateCode && query.length > 3) {
+      // User is typing city + state, don't show suggestions
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    let cancelled = false;
+    const timeout = setTimeout(async () => {
+      try {
+        // Use a free city search API - Geonames or similar
+        // For now, we'll use a simple approach: try to fetch suggestions
+        // This is a placeholder - you might want to use a proper city API
+        const response = await fetch(
+          `https://api.zippopotam.us/us/${query.slice(-2).toUpperCase()}`
+        );
+        if (!cancelled && response.ok) {
+          const json = await response.json();
+          const places = Array.isArray(json.places) ? json.places : [];
+          const cityNames = places
+            .map((p: any) => p['place name'] || p.place_name)
+            .filter((name: string) => 
+              name && name.toLowerCase().startsWith(query.split(/\s+/)[0].toLowerCase())
+            )
+            .slice(0, 5)
+            .map((name: string) => `${name}, ${json['country abbreviation'] || 'US'}`);
+          
+          if (!cancelled) {
+            setSuggestions(cityNames);
+            setShowSuggestions(cityNames.length > 0);
+          }
+        }
+      } catch (error) {
+        // Silently fail - suggestions are optional
+        if (!cancelled) {
+          setSuggestions([]);
+          setShowSuggestions(false);
+        }
+      }
+    }, 300);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [raw, mapboxLoaded]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(event.target as Node) &&
+        locationInputRef.current &&
+        !locationInputRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Verify location using a real lookup (no Mapbox key required):
   // - ZIP:   https://api.zippopotam.us/us/{zip}
@@ -94,7 +179,7 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
           setErrorMessage(
             isZip
               ? 'ZIP code not found. Please enter a valid 5-digit US ZIP.'
-              : 'City/State not found. Please enter a valid US city and 2-letter state (e.g., Naples, FL).',
+              : 'City/State not found. Please enter a valid US city and 2-letter state (e.g., Naples FL or Naples, FL).',
           );
         }
       }
@@ -166,28 +251,61 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
               id="location"
               type="text"
               name="location"
-              placeholder="Start typing city name..."
+              placeholder="Start typing city name (e.g., Naples FL or Naples, FL)..."
               value={data.location}
               onChange={(e) => onChange('location', e.target.value)}
               className="w-full px-4 py-3 sm:py-3 text-base sm:text-lg border border-input bg-background rounded-xl sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition duration-200 touch-manipulation min-h-[48px] sm:min-h-[44px]"
               style={{ fontSize: '16px' }}
               aria-label="City and State"
+              autoComplete="off"
               required
             />
           </AddressAutofill>
         ) : (
-          <input
-            ref={locationInputRef}
-            id="location"
-            type="text"
-            placeholder="Enter city and state (e.g., Naples, FL)"
-            value={data.location}
-            onChange={(e) => onChange('location', e.target.value)}
-            className="w-full px-4 py-3 sm:py-3 text-base sm:text-lg border border-input bg-background rounded-xl sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition duration-200 touch-manipulation min-h-[48px] sm:min-h-[44px]"
-            style={{ fontSize: '16px' }}
-            aria-label="City and State"
-            required
-          />
+          <div className="relative">
+            <input
+              ref={locationInputRef}
+              id="location"
+              type="text"
+              placeholder="Enter city and state (e.g., Naples FL or Naples, FL)"
+              value={data.location}
+              onChange={(e) => {
+                onChange('location', e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => {
+                if (suggestions.length > 0) {
+                  setShowSuggestions(true);
+                }
+              }}
+              className="w-full px-4 py-3 sm:py-3 text-base sm:text-lg border border-input bg-background rounded-xl sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition duration-200 touch-manipulation min-h-[48px] sm:min-h-[44px]"
+              style={{ fontSize: '16px' }}
+              aria-label="City and State"
+              autoComplete="off"
+              required
+            />
+            {showSuggestions && suggestions.length > 0 && (
+              <div
+                ref={suggestionsRef}
+                className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+              >
+                {suggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => {
+                      onChange('location', suggestion);
+                      setShowSuggestions(false);
+                      locationInputRef.current?.focus();
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         )}
         {errorMessage && (
           <p className="mt-2 text-sm text-red-500">{errorMessage}</p>
@@ -211,5 +329,7 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
     </div>
   );
 };
+
+StepLocation.displayName = 'StepLocation';
 
 export default StepLocation;
