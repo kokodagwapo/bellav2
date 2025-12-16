@@ -136,17 +136,24 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
         if (!cancelled) {
           if (normalizedCity && normalizedState) {
             const normalized = `${normalizedCity}, ${String(normalizedState).toUpperCase()}`;
-            // Only update if different to avoid infinite loops
-            if (normalized !== raw && normalized.toLowerCase() !== raw.toLowerCase()) {
+            // Only update if different to avoid infinite loops, and ensure normalized is not empty
+            if (normalized && normalized.trim() && normalized !== raw && normalized.toLowerCase() !== raw.toLowerCase()) {
               try {
                 onChange('location', normalized);
               } catch (error) {
                 console.error('Error updating location:', error);
+                // Don't clear the input on error - keep what user typed
               }
+            } else {
+              // If normalization would result in same value, just verify without updating
+              setStatus('verified');
+              setErrorMessage('');
             }
+          } else {
+            // If we can't normalize but verification succeeded, keep user's input
+            setStatus('verified');
+            setErrorMessage('');
           }
-          setStatus('verified');
-          setErrorMessage('');
         }
       } catch {
         if (!cancelled) {
@@ -227,8 +234,13 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
               type="text"
               name="location"
               placeholder="Start typing city name (e.g., Naples FL or Naples, FL)..."
-              value={data.location}
-              onChange={(e) => onChange('location', e.target.value)}
+              value={data.location || ''}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                if (newValue !== data.location) {
+                  onChange('location', newValue);
+                }
+              }}
               className="w-full px-4 py-3 sm:py-3 text-base sm:text-lg border border-input bg-background rounded-xl sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary transition duration-200 touch-manipulation min-h-[48px] sm:min-h-[44px]"
               style={{ fontSize: '16px' }}
               aria-label="City and State"
@@ -243,9 +255,12 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
               id="location"
               type="text"
               placeholder="Enter city and state (e.g., Naples FL or Naples, FL)"
-              value={data.location}
+              value={data.location || ''}
               onChange={(e) => {
-                onChange('location', e.target.value);
+                const newValue = e.target.value;
+                if (newValue !== data.location) {
+                  onChange('location', newValue);
+                }
                 setShowSuggestions(true);
               }}
               onFocus={() => {

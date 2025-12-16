@@ -235,12 +235,15 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
         }
 
         // Store structured fields for downstream usage
+        // Only update if we have a valid fullAddress to preserve user input
         if (address.zip !== zip || (address.state || '').toUpperCase() !== state || (address.city || '').toLowerCase() !== cityLower) {
           const updatedAddress = {
             ...address,
             zip,
             state,
             city: zipCity,
+            // Preserve fullAddress if it exists, otherwise build it
+            fullAddress: address.fullAddress || `${address.street || ''}${address.street && zipCity ? ', ' : ''}${zipCity}, ${state} ${zip}`.trim()
           };
           setAddress(updatedAddress);
           onChange('subjectProperty', {
