@@ -68,6 +68,46 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
     });
   };
 
+  const verifyTargetZip = async (zip: string) => {
+    if (zip.length !== 5) {
+      setTargetZipVerified(false);
+      setTargetZipError('');
+      return false;
+    }
+
+    // Prefer Mapbox when configured; otherwise fallback to Zippopotam (works on GitHub Pages).
+    try {
+      if (hasMapboxKey) {
+        const { getCityStateFromZip } = await import('../services/addressVerificationService');
+        const cityState = await getCityStateFromZip(zip);
+        if (cityState) {
+          setTargetZipVerified(true);
+          setTargetZipError(null);
+          return true;
+        }
+        setTargetZipVerified(false);
+        setTargetZipError('ZIP code not found. Please verify the ZIP code.');
+        return false;
+      }
+
+      const res = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(zip)}`);
+      if (!res.ok) {
+        setTargetZipVerified(false);
+        setTargetZipError('ZIP code not found. Please verify the ZIP code.');
+        return false;
+      }
+
+      setTargetZipVerified(true);
+      setTargetZipError(null);
+      return true;
+    } catch (error) {
+      console.error('Error verifying ZIP code:', error);
+      setTargetZipVerified(false);
+      setTargetZipError('Unable to verify ZIP code. Please check your connection.');
+      return false;
+    }
+  };
+
   const handleZipChange = async (zip: string) => {
     setTargetZip(zip);
     onChange('subjectProperty', {
@@ -75,27 +115,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
       targetZip: zip
     });
     
-    // Auto-fill city/state from ZIP using Mapbox API
-    if (zip.length === 5) {
-      try {
-        const { getCityStateFromZip } = await import('../services/addressVerificationService');
-        const cityState = await getCityStateFromZip(zip);
-        if (cityState) {
-          setTargetZipVerified(true);
-          setTargetZipError(null);
-        } else {
-          setTargetZipVerified(false);
-          setTargetZipError('ZIP code not found. Please verify the ZIP code.');
-        }
-      } catch (error) {
-        console.error('Error fetching city/state from ZIP:', error);
-        setTargetZipVerified(false);
-        setTargetZipError('Unable to verify ZIP code. Please check your connection.');
-      }
-    } else {
-      setTargetZipVerified(false);
-      setTargetZipError('');
-    }
+    await verifyTargetZip(zip);
   };
 
   const handleValueChange = (val: number) => {
@@ -710,12 +730,7 @@ const StepSubjectProperty: React.FC<StepSubjectPropertyProps> = ({
                   const zip = e.target.value.replace(/\D/g, '');
                   if (zip.length === 5 && !targetZipVerified) {
                     try {
-                      const { getCityStateFromZip } = await import('../services/addressVerificationService');
-                      const cityState = await getCityStateFromZip(zip);
-                      if (cityState) {
-                        setTargetZipVerified(true);
-                        setTargetZipError(null);
-                      }
+                      await verifyTargetZip(zip);
                     } catch (error) {
                       // Silent fail on blur
                     }
