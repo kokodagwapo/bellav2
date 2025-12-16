@@ -136,8 +136,13 @@ const StepLocation: React.FC<StepLocationProps> = ({ data, onChange, onNext, onB
         if (!cancelled) {
           if (normalizedCity && normalizedState) {
             const normalized = `${normalizedCity}, ${String(normalizedState).toUpperCase()}`;
-            if (normalized !== raw) {
-              onChange('location', normalized);
+            // Only update if different to avoid infinite loops
+            if (normalized !== raw && normalized.toLowerCase() !== raw.toLowerCase()) {
+              try {
+                onChange('location', normalized);
+              } catch (error) {
+                console.error('Error updating location:', error);
+              }
             }
           }
           setStatus('verified');
